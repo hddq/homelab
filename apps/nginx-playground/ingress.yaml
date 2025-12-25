@@ -1,0 +1,13 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: nginx-ingressroute
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`nginx.lan`)
+      kind: Rule
+      services:
+        - name: nginx-service # <-- Nazwa naszego serwisu
+          port: 80             # <-- Port naszego serwisu
