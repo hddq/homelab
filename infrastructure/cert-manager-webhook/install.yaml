@@ -1,0 +1,375 @@
+---
+# kubectl create secret generic duckdns-token \
+#   --from-literal=token=TOKEN_DUCKDNS \
+#   --namespace cert-manager
+# Source: cert-manager-duckdns-webhook/templates/rbac.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: duckdns-webhook-cert-manager-duckdns-webhook
+  namespace: "cert-manager"
+  labels:
+    app: cert-manager-duckdns-webhook
+    chart: cert-manager-duckdns-webhook-1.1.3
+    release: duckdns-webhook
+    heritage: Helm
+---
+# Source: cert-manager-duckdns-webhook/templates/rbac.yaml
+# Grant cert-manager permission to validate using our apiserver
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: duckdns-webhook-cert-manager-duckdns-webhook:domain-solver
+  labels:
+    app: cert-manager-duckdns-webhook
+    chart: cert-manager-duckdns-webhook-1.1.3
+    release: duckdns-webhook
+    heritage: Helm
+rules:
+  - apiGroups:
+      - acme.mycompany.com
+    resources:
+      - '*'
+    verbs:
+      - 'create'
+---
+# Source: cert-manager-duckdns-webhook/templates/rbac.yaml
+# apiserver gets the auth-delegator role to delegate auth decisions to
+# the core apiserver
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: duckdns-webhook-cert-manager-duckdns-webhook:auth-delegator
+  labels:
+    app: cert-manager-duckdns-webhook
+    chart: cert-manager-duckdns-webhook-1.1.3
+    release: duckdns-webhook
+    heritage: Helm
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:auth-delegator
+subjects:
+  - apiGroup: ""
+    kind: ServiceAccount
+    name: duckdns-webhook-cert-manager-duckdns-webhook
+    namespace: cert-manager
+---
+# Source: cert-manager-duckdns-webhook/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: duckdns-webhook-cert-manager-duckdns-webhook:domain-solver
+  labels:
+    app: cert-manager-duckdns-webhook
+    chart: cert-manager-duckdns-webhook-1.1.3
+    release: duckdns-webhook
+    heritage: Helm
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: duckdns-webhook-cert-manager-duckdns-webhook:domain-solver
+subjects:
+  - apiGroup: ""
+    kind: ServiceAccount
+    name: cert-manager
+    namespace: cert-manager
+---
+# Source: cert-manager-duckdns-webhook/templates/rbac.yaml
+# Grant access to the token secret
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: duckdns-webhook-cert-manager-duckdns-webhook:secret-reader
+  namespace: "cert-manager"
+  labels:
+    app: cert-manager-duckdns-webhook
+    chart: cert-manager-duckdns-webhook-1.1.3
+    release: duckdns-webhook
+    heritage: Helm
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - "secrets"
+    resourceNames:
+      - "duckdns-token"
+    verbs:
+      - "get"
+      - "watch"
+---
+# Source: cert-manager-duckdns-webhook/templates/rbac.yaml
+# Grant the webhook permission to read the ConfigMap containing the Kubernetes
+# apiserver's requestheader-ca-certificate.
+# This ConfigMap is automatically created by the Kubernetes apiserver.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: duckdns-webhook-cert-manager-duckdns-webhook:webhook-authentication-reader
+  namespace: kube-system
+  labels:
+    app: cert-manager-duckdns-webhook
+    chart: cert-manager-duckdns-webhook-1.1.3
+    release: duckdns-webhook
+    heritage: Helm
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: extension-apiserver-authentication-reader
+subjects:
+  - apiGroup: ""
+    kind: ServiceAccount
+    name: duckdns-webhook-cert-manager-duckdns-webhook
+    namespace: cert-manager
+---
+# Source: cert-manager-duckdns-webhook/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: duckdns-webhook-cert-manager-duckdns-webhook:secret-reader
+  namespace: "cert-manager"
+  labels:
+    app: cert-manager-duckdns-webhook
+    chart: cert-manager-duckdns-webhook-1.1.3
+    release: duckdns-webhook
+    heritage: Helm
+roleRef:
+  kind: Role
+  name: duckdns-webhook-cert-manager-duckdns-webhook:secret-reader
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+  - apiGroup: ""
+    kind: ServiceAccount
+    name: duckdns-webhook-cert-manager-duckdns-webhook
+    namespace: "cert-manager"
+---
+# Source: cert-manager-duckdns-webhook/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: duckdns-webhook-cert-manager-duckdns-webhook
+  namespace: "cert-manager"
+  labels:
+    app: cert-manager-duckdns-webhook
+    chart: cert-manager-duckdns-webhook-1.1.3
+    release: duckdns-webhook
+    heritage: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 443
+      targetPort: https
+      protocol: TCP
+      name: https
+  selector:
+    app: cert-manager-duckdns-webhook
+    release: duckdns-webhook
+---
+# Source: cert-manager-duckdns-webhook/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: duckdns-webhook-cert-manager-duckdns-webhook
+  namespace: "cert-manager"
+  labels:
+    app: cert-manager-duckdns-webhook
+    chart: cert-manager-duckdns-webhook-1.1.3
+    release: duckdns-webhook
+    heritage: Helm
+spec:
+  replicas: 
+  selector:
+    matchLabels:
+      app: cert-manager-duckdns-webhook
+      release: duckdns-webhook
+  template:
+    metadata:
+      labels:
+        app: cert-manager-duckdns-webhook
+        release: duckdns-webhook
+    spec:
+      serviceAccountName: duckdns-webhook-cert-manager-duckdns-webhook
+      containers:
+        - name: cert-manager-duckdns-webhook
+          image: "csp33/cert-manager-duckdns-webhook:latest"
+          imagePullPolicy: IfNotPresent
+          args:
+            - --tls-cert-file=/tls/tls.crt
+            - --tls-private-key-file=/tls/tls.key
+            - --v=2
+          env:
+            - name: GROUP_NAME
+              value: "acme.mycompany.com"
+          ports:
+            - name: https
+              containerPort: 443
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              scheme: HTTPS
+              path: /healthz
+              port: https
+          readinessProbe:
+            httpGet:
+              scheme: HTTPS
+              path: /healthz
+              port: https
+          volumeMounts:
+            - name: certs
+              mountPath: /tls
+              readOnly: true
+          resources:
+            {}
+      volumes:
+        - name: certs
+          secret:
+            secretName: duckdns-webhook-cert-manager-duckdns-webhook-webhook-tls
+---
+# Source: cert-manager-duckdns-webhook/templates/apiservice.yaml
+apiVersion: apiregistration.k8s.io/v1
+kind: APIService
+metadata:
+  name: v1alpha1.acme.mycompany.com
+  labels:
+    app: cert-manager-duckdns-webhook
+    chart: cert-manager-duckdns-webhook-1.1.3
+    release: duckdns-webhook
+    heritage: Helm
+  annotations:
+    cert-manager.io/inject-ca-from: "cert-manager/duckdns-webhook-cert-manager-duckdns-webhook-webhook-tls"
+spec:
+  group: acme.mycompany.com
+  groupPriorityMinimum: 1000
+  versionPriority: 15
+  service:
+    name: duckdns-webhook-cert-manager-duckdns-webhook
+    namespace: cert-manager
+  version: v1alpha1
+---
+# Source: cert-manager-duckdns-webhook/templates/pki.yaml
+# Generate a CA Certificate used to sign certificates for the webhook
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: duckdns-webhook-cert-manager-duckdns-webhook-ca
+  namespace: "cert-manager"
+  labels:
+    app: cert-manager-duckdns-webhook
+    chart: cert-manager-duckdns-webhook-1.1.3
+    release: duckdns-webhook
+    heritage: Helm
+spec:
+  secretName: duckdns-webhook-cert-manager-duckdns-webhook-ca
+  duration: 43800h # 5y
+  issuerRef:
+    name: duckdns-webhook-cert-manager-duckdns-webhook-selfsign
+  commonName: "ca.cert-manager-duckdns-webhook.cert-manager"
+  isCA: true
+---
+# Source: cert-manager-duckdns-webhook/templates/pki.yaml
+# Finally, generate a serving certificate for the webhook to use
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: duckdns-webhook-cert-manager-duckdns-webhook-webhook-tls
+  namespace: "cert-manager"
+  labels:
+    app: cert-manager-duckdns-webhook
+    chart: cert-manager-duckdns-webhook-1.1.3
+    release: duckdns-webhook
+    heritage: Helm
+spec:
+  secretName: duckdns-webhook-cert-manager-duckdns-webhook-webhook-tls
+  duration: 8760h # 1y
+  issuerRef:
+    name: duckdns-webhook-cert-manager-duckdns-webhook-ca
+  dnsNames:
+  - duckdns-webhook-cert-manager-duckdns-webhook
+  - duckdns-webhook-cert-manager-duckdns-webhook.cert-manager
+  - duckdns-webhook-cert-manager-duckdns-webhook.cert-manager.svc
+---
+# Source: cert-manager-duckdns-webhook/templates/clusterissuer-prod.yaml
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: duckdns-letsencrypt-prod
+  labels:
+    app: cert-manager-duckdns-webhook
+    chart: cert-manager-duckdns-webhook-1.1.3
+    release: duckdns-webhook
+    heritage: Helm
+spec:
+  acme:
+    email: 
+    preferredChain: "ISRG Root X1"
+    privateKeySecretRef:
+      name: duckdns-webhook-cert-manager-duckdns-webhook-production
+    server: https://acme-v02.api.letsencrypt.org/directory
+    solvers:
+      - dns01:
+          webhook:
+            config:
+              apiTokenSecretRef:
+                key: token
+                name: duckdns-token
+            groupName: acme.mycompany.com
+            solverName: duckdns
+---
+# Source: cert-manager-duckdns-webhook/templates/clusterissuer-staging.yaml
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: duckdns-letsencrypt-staging
+  labels:
+    app: cert-manager-duckdns-webhook
+    chart: cert-manager-duckdns-webhook-1.1.3
+    release: duckdns-webhook
+    heritage: Helm
+spec:
+  acme:
+    email: 
+    preferredChain: "ISRG Root X1"
+    privateKeySecretRef:
+      name: duckdns-webhook-cert-manager-duckdns-webhook-production
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    solvers:
+      - dns01:
+          webhook:
+            config:
+              apiTokenSecretRef:
+                key: token
+                name: duckdns-token
+            groupName: acme.mycompany.com
+            solverName: duckdns
+---
+# Source: cert-manager-duckdns-webhook/templates/pki.yaml
+# Create a selfsigned Issuer, in order to create a root CA certificate for
+# signing webhook serving certificates
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: duckdns-webhook-cert-manager-duckdns-webhook-selfsign
+  namespace: "cert-manager"
+  labels:
+    app: cert-manager-duckdns-webhook
+    chart: cert-manager-duckdns-webhook-1.1.3
+    release: duckdns-webhook
+    heritage: Helm
+spec:
+  selfSigned: {}
+---
+# Source: cert-manager-duckdns-webhook/templates/pki.yaml
+# Create an Issuer that uses the above generated CA certificate to issue certs
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: duckdns-webhook-cert-manager-duckdns-webhook-ca
+  namespace: "cert-manager"
+  labels:
+    app: cert-manager-duckdns-webhook
+    chart: cert-manager-duckdns-webhook-1.1.3
+    release: duckdns-webhook
+    heritage: Helm
+spec:
+  ca:
+    secretName: duckdns-webhook-cert-manager-duckdns-webhook-ca
