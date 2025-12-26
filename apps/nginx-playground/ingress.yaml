@@ -9,10 +9,10 @@ spec:
   ingressClassName: traefik
   tls:
   - hosts:
-    - skibidi12.duckdns.org
-    secretName: skibidi12-tls
+    - "*.skibidi12.duckdns.org"
+    secretName: skibidi12-wildcard-tls
   rules:
-  - host: skibidi12.duckdns.org
+  - host: nginx.skibidi12.duckdns.org
     http:
       paths:
       - path: /
