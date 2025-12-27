@@ -83,7 +83,7 @@ metadata:
     app.kubernetes.io/version: v1.10.1
 data:
   default-setting.yaml: |-
-    create-default-disk-labeled-nodes: true
+    create-default-disk-labeled-nodes: false
     priority-class: "longhorn-critical"
     disable-revision-counter: "{\"v1\":\"true\"}"
 ---
