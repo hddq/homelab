@@ -25,6 +25,8 @@
     vm_cores: 2
     my_ssh_key: "{{ lookup('file', '~/.ssh/hddq-key.pub') }}" 
 
+    inventory_file: "../inventory/hosts.ini"
+
   tasks:
     - name: 🐑 Stage 1 - Clone VM from Template
       community.proxmox.proxmox_kvm:
@@ -94,3 +96,11 @@
         timeout: 300
         search_regex: OpenSSH
       connection: local
+
+    - name: 📝 Stage 6 - Add to Inventory File
+      lineinfile:
+        path: "{{ inventory_file }}"
+        insertafter: '\[k3s_new_nodes\]'
+        line: "{{ new_vm_ip }} ansible_user={{ vm_user }}"
+        state: present
+      check_mode: no
