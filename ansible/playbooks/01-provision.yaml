@@ -5,7 +5,7 @@
   vars_files:
     - "../secrets.yaml"
     - "../vars/proxmox_infra.yaml"
-    - "../vars/vm.yaml"
+    - "../vars/k3s_cluster.yaml"
 
   tasks:
     - name: 🐑 Stage 1 - Clone VM from Template
@@ -18,13 +18,14 @@
         node: "{{ proxmox_node }}"
         clone: yes
         vmid: "{{ template_id }}"
-        newid: "{{ new_vm_id }}"
-        name: "{{ new_vm_name }}"
+        newid: "{{ item.vmid }}"
+        name: "{{ item.name }}"
         target: "{{ proxmox_node }}"
         format: raw
         full: yes
         timeout: 500
         state: present
+      loop: "{{ vms_to_provision }}"
 
     - name: 💉 Stage 2 - Inject Cloud-Init Config
       community.proxmox.proxmox_kvm:
@@ -34,16 +35,17 @@
         api_token_secret: "{{ proxmox_api_token_secret }}"
         validate_certs: false
         node: "{{ proxmox_node }}"
-        vmid: "{{ new_vm_id }}"
+        vmid: "{{ item.vmid }}"
         state: present
         update: yes
         ciuser: "{{ vm_user }}"
         sshkeys: "{{ my_ssh_key }}"
         ipconfig:
-          ipconfig0: "ip={{ new_vm_ip }}/24,gw={{ new_vm_gateway }}"
-        nameservers: "{{ vm_dns }}"
-        memory: "{{ vm_memory }}"
-        cores: "{{ vm_cores }}"
+          ipconfig0: "ip={{ item.ip }}/24,gw={{ item.gateway | default(default_vm_gateway) }}"
+        nameservers: "{{ item.dns | default(default_vm_dns) }}"
+        memory: "{{ item.ram | default(default_vm_ram) }}"
+        cores: "{{ item.cores | default(default_vm_cores) }}"
+      loop: "{{ vms_to_provision }}"
 
     - name: 💿 Stage 3 - Resize Disk
       community.proxmox.proxmox_disk:
@@ -52,10 +54,11 @@
        api_token_id: "{{ proxmox_api_token_id }}"
        api_token_secret: "{{ proxmox_api_token_secret }}"
        validate_certs: false
-       vmid: "{{ new_vm_id }}"
+       vmid: "{{ item.vmid }}"
        disk: "scsi0"
-       size: "{{ vm_disk_size }}"
+       size: "{{ item.disk | default(default_vm_disk) }}"
        state: resized
+      loop: "{{ vms_to_provision }}"
 
     - name: 🚀 Stage 4 - Power On
       community.proxmox.proxmox_kvm:
@@ -65,22 +68,25 @@
         api_token_secret: "{{ proxmox_api_token_secret }}"
         validate_certs: false
         node: "{{ proxmox_node }}"
-        vmid: "{{ new_vm_id }}"
+        vmid: "{{ item.vmid }}"
         state: started
+      loop: "{{ vms_to_provision }}"
 
     - name: ⏳ Stage 5 - Wait for SSH
       wait_for:
-        host: "{{ new_vm_ip }}"
+        host: "{{ item.ip }}"
         port: 22
         delay: 5
         timeout: 300
         search_regex: OpenSSH
       connection: local
+      loop: "{{ vms_to_provision }}"
 
     - name: 📝 Stage 6 - Add to Inventory File
       lineinfile:
         path: "{{ inventory_file }}"
         insertafter: '\[k3s_new_nodes\]'
-        line: "{{ new_vm_ip }} ansible_user={{ vm_user }}"
+        line: "{{ item.ip }} ansible_user={{ vm_user }}"
         state: present
       check_mode: no
+      loop: "{{ vms_to_provision }}"

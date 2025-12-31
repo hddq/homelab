@@ -1,0 +1,25 @@
+template_id: 299
+vm_user: "hddq"
+my_ssh_key: "{{ lookup('file', '~/.ssh/hddq-key.pub') }}" 
+inventory_file: "../inventory/hosts.ini"
+
+default_vm_ram: 4096
+default_vm_cores: 2
+default_vm_disk: "20G"
+default_vm_gateway: "192.168.20.1"
+default_vm_dns: 
+  - "1.1.1.1"
+  - "8.8.8.8"
+
+vms_to_provision:
+  - name: "k3s-playground-1"
+    vmid: 211
+    ip: "192.168.20.111"
+
+  - name: "k3s-playground-2"
+    vmid: 212
+    ip: "192.168.20.112"
+
+  - name: "k3s-playground-3"
+    vmid: 213
+    ip: "192.168.20.113"
