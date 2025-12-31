@@ -1,0 +1,14 @@
+template_id: 299
+new_vm_id: 298
+new_vm_name: "k3s-playground"
+new_vm_ip: "192.168.20.111"
+new_vm_gateway: "192.168.20.1"
+vm_user: "hddq"
+vm_dns: 
+  - "1.1.1.1"
+  - "8.8.8.8"
+vm_disk_size: "20G"
+vm_memory: 4096
+vm_cores: 2
+my_ssh_key: "{{ lookup('file', '~/.ssh/hddq-key.pub') }}" 
+inventory_file: "../inventory/hosts.ini"

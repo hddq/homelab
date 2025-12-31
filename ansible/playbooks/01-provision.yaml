@@ -4,28 +4,8 @@
   gather_facts: false
   vars_files:
     - "../secrets.yaml"
-  vars:
-    # --- PROXMOX CONNECTION ---
-    proxmox_api_host: "192.168.20.10"
-    proxmox_node: "z690"
-    proxmox_api_user: "root@pam"
-    proxmox_api_token_id: "ansible"
-    # --- VM SPEC ---
-    template_id: 299
-    new_vm_id: 298
-    new_vm_name: "ansible-test"
-    new_vm_ip: "192.168.20.111"
-    new_vm_gateway: "192.168.20.1"
-    vm_user: "hddq"
-    vm_dns: 
-      - "1.1.1.1"
-      - "8.8.8.8"
-    vm_disk_size: "20G"
-    vm_memory: 4096
-    vm_cores: 2
-    my_ssh_key: "{{ lookup('file', '~/.ssh/hddq-key.pub') }}" 
-
-    inventory_file: "../inventory/hosts.ini"
+    - "../vars/proxmox_infra.yaml"
+    - "../vars/vm.yaml"
 
   tasks:
     - name: 🐑 Stage 1 - Clone VM from Template

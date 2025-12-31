@@ -1,0 +1,4 @@
+proxmox_api_host: "192.168.20.10"
+proxmox_node: "z690"
+proxmox_api_user: "root@pam"
+proxmox_api_token_id: "ansible"
