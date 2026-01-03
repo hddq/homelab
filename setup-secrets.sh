@@ -41,4 +41,33 @@ else
     echo "⚠️  Warning: DUCKDNS_TOKEN not set in .env, skipping..."
 fi
 
+# 4. Create ArgoCD Repository Secret
+# Needed for ArgoCD to access your private Git repository via SSH
+if [ -n "$ARGOCD_REPO_URL" ] && [ -n "$ARGOCD_SSH_KEY_PATH" ]; then
+    echo "🐙 Creating 'argocd-repo-secret'..."
+    
+    # Ensure argocd namespace exists
+    kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
+
+    if [ -f "$ARGOCD_SSH_KEY_PATH" ]; then
+        # Read the private key content
+        SSH_KEY_CONTENT=$(cat "$ARGOCD_SSH_KEY_PATH")
+        
+        # Create the secret with specific labels for ArgoCD
+        kubectl create secret generic argocd-repo-secret \
+            --namespace argocd \
+            --from-literal=type="git" \
+            --from-literal=url="$ARGOCD_REPO_URL" \
+            --from-literal=sshPrivateKey="$SSH_KEY_CONTENT" \
+            --dry-run=client -o yaml | \
+            kubectl label --local -f - -o yaml \
+            "argocd.argoproj.io/secret-type=repository" | \
+            kubectl apply -f -
+    else
+         echo "❌ Error: SSH Key file not found at $ARGOCD_SSH_KEY_PATH!"
+    fi
+else
+    echo "⚠️  Warning: ARGOCD_REPO_URL or ARGOCD_SSH_KEY_PATH not set in .env, skipping ArgoCD secret..."
+fi
+
 echo "✅ Success! All secrets have been processed."
