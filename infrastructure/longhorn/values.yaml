@@ -1,0 +1,11 @@
+longhorn:
+  persistence:
+    defaultClass: true
+    defaultClassReplicaCount: 3
+    reclaimPolicy: Delete
+  
+  defaultSettings:
+    createDefaultDiskLabeledNodes: true
+
+  ingress:
+    enabled: false
