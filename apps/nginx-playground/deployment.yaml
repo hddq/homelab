@@ -19,7 +19,7 @@ spec:
         tolerationSeconds: 10
       containers:
       - name: nginx
-        image: nginx:latest
+        image: nginx:1.29.4
         ports:
         - containerPort: 80
         readinessProbe:
