@@ -1,5 +1,9 @@
----
 collections:
   - name: community.general
+    version: "12.1.0"
+
   - name: kubernetes.core
+    version: "6.2.0"
+
   - name: community.proxmox
+    version: "1.5.0"
