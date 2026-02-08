@@ -1,3 +1,6 @@
 kubeconfig
 .env
 ansible/secrets.yaml
+.ansible
+.venv
+.direnv
