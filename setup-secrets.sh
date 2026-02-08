@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # Define the path to the .env file
 ENV_FILE=".env"
 
