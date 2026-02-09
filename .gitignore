@@ -4,3 +4,4 @@ ansible/secrets.yaml
 .ansible
 .venv
 .direnv
+*.tgz
