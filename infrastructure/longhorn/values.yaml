@@ -4,6 +4,9 @@ longhorn:
     defaultClassReplicaCount: 3
     reclaimPolicy: Delete
   
+  preUpgradeChecker:
+    jobEnabled: false
+
   defaultSettings:
     createDefaultDiskLabeledNodes: true
 
