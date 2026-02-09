@@ -4,7 +4,7 @@ my_ssh_key: "{{ lookup('file', '~/.ssh/hddq-key.pub') }}"
 inventory_file: "../inventory/hosts.ini"
 
 default_vm_ram: 4096
-default_vm_balloon: 2048
+default_vm_balloon: 4096
 default_vm_balloon_shares: 1000
 default_vm_cores: 2
 default_vm_disk: "20G"
