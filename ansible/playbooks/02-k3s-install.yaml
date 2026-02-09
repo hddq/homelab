@@ -1,4 +1,26 @@
 ---
+- name: 🛠️ Prepare Nodes (System Dependencies)
+  hosts: k3s_new_nodes
+  become: true
+  gather_facts: true
+  tasks:
+    - name: 📦 Install System Dependencies
+      apt:
+        name:
+          - open-iscsi
+          - nfs-common
+          - qemu-guest-agent
+        state: present
+        update_cache: yes
+
+    - name: 🔌 Enable and Start Services
+      service:
+        name: "{{ item }}"
+        state: started
+        enabled: yes
+      loop:
+        - iscsid
+        - qemu-guest-agent
 - name: 👑 Initialize K3s First Master
   hosts: k3s_new_nodes[0]
   become: true
