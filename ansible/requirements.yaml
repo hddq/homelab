@@ -3,7 +3,7 @@ collections:
     version: "12.2.0"
 
   - name: kubernetes.core
-    version: "6.2.0"
+    version: "6.3.0"
 
   - name: community.proxmox
     version: "1.5.0"
