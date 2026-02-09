@@ -9,6 +9,7 @@ longhorn:
 
   defaultSettings:
     createDefaultDiskLabeledNodes: true
+    # kubectl label node NODE_NAME node.longhorn.io/create-default-disk=true
 
   ingress:
     enabled: false
