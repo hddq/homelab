@@ -1,4 +1,13 @@
 longhorn:
+  # 🚨 HOTFIX [2026-02-10]: Fix for the "CNI vs Webhook" death loop.
+  # Version 1.11.0 has a bug where the manager waits for the network, and the network waits for the webhook.
+  # TODO: REMOVE THIS ENTIRE SECTION WHEN UPGRADING TO v1.11.1+.
+  # Link: https://longhorn.io/docs/1.11.0/Important-notes/#longhorn-manager-image
+  image:
+    longhorn:
+      manager:
+        repository: longhornio/longhorn-manager
+        tag: v1.11.0-hotfix-1
   persistence:
     defaultClass: true
     defaultClassReplicaCount: 3
@@ -6,6 +15,7 @@ longhorn:
   
   preUpgradeChecker:
     jobEnabled: false
+    upgradeVersionCheck: false # Because of hotfix
 
   defaultSettings:
     createDefaultDiskLabeledNodes: true
