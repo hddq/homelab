@@ -1,0 +1,37 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: postgres-migration-job
+  namespace: default
+spec:
+  ttlSecondsAfterFinished: 3600
+  template:
+    spec:
+      containers:
+      - name: migrator
+        image: alpine:latest
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            echo "🚀 Installing rsync..."
+            apk add --no-cache rsync
+            
+            echo "📦 Starting migration from OLD to NEW..."
+            rsync -av --delete /mnt/old/ /mnt/new/
+            
+            echo "✅ Migration completed!"
+            ls -la /mnt/new/
+        volumeMounts:
+        - name: old-data
+          mountPath: /mnt/old
+          readOnly: true
+        - name: new-data
+          mountPath: /mnt/new
+      restartPolicy: OnFailure
+      volumes:
+      - name: old-data
+        persistentVolumeClaim:
+          claimName: postgres-pvc
+      - name: new-data
+        persistentVolumeClaim:
+          claimName: postgres-pvc-ha
