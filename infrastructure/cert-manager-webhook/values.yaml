@@ -1,0 +1,9 @@
+cert-manager-duckdns-webhook:
+  groupName: cert-manager.webhook.duckdns.org
+
+  certManager:
+    namespace: cert-manager
+    serviceAccountName: cert-manager
+
+  token:
+    existingSecretName: duckdns-secret
