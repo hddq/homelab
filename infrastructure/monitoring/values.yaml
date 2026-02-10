@@ -1,0 +1,52 @@
+kube-prometheus-stack:
+  coreDns:
+    enabled: false
+  kubeDns:
+    enabled: false
+  kubeControllerManager:
+    enabled: false
+  kubeScheduler:
+    enabled: false
+  kubeProxy:
+    enabled: false
+  kubeEtcd:
+    enabled: false
+
+  grafana:
+    adminPassword: "admin123"
+    persistence:
+      enabled: true
+      storageClassName: longhorn
+      size: 2Gi
+    ingress:
+      enabled: true
+      ingressClassName: traefik
+      annotations:
+        cert-manager.io/cluster-issuer: duckdns-letsencrypt-prod
+      hosts:
+        - grafana.skibidi12.duckdns.org
+      tls:
+        - secretName: grafana-tls
+          hosts:
+            - grafana.skibidi12.duckdns.org
+
+  prometheus:
+    prometheusSpec:
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            storageClassName: longhorn
+            accessModes: ["ReadWriteOnce"]
+            resources:
+              requests:
+                storage: 5Gi
+      resources:
+        requests:
+          memory: 400Mi
+        limits:
+          memory: 2Gi
+    prometheusOperator:
+       admissionWebhooks:
+         enabled: false
+         patch:
+           enabled: false
