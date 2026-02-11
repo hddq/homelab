@@ -31,8 +31,12 @@ fi
 # Usually needed for DDNS updaters or Cert-Manager
 if [ -n "$DUCKDNS_TOKEN" ]; then
     echo "🦆 Creating 'duckdns-secret'..."
+    
+    # Ensure cert-manager namespace exists (it might be created by ArgoCD later, but we need it for the secret)
+    kubectl create namespace cert-manager --dry-run=client -o yaml | kubectl apply -f -
+
     kubectl create secret generic duckdns-secret \
-        --namespace default \
+        --namespace cert-manager \
         --from-literal=token="$DUCKDNS_TOKEN" \
         --dry-run=client -o yaml | kubectl apply -f -
 else
