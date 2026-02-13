@@ -18,6 +18,8 @@ kube-prometheus-stack:
       enabled: true
       storageClassName: longhorn
       size: 2Gi
+    deploymentStrategy:
+      type: Recreate
     ingress:
       enabled: true
       ingressClassName: traefik
