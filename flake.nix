@@ -16,6 +16,7 @@
           ansible
           kubectl
           kubernetes-helm
+          kubeseal
         ];
 
         shellHook = ''
