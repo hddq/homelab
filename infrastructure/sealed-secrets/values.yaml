@@ -1,3 +1,4 @@
 sealed-secrets:
+  fullnameOverride: sealed-secrets-controller
   ingress:
     enabled: false
