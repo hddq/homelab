@@ -49,7 +49,7 @@ kube-prometheus-stack:
         limits:
           memory: 2Gi
     prometheusOperator:
-       admissionWebhooks:
-         enabled: false
-         patch:
-           enabled: false
+      admissionWebhooks:
+        enabled: false
+        patch:
+          enabled: false

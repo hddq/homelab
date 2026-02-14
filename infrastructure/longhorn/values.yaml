@@ -12,7 +12,7 @@ longhorn:
     defaultClass: true
     defaultClassReplicaCount: 1
     reclaimPolicy: Delete
-  
+
   preUpgradeChecker:
     jobEnabled: false
     upgradeVersionCheck: false # Because of hotfix

@@ -18,6 +18,7 @@
           kubernetes-helm
           kubeseal
           argocd
+          yamllint
         ];
 
         shellHook = ''

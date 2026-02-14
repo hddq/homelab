@@ -12,15 +12,15 @@ spec:
         image: alpine:latest
         command: ["/bin/sh", "-c"]
         args:
-          - |
-            echo "🚀 Installing rsync..."
-            apk add --no-cache rsync
-            
-            echo "📦 Starting migration from OLD to NEW..."
-            rsync -av --delete /mnt/old/ /mnt/new/
-            
-            echo "✅ Migration completed!"
-            ls -la /mnt/new/
+        - |
+          echo "🚀 Installing rsync..."
+          apk add --no-cache rsync
+
+          echo "📦 Starting migration from OLD to NEW..."
+          rsync -av --delete /mnt/old/ /mnt/new/
+
+          echo "✅ Migration completed!"
+          ls -la /mnt/new/
         volumeMounts:
         - name: old-data
           mountPath: /mnt/old

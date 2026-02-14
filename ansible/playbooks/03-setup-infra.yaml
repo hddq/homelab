@@ -40,7 +40,7 @@
 
     - name: ℹ️ ArgoCD Credentials
       debug:
-        msg: 
+        msg:
           - "ArgoCD installed successfully!"
           - "User: admin"
           - "Password: {{ argocd_pass.stdout }}"

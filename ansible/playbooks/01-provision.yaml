@@ -42,7 +42,7 @@
         sshkeys: "{{ my_ssh_key }}"
         update_unsafe: true
         net:
-           net0: "virtio,bridge=vmbr0,tag={{ item.vlan | default(default_vm_vlan) }}"
+          net0: "virtio,bridge=vmbr0,tag={{ item.vlan | default(default_vm_vlan) }}"
         ipconfig:
           ipconfig0: "ip={{ item.ip }}/24,gw={{ item.gateway | default(default_vm_gateway) }}"
         nameservers: "{{ item.dns | default(default_vm_dns) }}"
@@ -54,15 +54,15 @@
 
     - name: 💿 Stage 3 - Resize Disk
       community.proxmox.proxmox_disk:
-       api_host: "{{ proxmox_api_host }}"
-       api_user: "{{ proxmox_api_user }}"
-       api_token_id: "{{ proxmox_api_token_id }}"
-       api_token_secret: "{{ proxmox_api_token_secret }}"
-       validate_certs: false
-       vmid: "{{ item.vmid }}"
-       disk: "scsi0"
-       size: "{{ item.disk | default(default_vm_disk) }}"
-       state: resized
+        api_host: "{{ proxmox_api_host }}"
+        api_user: "{{ proxmox_api_user }}"
+        api_token_id: "{{ proxmox_api_token_id }}"
+        api_token_secret: "{{ proxmox_api_token_secret }}"
+        validate_certs: false
+        vmid: "{{ item.vmid }}"
+        disk: "scsi0"
+        size: "{{ item.disk | default(default_vm_disk) }}"
+        state: resized
       loop: "{{ vms_to_provision }}"
 
     - name: 🚀 Stage 4 - Power On
