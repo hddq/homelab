@@ -19,6 +19,7 @@
           kubeseal
           argocd
           yamllint
+          kubeconform
         ];
 
         shellHook = ''
