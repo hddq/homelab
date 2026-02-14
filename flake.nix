@@ -17,6 +17,7 @@
           kubectl
           kubernetes-helm
           kubeseal
+          argocd
         ];
 
         shellHook = ''
