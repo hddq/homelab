@@ -8,6 +8,7 @@ default_vm_balloon: 4096
 default_vm_balloon_shares: 1000
 default_vm_cores: 2
 default_vm_disk: "20G"
+default_vm_storage: "local-zfs"
 default_vm_gateway: "192.168.20.1"
 default_vm_vlan: 20
 default_vm_dns:

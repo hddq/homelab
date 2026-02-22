@@ -21,6 +21,7 @@
         newid: "{{ item.vmid }}"
         name: "{{ item.name }}"
         target: "{{ proxmox_node }}"
+        storage: "{{ item.storage | default(default_vm_storage) }}"
         format: raw
         full: yes
         timeout: 500
