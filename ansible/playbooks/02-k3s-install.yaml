@@ -1,15 +1,20 @@
 ---
-- name: 🛠️ Prepare Nodes (System Dependencies)
+- name: 🛠️ Prepare Nodes & Group Dynamically
   hosts: k3s_new_nodes
   become: true
   gather_facts: true
+  vars_files:
+    - ../vars/k3s_cluster.yaml
   tasks:
+    - name: 🏷️ Group hosts by K3s role dynamically
+      group_by:
+        key: "k3s_{{ item.k3s_role }}"
+      loop: "{{ vms_to_provision }}"
+      when: item.ip == inventory_hostname
+
     - name: 📦 Install System Dependencies
       apt:
-        name:
-          - open-iscsi
-          - nfs-common
-          - qemu-guest-agent
+        name: [open-iscsi, nfs-common, qemu-guest-agent]
         state: present
         update_cache: yes
 
@@ -18,69 +23,87 @@
         name: "{{ item }}"
         state: started
         enabled: yes
-      loop:
-        - iscsid
-        - qemu-guest-agent
+      loop: [iscsid, qemu-guest-agent]
+
 - name: 👑 Initialize K3s First Master
-  hosts: k3s_new_nodes[0]
+  hosts: k3s_master[0]
   become: true
-  gather_facts: true
   tasks:
-    - name: 📥 Install K3s Server (Cluster Init)
-      shell: curl -sfL https://get.k3s.io | sh -s - server --cluster-init
+    - name: 🧠 Determine if HA (etcd) is needed
+      set_fact:
+        is_ha_cluster: "{{ groups['k3s_master'] | length > 1 }}"
+
+    - name: 🧠 Determine Node Taint (Control Plane Isolation)
+      set_fact:
+        taint_args: >-
+          {% if not hostvars[inventory_hostname].get('run_workloads', true) %}
+          --node-taint node-role.kubernetes.io/control-plane=true:NoSchedule
+          {% else %}
+          {% endif %}
+
+    - name: 📥 Install K3s Server (Init)
+      shell: >
+        curl -sfL https://get.k3s.io | sh -s - server 
+        {{ '--cluster-init' if is_ha_cluster else '' }}
+        {{ taint_args }}
       args:
         creates: /etc/rancher/k3s/k3s.yaml
-      environment:
-        {}
 
     - name: ⏳ Wait for Node Token
       wait_for:
         path: /var/lib/rancher/k3s/server/node-token
 
-    - name: 🔑 Read Node Token
+    - name: 🔑 Set Fact for Token
       slurp:
         src: /var/lib/rancher/k3s/server/node-token
-      register: node_token
+      register: token_data
 
-    - name: 💾 Set Fact for Token
+    - name: 💾 Store Token globally
       set_fact:
-        k3s_token: "{{ node_token['content'] | b64decode | trim }}"
+        k3s_token: "{{ token_data['content'] | b64decode | trim }}"
 
-- name: 🤝 Join Additional Masters
-  hosts: k3s_new_nodes[1:]
+- name: 🤝 Join Additional Masters (If HA)
+  hosts: k3s_master[1:]
   become: true
-  gather_facts: true
   vars:
-    master_ip: "{{ hostvars[groups['k3s_new_nodes'][0]]['inventory_hostname'] }}"
-    k3s_token: "{{ hostvars[groups['k3s_new_nodes'][0]]['k3s_token'] }}"
+    master_ip: "{{ hostvars[groups['k3s_master'][0]]['inventory_hostname'] }}"
+    k3s_token: "{{ hostvars[groups['k3s_master'][0]]['k3s_token'] }}"
   tasks:
-    - name: 🔍 Debug Connection Params
-      debug:
-        msg: "Joining cluster as SERVER at https://{{ master_ip }}:6443..."
-
-    - name: 📥 Install K3s Server (Join)
+    - name: 📥 Install K3s Server (Join HA)
       shell: "curl -sfL https://get.k3s.io | K3S_URL=https://{{ master_ip }}:6443 K3S_TOKEN={{ k3s_token }} sh -s - server"
       args:
         creates: /etc/systemd/system/k3s.service
 
-- name: ⚙️ Configure Local Access
-  hosts: k3s_new_nodes[0]
+- name: 👷 Join Worker Nodes
+  hosts: k3s_worker
   become: true
+  vars:
+    master_ip: "{{ hostvars[groups['k3s_master'][0]]['inventory_hostname'] }}"
+    k3s_token: "{{ hostvars[groups['k3s_master'][0]]['k3s_token'] }}"
   tasks:
-    - name: 📥 Fetch Kubeconfig
+    - name: 📥 Install K3s Agent (Worker)
+      shell: "curl -sfL https://get.k3s.io | K3S_URL=https://{{ master_ip }}:6443 K3S_TOKEN={{ k3s_token }} sh -s - agent"
+      args:
+        creates: /etc/systemd/system/k3s-agent.service
+
+- name: ⚙️ Configure Local Access
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: 📥 Fetch Kubeconfig from First Master
       fetch:
         src: /etc/rancher/k3s/k3s.yaml
         dest: ../../kubeconfig
         flat: yes
+      delegate_to: "{{ groups['k3s_master'][0] }}"
+      become: true
 
     - name: 📝 Update Kubeconfig Server Address
-      delegate_to: localhost
-      become: false
       replace:
         path: ../../kubeconfig
         regexp: '127.0.0.1'
-        replace: "{{ inventory_hostname }}"
+        replace: "{{ hostvars[groups['k3s_master'][0]]['inventory_hostname'] }}"
 
     - name: ℹ️ Instructions
       debug:
-        msg: "HA Cluster installed! All nodes are masters. Config saved to 'kubeconfig'."
+        msg: "Cluster provisioned successfully! Config saved to 'kubeconfig'."

@@ -3,8 +3,8 @@ vm_user: "hddq"
 my_ssh_key: "{{ lookup('file', '~/.ssh/hddq-key.pub') }}"
 inventory_file: "../inventory/hosts.ini"
 
-default_vm_ram: 4096
-default_vm_balloon: 4096
+default_vm_ram: 8192
+default_vm_balloon: 6144
 default_vm_balloon_shares: 1000
 default_vm_cores: 2
 default_vm_disk: "20G"
@@ -16,14 +16,18 @@ default_vm_dns:
   - "8.8.8.8"
 
 vms_to_provision:
-  - name: "k3s-playground-1"
+  - name: "k8s-cp-1"
     vmid: 211
     ip: "192.168.20.111"
+    k3s_role: "master"
+    run_workloads: false
 
-  - name: "k3s-playground-2"
+  - name: "k8s-worker-1"
     vmid: 212
     ip: "192.168.20.112"
-
-  - name: "k3s-playground-3"
+    k3s_role: "worker"
+    
+  - name: "k8s-worker-2"
     vmid: 213
     ip: "192.168.20.113"
+    k3s_role: "worker"
