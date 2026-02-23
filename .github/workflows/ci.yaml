@@ -50,6 +50,8 @@ jobs:
 
       - name: Run Trivy vulnerability scanner in IaC mode
         uses: aquasecurity/trivy-action@0.34.1
+        env:
+          TRIVY_IGNOREFILE: apps/.trivyignore.yaml
         with:
           scan-type: 'config'
           hide-progress: true
