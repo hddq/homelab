@@ -8,9 +8,10 @@
 
   tasks:
     - name: 📦 Update Helm Dependencies for ArgoCD
-      command: helm dependency update
+      ansible.builtin.command: helm dependency update
       args:
         chdir: "{{ argocd_chart_path }}"
+      changed_when: false
 
     - name: ⚓ Install ArgoCD
       kubernetes.core.helm:
@@ -23,11 +24,12 @@
         wait_timeout: 10m
 
     - name: ⏳ Pause for Secret Creation
-      pause:
+      ansible.builtin.pause:
         seconds: 10
 
     - name: 🔑 Get ArgoCD Initial Admin Password
-      shell: |
+      ansible.builtin.shell: |
+        set -o pipefail
         kubectl --kubeconfig {{ kubeconfig_path }} -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
       register: argocd_pass
       changed_when: false
@@ -38,8 +40,8 @@
         src: "../../bootstrap.yaml"
         state: present
 
-    - name: ℹ️ ArgoCD Credentials
-      debug:
+    - name: Show ArgoCD Credentials
+      ansible.builtin.debug:
         msg:
           - "ArgoCD installed successfully!"
           - "User: admin"

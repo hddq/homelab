@@ -13,7 +13,6 @@
       devShells.${system}.default = pkgs.mkShell {
         packages = with pkgs; [
           python3
-          ansible
           kubectl
           kubernetes-helm
           kubeseal

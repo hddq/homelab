@@ -5,3 +5,4 @@ ansible/secrets.yaml
 .venv
 .direnv
 *.tgz
+sealed-secrets-master-key.yaml

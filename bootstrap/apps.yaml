@@ -8,7 +8,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: git@github.com:hddq/homelab-playground.git
+    repoURL: git@github.com:hddq/homelab.git
     targetRevision: HEAD
     path: apps/nginx-playground
   destination:
@@ -29,7 +29,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: git@github.com:hddq/homelab-playground.git
+    repoURL: git@github.com:hddq/homelab.git
     targetRevision: HEAD
     path: apps/postgres-playground
   destination:
