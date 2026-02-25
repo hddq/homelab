@@ -30,11 +30,11 @@ spec:
           readOnlyRootFilesystem: true
           runAsNonRoot: true
         ports:
-        - containerPort: 80
+        - containerPort: 8080
         readinessProbe:
           httpGet:
             path: /
-            port: 80
+            port: 8080
           initialDelaySeconds: 5
           periodSeconds: 10
           timeoutSeconds: 1
@@ -46,3 +46,9 @@ spec:
           limits:
             cpu: 250m
             memory: 16M
+        volumeMounts:
+        - name: tmp-volume
+          mountPath: /tmp
+      volumes:
+      - name: tmp-volume
+        emptyDir: {}
