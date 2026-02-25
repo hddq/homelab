@@ -40,3 +40,18 @@ jobs:
             -schema-location default
             -schema-location https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json
             apps/ infrastructure/ bootstrap/
+
+  ansible-lint:
+    name: 🦅 Validate Ansible
+    runs-on: ubuntu-latest
+    needs: yaml-lint
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Run ansible-lint
+        uses: ansible/ansible-lint@v26
+        with:
+          args: "ansible/"
+          setup_python: "true"
+          requirements_file: "ansible/requirements.yaml"
