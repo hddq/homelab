@@ -43,7 +43,7 @@
 
     - name: 📥 Install K3s Server (Init)
       shell: >
-        curl -sfL https://get.k3s.io | sh -s - server 
+        curl -sfL https://get.k3s.io | sh -s - server
         {{ '--cluster-init' if is_ha_cluster else '' }}
         {{ taint_args }}
       args:

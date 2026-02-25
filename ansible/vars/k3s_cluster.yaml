@@ -26,7 +26,7 @@ vms_to_provision:
     vmid: 212
     ip: "192.168.20.112"
     k3s_role: "worker"
-    
+
   - name: "k8s-worker-2"
     vmid: 213
     ip: "192.168.20.113"
