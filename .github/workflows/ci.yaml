@@ -36,7 +36,7 @@ jobs:
           args: >-
             -summary -strict
             -ignore-missing-schemas
-            -ignore-filename-pattern Chart.yaml|values.yaml
+            -ignore-filename-pattern Chart.yaml|values.yaml|.trivyignore.yaml
             -schema-location default
             -schema-location https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json
             apps/ infrastructure/ bootstrap/
@@ -55,3 +55,24 @@ jobs:
           args: "ansible/"
           setup_python: "true"
           requirements_file: "ansible/requirements.yaml"
+
+  trivy:
+    name: 🛡️ Security Scan (Trivy)
+    runs-on: ubuntu-latest
+    needs: yaml-lint
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Run Trivy vulnerability scanner in IaC mode
+        uses: aquasecurity/trivy-action@0.34.1
+        env:
+          TRIVY_IGNOREFILE: apps/.trivyignore.yaml
+        with:
+          scan-type: 'config'
+          hide-progress: true
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          severity: 'CRITICAL,HIGH'
+          scan-ref: 'apps/'

@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: postgres
-  namespace: default
+  namespace: playground
 spec:
   replicas: 1
   selector:
@@ -13,9 +13,17 @@ spec:
       labels:
         app: postgres
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
       containers:
       - name: postgres
         image: postgres:18.1
+        securityContext:
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
         env:
         - name: POSTGRES_PASSWORD
           valueFrom:

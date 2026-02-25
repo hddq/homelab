@@ -1,0 +1,9 @@
+misconfigurations:
+  - id: KSV-0020
+    paths:
+      - "postgres-playground/02-deployment.yaml"
+    statement: Postgres requires UID 999
+  - id: KSV-0021
+    paths:
+      - "postgres-playground/02-deployment.yaml"
+    statement: Postgres requires GID 999

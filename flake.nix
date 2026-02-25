@@ -19,6 +19,7 @@
           argocd
           yamllint
           kubeconform
+          trivy
         ];
 
         shellHook = ''
