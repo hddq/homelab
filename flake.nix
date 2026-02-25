@@ -20,6 +20,7 @@
           argocd
           yamllint
           kubeconform
+          ansible-lint
         ];
 
         shellHook = ''

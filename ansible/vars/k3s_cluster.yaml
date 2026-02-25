@@ -1,7 +1,7 @@
 template_id: 299
 vm_user: "hddq"
 my_ssh_key: "{{ lookup('file', '~/.ssh/hddq-key.pub') }}"
-inventory_file: "../inventory/hosts.ini"
+target_inventory_file: "../inventory/hosts.ini"
 
 default_vm_ram: 8192
 default_vm_balloon: 6144

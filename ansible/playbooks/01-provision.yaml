@@ -79,7 +79,7 @@
       loop: "{{ vms_to_provision }}"
 
     - name: ⏳ Stage 5 - Wait for SSH
-      wait_for:
+      ansible.builtin.wait_for:
         host: "{{ item.ip }}"
         port: 22
         delay: 5
@@ -89,8 +89,8 @@
       loop: "{{ vms_to_provision }}"
 
     - name: 📝 Stage 6 - Add to Inventory File
-      lineinfile:
-        path: "{{ inventory_file }}"
+      ansible.builtin.lineinfile:
+        path: "{{ target_inventory_file }}"
         insertafter: '\[k3s_new_nodes\]'
         line: "{{ item.ip }} ansible_user={{ vm_user }}"
         state: present
