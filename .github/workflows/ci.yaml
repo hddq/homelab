@@ -49,12 +49,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
+      - name: Force install Ansible requirements
+        run: ansible-galaxy collection install -r ansible/requirements.yaml --force
+
       - name: Run ansible-lint
         uses: ansible/ansible-lint@v26
         with:
           args: "ansible/"
           setup_python: "true"
-          requirements_file: "ansible/requirements.yaml"
 
   trivy:
     name: 🛡️ Security Scan (Trivy)
