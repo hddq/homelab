@@ -6,7 +6,7 @@ metadata:
 spec:
   ingressClassName: traefik
   rules:
-  - host: nginx.skibidi12.duckdns.org
+  - host: nginx.hddq-k8s.duckdns.org
     http:
       paths:
       - path: /

@@ -25,7 +25,7 @@ kube-prometheus-stack:
       enabled: true
       ingressClassName: traefik
       hosts:
-        - grafana.skibidi12.duckdns.org
+        - grafana.hddq-k8s.duckdns.org
 
   prometheus:
     prometheusSpec:
