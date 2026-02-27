@@ -3,14 +3,14 @@ kind: Ingress
 metadata:
   name: longhorn-ingress
   namespace: longhorn-system
-  annotations:
-    cert-manager.io/cluster-issuer: duckdns-letsencrypt-prod
+  # annotations:
+  #   cert-manager.io/cluster-issuer: duckdns-letsencrypt-prod
 spec:
   ingressClassName: traefik
-  tls:
-  - hosts:
-    - "longhorn.skibidi12.duckdns.org"
-    secretName: longhorn-tls
+  # tls:
+  # - hosts:
+  #   - "*.skibidi12.duckdns.org"
+  #   secretName: skibidi12-wildcard-tls
   rules:
   - host: longhorn.skibidi12.duckdns.org
     http:
