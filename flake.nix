@@ -20,6 +20,7 @@
           yamllint
           kubeconform
           trivy
+          kubectx
         ];
 
         shellHook = ''
