@@ -1,0 +1,28 @@
+name: CI - Global Lint
+
+on:
+  push:
+    branches: ["master"]
+    paths:
+      - '**/*.yaml'
+      - '**/*.yml'
+  pull_request:
+    branches: ["master"]
+    paths:
+      - '**/*.yaml'
+      - '**/*.yml'
+
+jobs:
+  yaml-lint:
+    name: 🧹 Lint YAML
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Run yamllint
+        uses: ibiqlik/action-yamllint@v3
+        with:
+          config_file: .yamllint
+          file_or_dir: .
+          strict: true
