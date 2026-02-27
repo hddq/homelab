@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: searxng
+  name: searxng
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: searxng
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: searxng
+    spec:
+      containers:
+      - image: searxng/searxng
+        name: searxng
+        resources: {}
+status: {}
