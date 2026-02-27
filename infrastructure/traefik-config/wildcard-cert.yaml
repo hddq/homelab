@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: skibidi12-wildcard
+  namespace: kube-system
+spec:
+  secretName: skibidi12-wildcard-tls
+  issuerRef:
+    name: duckdns-letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+    - "*.skibidi12.duckdns.org"
+    - "skibidi12.duckdns.org"

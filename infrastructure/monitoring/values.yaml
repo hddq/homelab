@@ -24,14 +24,8 @@ kube-prometheus-stack:
     ingress:
       enabled: true
       ingressClassName: traefik
-      annotations:
-        cert-manager.io/cluster-issuer: duckdns-letsencrypt-prod
       hosts:
         - grafana.skibidi12.duckdns.org
-      tls:
-        - secretName: grafana-tls
-          hosts:
-            - grafana.skibidi12.duckdns.org
 
   prometheus:
     prometheusSpec:

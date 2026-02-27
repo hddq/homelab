@@ -3,14 +3,8 @@ kind: Ingress
 metadata:
   name: argocd-server-ingress
   namespace: argocd
-  annotations:
-    cert-manager.io/cluster-issuer: duckdns-letsencrypt-prod
 spec:
   ingressClassName: traefik
-  tls:
-  - hosts:
-    - argocd.skibidi12.duckdns.org
-    secretName: argocd-server-tls
   rules:
   - host: argocd.skibidi12.duckdns.org
     http:
