@@ -20,6 +20,7 @@
         kubeconform
         trivy
         kubectx
+        gitleaks
       ];
 
       shellHook = ''
