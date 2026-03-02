@@ -8,5 +8,14 @@
   },
   "lockFileMaintenance": {
     "enabled": true
-  }
+  },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": ["^ansible/vars/k3s_cluster\\.yaml$"],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n.*k3s_version: \"(?<currentValue>.*?)\""
+      ]
+    }
+  ]
 }

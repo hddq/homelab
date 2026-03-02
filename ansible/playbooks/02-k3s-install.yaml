@@ -44,7 +44,7 @@
     - name: 📥 Install K3s Server (Init)
       ansible.builtin.shell: >
         set -o pipefail &&
-        curl -sfL https://get.k3s.io | sh -s - server
+        curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="{{ k3s_version }}" sh -s - server
         {{ '--cluster-init' if is_ha_cluster else '' }}
         {{ taint_args }}
       args:
@@ -72,7 +72,7 @@
     k3s_token: "{{ hostvars[groups['k3s_master'][0]]['k3s_token'] }}"
   tasks:
     - name: 📥 Install K3s Server (Join HA)
-      ansible.builtin.shell: "set -o pipefail && curl -sfL https://get.k3s.io | K3S_URL=https://{{ master_ip }}:6443 K3S_TOKEN={{ k3s_token }} sh -s - server"
+      ansible.builtin.shell: "set -o pipefail && curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=\"{{ k3s_version }}\" K3S_URL=https://{{ master_ip }}:6443 K3S_TOKEN={{ k3s_token }} sh -s - server"
       args:
         creates: /etc/systemd/system/k3s.service
         executable: /bin/bash
@@ -85,7 +85,7 @@
     k3s_token: "{{ hostvars[groups['k3s_master'][0]]['k3s_token'] }}"
   tasks:
     - name: 📥 Install K3s Agent (Worker)
-      ansible.builtin.shell: "set -o pipefail && curl -sfL https://get.k3s.io | K3S_URL=https://{{ master_ip }}:6443 K3S_TOKEN={{ k3s_token }} sh -s - agent"
+      ansible.builtin.shell: "set -o pipefail && curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=\"{{ k3s_version }}\" K3S_URL=https://{{ master_ip }}:6443 K3S_TOKEN={{ k3s_token }} sh -s - agent"
       args:
         creates: /etc/systemd/system/k3s-agent.service
         executable: /bin/bash
