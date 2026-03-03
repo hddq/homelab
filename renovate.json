@@ -12,16 +12,12 @@
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["^ansible/vars/k3s_cluster\\.yaml$"],
+      "fileMatch": [
+        "^ansible/vars/k3s_cluster\\.yaml$",
+        "^\\.github/workflows/ci-k8s\\.yaml$"
+      ],
       "matchStrings": [
-        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n.*k3s_version: \"(?<currentValue>.*?)\""
-      ]
-    },
-    {
-      "customType": "regex",
-      "fileMatch": ["^\\.github/workflows/ci-k8s\\.yaml$"],
-      "matchStrings": [
-        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+) extractVersion=(?<extractVersion>\\S+)\\n.*--target-versions k8s=(?<currentValue>\\S+)"
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n.*(?:k3s_version: |K3S_VER=)\"(?<currentValue>.*?)\""
       ]
     }
   ]

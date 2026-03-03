@@ -68,5 +68,6 @@ jobs:
 
       - name: Use pluto
         run: |
-          # renovate: datasource=github-releases depName=k3s-io/k3s extractVersion=^(?<version>v\d+\.\d+\.\d+)
-          pluto detect-files -d . --target-versions k8s=v1.34.4
+          # renovate: datasource=github-releases depName=k3s-io/k3s
+          K3S_VER="v1.34.4+k3s1"
+          pluto detect-files -d . --target-versions k8s=${K3S_VER%+*}
