@@ -1,4 +1,4 @@
-name: gitleaks
+name: CI - gitleaks
 on:
   push:
     branches: [master]
@@ -9,7 +9,7 @@ on:
 
 jobs:
   scan:
-    name: gitleaks
+    name: 🕵️ Gitleaks Scan
     runs-on: ubuntu-latest
     permissions:
       contents: read
