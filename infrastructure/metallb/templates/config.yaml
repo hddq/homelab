@@ -1,16 +1,24 @@
+apiVersion: metallb.io/v1beta2
+kind: BGPPeer
+metadata:
+  name: openwrt-router
+spec:
+  myASN: 65001
+  peerASN: 65000
+  peerAddress: 192.168.20.1
+---
 apiVersion: metallb.io/v1beta1
 kind: IPAddressPool
 metadata:
   name: default-pool
 spec:
   addresses:
-  - 192.168.20.105/32
-  - 192.168.20.106/32
+  - 192.168.41.10-192.168.41.250
 ---
 apiVersion: metallb.io/v1beta1
-kind: L2Advertisement
+kind: BGPAdvertisement
 metadata:
-  name: default-l2
+  name: default-bgp
 spec:
   ipAddressPools:
   - default-pool
