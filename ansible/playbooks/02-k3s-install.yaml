@@ -28,6 +28,8 @@
 - name: 👑 Initialize K3s First Master
   hosts: k3s_master[0]
   become: true
+  vars_files:
+   - ../vars/k3s_cluster.yaml
   tasks:
     - name: 🧠 Determine if HA (etcd) is needed
       ansible.builtin.set_fact:
@@ -48,7 +50,6 @@
         {{ '--cluster-init' if is_ha_cluster else '' }}
         {{ taint_args }}
       args:
-        creates: /etc/rancher/k3s/k3s.yaml
         executable: /bin/bash
 
     - name: ⏳ Wait for Node Token
@@ -67,6 +68,8 @@
 - name: 🤝 Join Additional Masters (If HA)
   hosts: k3s_master[1:]
   become: true
+  vars_files:
+   - ../vars/k3s_cluster.yaml
   vars:
     master_ip: "{{ hostvars[groups['k3s_master'][0]]['inventory_hostname'] }}"
     k3s_token: "{{ hostvars[groups['k3s_master'][0]]['k3s_token'] }}"
@@ -74,12 +77,13 @@
     - name: 📥 Install K3s Server (Join HA)
       ansible.builtin.shell: "set -o pipefail && curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=\"{{ k3s_version }}\" K3S_URL=https://{{ master_ip }}:6443 K3S_TOKEN={{ k3s_token }} sh -s - server"
       args:
-        creates: /etc/systemd/system/k3s.service
         executable: /bin/bash
 
 - name: 👷 Join Worker Nodes
   hosts: k3s_worker
   become: true
+  vars_files:
+   - ../vars/k3s_cluster.yaml
   vars:
     master_ip: "{{ hostvars[groups['k3s_master'][0]]['inventory_hostname'] }}"
     k3s_token: "{{ hostvars[groups['k3s_master'][0]]['k3s_token'] }}"
@@ -87,7 +91,6 @@
     - name: 📥 Install K3s Agent (Worker)
       ansible.builtin.shell: "set -o pipefail && curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=\"{{ k3s_version }}\" K3S_URL=https://{{ master_ip }}:6443 K3S_TOKEN={{ k3s_token }} sh -s - agent"
       args:
-        creates: /etc/systemd/system/k3s-agent.service
         executable: /bin/bash
 
 - name: ⚙️ Configure Local Access
