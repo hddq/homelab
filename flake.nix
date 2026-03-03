@@ -21,6 +21,7 @@
         trivy
         kubectx
         gitleaks
+        pluto
       ];
 
       shellHook = ''

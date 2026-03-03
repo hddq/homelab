@@ -55,3 +55,18 @@ jobs:
           ignore-unfixed: true
           severity: 'CRITICAL,HIGH'
           scan-ref: 'apps/'
+
+  pluto:
+    name: ♇ Pluto (API Deprecations)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Download Pluto
+        uses: FairwindsOps/pluto/github-action@master
+
+      - name: Use pluto
+        run: |
+          # renovate: datasource=github-releases depName=k3s-io/k3s extractVersion=^(?<version>v\d+\.\d+\.\d+)
+          pluto detect-files -d . --target-versions k8s=v1.34.4
