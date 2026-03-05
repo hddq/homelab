@@ -3,16 +3,10 @@ kind: Ingress
 metadata:
   name: nginx-ingress
   namespace: playground
-  annotations:
-    cert-manager.io/cluster-issuer: duckdns-letsencrypt-prod
 spec:
   ingressClassName: traefik
-  tls:
-  - hosts:
-    - "*.skibidi12.duckdns.org"
-    secretName: skibidi12-wildcard-tls
   rules:
-  - host: nginx.skibidi12.duckdns.org
+  - host: nginx.hddq-k8s.duckdns.org
     http:
       paths:
       - path: /

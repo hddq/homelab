@@ -44,7 +44,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Run Trivy vulnerability scanner in IaC mode
-        uses: aquasecurity/trivy-action@0.34.1
+        uses: aquasecurity/trivy-action@0.34.2
         env:
           TRIVY_IGNOREFILE: apps/.trivyignore.yaml
         with:
@@ -55,3 +55,19 @@ jobs:
           ignore-unfixed: true
           severity: 'CRITICAL,HIGH'
           scan-ref: 'apps/'
+
+  pluto:
+    name: ♇ Pluto (API Deprecations)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Download Pluto
+        uses: FairwindsOps/pluto/github-action@master
+
+      - name: Use pluto
+        run: |
+          # renovate: datasource=github-releases depName=k3s-io/k3s
+          K3S_VER="v1.35.1+k3s1"
+          pluto detect-files -d . --target-versions k8s=${K3S_VER%+*}
