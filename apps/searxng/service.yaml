@@ -4,6 +4,7 @@ metadata:
   labels:
     app: searxng
   name: searxng-service
+  namespace: searxng
 spec:
   ports:
   - port: 80
