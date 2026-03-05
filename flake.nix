@@ -22,6 +22,7 @@
         kubectx
         gitleaks
         pluto
+        pre-commit
       ];
 
       shellHook = ''
@@ -45,6 +46,8 @@
            echo "📦 Checking Ansible collections..."
            ansible-galaxy install -r ansible/requirements.yaml
         fi
+
+        pre-commit install
 
         echo "✅ Ready! Python: $(which python)"
       '';
