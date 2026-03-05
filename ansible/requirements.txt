@@ -1,4 +1,4 @@
-proxmoxer==2.2.0
+proxmoxer==2.3.0
 requests==2.32.5
 kubernetes==35.0.0
 ansible-core==2.20.3
