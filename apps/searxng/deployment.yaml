@@ -26,7 +26,13 @@ spec:
         name: searxng
         securityContext:
           readOnlyRootFilesystem: true
-        resources: {}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
         env:
         - name: BASE_URL
           value: "https://searxng.hddq-k8s.duckdns.org/"
