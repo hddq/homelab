@@ -27,6 +27,14 @@ spec:
         securityContext:
           readOnlyRootFilesystem: true
         resources: {}
+        env:
+        - name: BASE_URL
+          value: "https://searxng.hddq-k8s.duckdns.org/"
+        - name: SEARXNG_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: searxng-secret
+              key: secret_key
         volumeMounts:
         - name: tmp
           mountPath: /tmp
