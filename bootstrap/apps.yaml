@@ -13,7 +13,7 @@ spec:
     path: apps/nginx-playground
   destination:
     server: https://kubernetes.default.svc
-    namespace: default
+    namespace: playground
   syncPolicy:
     automated:
       prune: true
@@ -34,7 +34,7 @@ spec:
     path: apps/postgres-playground
   destination:
     server: https://kubernetes.default.svc
-    namespace: default
+    namespace: playground
   syncPolicy:
     automated:
       prune: true
