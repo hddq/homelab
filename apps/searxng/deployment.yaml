@@ -49,11 +49,11 @@ spec:
         - name: certs
           mountPath: /etc/ssl/certs
       volumes:
-        - name: tmp
-          emptyDir: {}
-        - name: etc-searxng
-          emptyDir: {}
-        - name: certs
-          emptyDir: {}
+      - name: tmp
+        emptyDir: {}
+      - name: etc-searxng
+        emptyDir: {}
+      - name: certs
+        emptyDir: {}
 
 status: {}
