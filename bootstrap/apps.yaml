@@ -39,3 +39,45 @@ spec:
     automated:
       prune: true
       selfHeal: true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: apps-searxng
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: git@github.com:hddq/homelab.git
+    targetRevision: HEAD
+    path: apps/searxng
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: searxng
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: apps-unbound
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: git@github.com:hddq/homelab.git
+    targetRevision: HEAD
+    path: apps/unbound
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: unbound
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
