@@ -15,9 +15,22 @@ spec:
       labels:
         app: unbound
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 100
+        runAsGroup: 101
+        fsGroup: 101
+        seccompProfile:
+          type: RuntimeDefault
       containers:
       - image: alpinelinux/unbound
         name: unbound
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
         ports:
         - containerPort: 53
           name: dns-udp
@@ -25,13 +38,23 @@ spec:
         - containerPort: 53
           name: dns-tcp
           protocol: TCP
-        resources: {}
+        resources:
+          limits:
+            memory: 512Mi
+            cpu: 500m
+          requests:
+            memory: 128Mi
+            cpu: 100m
         volumeMounts:
         - name: config
           mountPath: /etc/unbound/unbound.conf
           subPath: unbound.conf
+        - name: unbound-run
+          mountPath: /etc/unbound
       volumes:
       - name: config
         configMap:
           name: unbound-config
+      - name: unbound-run
+        emptyDir: {}
 status: {}
