@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: unbound
+  name: unbound
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: unbound
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: unbound
+    spec:
+      containers:
+      - image: alpinelinux/unbound
+        name: unbound
+        ports:
+        - containerPort: 53
+          name: dns-udp
+          protocol: UDP
+        - containerPort: 53
+          name: dns-tcp
+          protocol: TCP
+        resources: {}
+        volumeMounts:
+        - name: config
+          mountPath: /etc/unbound/unbound.conf
+          subPath: unbound.conf
+      volumes:
+      - name: config
+        configMap:
+          name: unbound-config
+status: {}
