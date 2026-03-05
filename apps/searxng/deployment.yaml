@@ -16,8 +16,26 @@ spec:
       labels:
         app: searxng
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 977
+        runAsGroup: 977
+        fsGroup: 977
       containers:
       - image: searxng/searxng
         name: searxng
+        securityContext:
+          readOnlyRootFilesystem: true
         resources: {}
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: etc-searxng
+          mountPath: /etc/searxng
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: etc-searxng
+          emptyDir: {}
+
 status: {}
