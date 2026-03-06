@@ -3,6 +3,10 @@
   "extends": [
     "config:recommended"
   ],
+  "kubernetes": {
+    "enabled": true,
+    "managerFilePatterns": ["/apps/.+\\.yaml$/", "/infrastructure/.+\\.yaml$/"]
+  },
   "nix": {
     "enabled": true
   },
