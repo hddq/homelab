@@ -21,5 +21,18 @@
       "depNameTemplate": "k3s-io/k3s",
       "datasourceTemplate": "github-releases"
     }
-  ]
+  ],
+  "packageRules": [      
+      { "matchFileNames": ["ansible/**"], "matchUpdateTypes": ["patch", "digest"], "groupName": "Patch ansible" },
+      { "matchFileNames": ["ansible/**"], "matchUpdateTypes": ["minor"], "groupName": "Minor ansible" },
+      
+      { "matchFileNames": ["apps/**"], "matchUpdateTypes": ["patch", "digest"], "groupName": "Patch apps" },
+      { "matchFileNames": ["apps/**"], "matchUpdateTypes": ["minor"], "groupName": "Minor apps" },
+      
+      { "matchFileNames": ["infrastructure/**"], "matchUpdateTypes": ["patch", "digest"], "groupName": "Patch infrastructure" },
+      { "matchFileNames": ["infrastructure/**"], "matchUpdateTypes": ["minor"], "groupName": "Minor infrastructure" },
+      
+      { "matchFileNames": [".github/**"], "matchUpdateTypes": ["patch", "digest"], "groupName": "Patch ci" },
+      { "matchFileNames": [".github/**"], "matchUpdateTypes": ["minor"], "groupName": "Minor ci" }
+    ]
 }
