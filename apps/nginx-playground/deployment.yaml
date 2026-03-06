@@ -14,41 +14,41 @@ spec:
         app: nginx
     spec:
       tolerations:
-      - key: "node.kubernetes.io/unreachable"
-        operator: "Exists"
-        effect: "NoExecute"
-        tolerationSeconds: 10
+        - key: "node.kubernetes.io/unreachable"
+          operator: "Exists"
+          effect: "NoExecute"
+          tolerationSeconds: 10
       securityContext:
         runAsNonRoot: true
         runAsUser: 101
         runAsGroup: 101
         fsGroup: 101
       containers:
-      - name: nginx
-        image: nginxinc/nginx-unprivileged:1.29.4
-        securityContext:
-          readOnlyRootFilesystem: true
-          runAsNonRoot: true
-        ports:
-        - containerPort: 8080
-        readinessProbe:
-          httpGet:
-            path: /
-            port: 8080
-          initialDelaySeconds: 5
-          periodSeconds: 10
-          timeoutSeconds: 1
-          failureThreshold: 3
-        resources:
-          requests:
-            cpu: 100m
-            memory: 10M
-          limits:
-            cpu: 250m
-            memory: 16M
-        volumeMounts:
-        - name: tmp-volume
-          mountPath: /tmp
+        - name: nginx
+          image: nginxinc/nginx-unprivileged:1.29.4
+          securityContext:
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 10M
+            limits:
+              cpu: 250m
+              memory: 16M
+          volumeMounts:
+            - name: tmp-volume
+              mountPath: /tmp
       volumes:
-      - name: tmp-volume
-        emptyDir: {}
+        - name: tmp-volume
+          emptyDir: {}

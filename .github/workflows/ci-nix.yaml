@@ -4,15 +4,15 @@ on:
   push:
     branches: ["master"]
     paths:
-      - 'flake.nix'
-      - 'flake.lock'
-      - '.github/workflows/ci-nix.yaml'
+      - "flake.nix"
+      - "flake.lock"
+      - ".github/workflows/ci-nix.yaml"
   pull_request:
     branches: ["master"]
     paths:
-      - 'flake.nix'
-      - 'flake.lock'
-      - '.github/workflows/ci-nix.yaml'
+      - "flake.nix"
+      - "flake.lock"
+      - ".github/workflows/ci-nix.yaml"
 
 jobs:
   nix-lint:

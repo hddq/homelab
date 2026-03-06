@@ -23,38 +23,38 @@ spec:
         seccompProfile:
           type: RuntimeDefault
       containers:
-      - image: alpinelinux/unbound
-        name: unbound
-        securityContext:
-          allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: true
-          capabilities:
-            drop:
-            - ALL
-        ports:
-        - containerPort: 53
-          name: dns-udp
-          protocol: UDP
-        - containerPort: 53
-          name: dns-tcp
-          protocol: TCP
-        resources:
-          limits:
-            memory: 512Mi
-            cpu: 500m
-          requests:
-            memory: 128Mi
-            cpu: 100m
-        volumeMounts:
-        - name: config
-          mountPath: /etc/unbound/unbound.conf
-          subPath: unbound.conf
-        - name: unbound-run
-          mountPath: /etc/unbound
+        - image: alpinelinux/unbound
+          name: unbound
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          ports:
+            - containerPort: 53
+              name: dns-udp
+              protocol: UDP
+            - containerPort: 53
+              name: dns-tcp
+              protocol: TCP
+          resources:
+            limits:
+              memory: 512Mi
+              cpu: 500m
+            requests:
+              memory: 128Mi
+              cpu: 100m
+          volumeMounts:
+            - name: config
+              mountPath: /etc/unbound/unbound.conf
+              subPath: unbound.conf
+            - name: unbound-run
+              mountPath: /etc/unbound
       volumes:
-      - name: config
-        configMap:
-          name: unbound-config
-      - name: unbound-run
-        emptyDir: {}
+        - name: config
+          configMap:
+            name: unbound-config
+        - name: unbound-run
+          emptyDir: {}
 status: {}

@@ -19,33 +19,33 @@ spec:
         runAsGroup: 999
         fsGroup: 999
       containers:
-      - name: postgres
-        image: postgres:18.1
-        securityContext:
-          readOnlyRootFilesystem: true
-          runAsNonRoot: true
-        env:
-        - name: POSTGRES_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: postgres-secret
-              key: password
-        - name: PGDATA
-          value: "/var/lib/postgresql/data/pgdata"
-        ports:
-        - containerPort: 5432
-        volumeMounts:
-        - name: postgres-storage
-          mountPath: /var/lib/postgresql/data
-        - name: tmp-volume
-          mountPath: /tmp
-        - name: run-volume
-          mountPath: /var/run/postgresql
+        - name: postgres
+          image: postgres:18.1
+          securityContext:
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: password
+            - name: PGDATA
+              value: "/var/lib/postgresql/data/pgdata"
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql/data
+            - name: tmp-volume
+              mountPath: /tmp
+            - name: run-volume
+              mountPath: /var/run/postgresql
       volumes:
-      - name: postgres-storage
-        persistentVolumeClaim:
-          claimName: postgres-pvc-ha
-      - name: tmp-volume
-        emptyDir: {}
-      - name: run-volume
-        emptyDir: {}
+        - name: postgres-storage
+          persistentVolumeClaim:
+            claimName: postgres-pvc-ha
+        - name: tmp-volume
+          emptyDir: {}
+        - name: run-volume
+          emptyDir: {}

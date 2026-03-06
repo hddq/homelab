@@ -4,13 +4,13 @@ on:
   push:
     branches: ["master"]
     paths:
-      - 'ansible/**'
-      - '.github/workflows/ci-ansible.yaml'
+      - "ansible/**"
+      - ".github/workflows/ci-ansible.yaml"
   pull_request:
     branches: ["master"]
     paths:
-      - 'ansible/**'
-      - '.github/workflows/ci-ansible.yaml'
+      - "ansible/**"
+      - ".github/workflows/ci-ansible.yaml"
 
 jobs:
   ansible-lint:

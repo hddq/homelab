@@ -22,38 +22,38 @@ spec:
         runAsGroup: 977
         fsGroup: 977
       containers:
-      - image: searxng/searxng
-        name: searxng
-        securityContext:
-          readOnlyRootFilesystem: true
-        resources:
-          requests:
-            cpu: 100m
-            memory: 256Mi
-          limits:
-            cpu: 500m
-            memory: 512Mi
-        env:
-        - name: BASE_URL
-          value: "https://searxng.hddq-k8s.duckdns.org/"
-        - name: SEARXNG_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: searxng-secret
-              key: secret_key
-        volumeMounts:
-        - name: tmp
-          mountPath: /tmp
-        - name: etc-searxng
-          mountPath: /etc/searxng
-        - name: certs
-          mountPath: /etc/ssl/certs
+        - image: searxng/searxng
+          name: searxng
+          securityContext:
+            readOnlyRootFilesystem: true
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          env:
+            - name: BASE_URL
+              value: "https://searxng.hddq-k8s.duckdns.org/"
+            - name: SEARXNG_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: searxng-secret
+                  key: secret_key
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: etc-searxng
+              mountPath: /etc/searxng
+            - name: certs
+              mountPath: /etc/ssl/certs
       volumes:
-      - name: tmp
-        emptyDir: {}
-      - name: etc-searxng
-        emptyDir: {}
-      - name: certs
-        emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+        - name: etc-searxng
+          emptyDir: {}
+        - name: certs
+          emptyDir: {}
 
 status: {}

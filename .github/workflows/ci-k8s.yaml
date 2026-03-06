@@ -4,17 +4,17 @@ on:
   push:
     branches: ["master"]
     paths:
-      - 'apps/**'
-      - 'infrastructure/**'
-      - 'bootstrap/**'
-      - '.github/workflows/ci-k8s.yaml'
+      - "apps/**"
+      - "infrastructure/**"
+      - "bootstrap/**"
+      - ".github/workflows/ci-k8s.yaml"
   pull_request:
     branches: ["master"]
     paths:
-      - 'apps/**'
-      - 'infrastructure/**'
-      - 'bootstrap/**'
-      - '.github/workflows/ci-k8s.yaml'
+      - "apps/**"
+      - "infrastructure/**"
+      - "bootstrap/**"
+      - ".github/workflows/ci-k8s.yaml"
 
 jobs:
   kubeconform:
@@ -48,13 +48,13 @@ jobs:
         env:
           TRIVY_IGNOREFILE: apps/.trivyignore.yaml
         with:
-          scan-type: 'config'
+          scan-type: "config"
           hide-progress: true
-          format: 'table'
-          exit-code: '1'
+          format: "table"
+          exit-code: "1"
           ignore-unfixed: true
-          severity: 'CRITICAL,HIGH'
-          scan-ref: 'apps/'
+          severity: "CRITICAL,HIGH"
+          scan-ref: "apps/"
 
   pluto:
     name: ♇ Pluto (API Deprecations)

@@ -13,7 +13,7 @@ metadata:
   name: default-pool
 spec:
   addresses:
-  - 192.168.41.10-192.168.41.250
+    - 192.168.41.10-192.168.41.250
 ---
 apiVersion: metallb.io/v1beta1
 kind: BGPAdvertisement
@@ -21,4 +21,4 @@ metadata:
   name: default-bgp
 spec:
   ipAddressPools:
-  - default-pool
+    - default-pool

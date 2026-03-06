@@ -6,13 +6,13 @@ metadata:
 spec:
   ingressClassName: traefik
   rules:
-  - host: nginx.hddq-k8s.duckdns.org
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: nginx-service
-            port:
-              number: 80
+    - host: nginx.hddq-k8s.duckdns.org
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx-service
+                port:
+                  number: 80
