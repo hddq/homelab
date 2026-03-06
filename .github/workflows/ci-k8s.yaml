@@ -68,5 +68,6 @@ jobs:
 
       - name: Use pluto
         run: |
-          K3S_VER=$(cat k3s_version.txt | tr -d '\n')
+          K3S_VER=$(cat k3s_version.txt)
+          echo "k3s version: $K3S_VER"
           pluto detect-files -d . --target-versions k8s=${K3S_VER%+*}
