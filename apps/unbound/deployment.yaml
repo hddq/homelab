@@ -17,14 +17,21 @@ spec:
     spec:
       securityContext:
         runAsNonRoot: true
-        runAsUser: 100
-        runAsGroup: 101
-        fsGroup: 101
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
         seccompProfile:
           type: RuntimeDefault
       containers:
-        - image: alpinelinux/unbound
+        - image: madnuttah/unbound:1.24.2-1
           name: unbound
+          env:
+            - name: UNBOUND_UID
+              value: "1000"
+            - name: UNBOUND_GID
+              value: "1000"
+            - name: DISABLE_SET_PERMS
+              value: "true"
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
@@ -47,14 +54,15 @@ spec:
               cpu: 100m
           volumeMounts:
             - name: config
-              mountPath: /etc/unbound/unbound.conf
+              mountPath: /usr/local/unbound/unbound.conf
               subPath: unbound.conf
-            - name: unbound-run
-              mountPath: /etc/unbound
+            - name: unbound-data
+              mountPath: /usr/local/unbound/iana.d
+              subPath: iana
       volumes:
         - name: config
           configMap:
             name: unbound-config
-        - name: unbound-run
+        - name: unbound-data
           emptyDir: {}
 status: {}
