@@ -23,6 +23,7 @@
         gitleaks
         pluto
         pre-commit
+        shellcheck
       ];
 
       shellHook = ''
