@@ -1,5 +1,5 @@
 #!/bin/bash
-# v3.8.2
+# v3.8.3
 
 set -e
 
@@ -22,16 +22,20 @@ declare -a POOLS_TO_PROCESS
 
 # --- CORE FUNCTIONS ---
 
+# shellcheck disable=SC2329
 cleanup() {
     echo "--- CLEANUP ---"
-    if [ ${#MOUNT_POINTS[@]} -gt 0 ]; then
-        for mp in $(printf "%s\n" "${MOUNT_POINTS[@]}" | sort -r); do
+    if [ "${#MOUNT_POINTS[@]}" -gt 0 ]; then
+        local sorted_mounts
+        mapfile -t sorted_mounts < <(printf "%s\n" "${MOUNT_POINTS[@]}" | sort -r)
+        for mp in "${sorted_mounts[@]}"; do
             echo "Unmounting: $mp"
             umount "$mp" || echo "Warning: Failed to unmount $mp"
         done
     fi
 
-    local ALL_POOLS=($(printf "%s\n" "${DAILY_POOLS[@]}" "${WEEKLY_POOLS[@]}" | sort -u))
+    local ALL_POOLS
+    mapfile -t ALL_POOLS < <(printf "%s\n" "${DAILY_POOLS[@]}" "${WEEKLY_POOLS[@]}" | sort -u)
     echo "Searching for and deleting old restic backup snapshots..."
     for pool in "${ALL_POOLS[@]}"; do
         zfs list -H -o name -t snapshot | grep "${pool}@restic-backup-" | while IFS= read -r SNAP_TO_DESTROY; do
@@ -45,12 +49,14 @@ cleanup() {
     echo "Cleanup finished."
 }
 
+# shellcheck disable=SC2329
 error_handler() {
     echo "--- SCRIPT FAILED (Exit Code: $?) ---"
 }
 
 determine_pools_to_process() {
-    local day_of_week=$(date +%u)
+    local day_of_week
+    day_of_week=$(date +%u)
     echo "Today is day $day_of_week. (Weekly backup day: $WEEKLY_BACKUP_DAY)."
     
     POOLS_TO_PROCESS+=("${DAILY_POOLS[@]}")
@@ -60,9 +66,9 @@ determine_pools_to_process() {
         POOLS_TO_PROCESS+=("${WEEKLY_POOLS[@]}")
     fi
 
-    POOLS_TO_PROCESS=($(printf "%s\n" "${POOLS_TO_PROCESS[@]}" | sort -u))
+    mapfile -t POOLS_TO_PROCESS < <(printf "%s\n" "${POOLS_TO_PROCESS[@]}" | sort -u)
     
-    if [ ${#POOLS_TO_PROCESS[@]} -eq 0 ]; then
+    if [ "${#POOLS_TO_PROCESS[@]}" -eq 0 ]; then
         echo "No pools scheduled for backup today. Exiting. ✅"
         exit 0
     fi
@@ -74,7 +80,8 @@ mount_pool_datasets() {
     echo "Creating temporary snapshot: ${pool}@${SNAP_NAME}"
     zfs snapshot -r "${pool}@${SNAP_NAME}"
 
-    local dataset_list=$(zfs list -r -H -o name "$pool" | grep -v "/\.")
+    local dataset_list
+    dataset_list=$(zfs list -r -H -o name "$pool" | grep -v "/\.")
 
     for item in "${BLACKLISTED_DATASETS[@]}"; do
         dataset_list=$(echo "$dataset_list" | grep -v "^${item}")
@@ -125,7 +132,8 @@ run_maintenance() {
     local check_subset_total=7
     [ ! -f "$check_counter_file" ] && echo 0 > "$check_counter_file"
 
-    local current_check=$(cat "$check_counter_file")
+    local current_check
+    current_check=$(cat "$check_counter_file")
     local next_check=$(( (current_check % check_subset_total) + 1 ))
     echo "$next_check" > "$check_counter_file"
 
