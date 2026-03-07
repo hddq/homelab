@@ -94,7 +94,7 @@ nix develop  # or: direnv allow
 **Step 2 — Create secrets file:**
 
 ```bash
-cp ansible/secrets.yaml.example ansible/secrets.yaml
+cp ansible/secrets.example.yaml ansible/secrets.yaml
 # Fill in proxmox_api_token_secret
 ```
 
