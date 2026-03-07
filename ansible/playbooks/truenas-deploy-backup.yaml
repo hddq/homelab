@@ -1,0 +1,62 @@
+---
+- name: 💾 Deploy TrueNAS Offsite Backup
+  hosts: truenas
+  gather_facts: false
+  vars_files:
+    - "../../ansible/secrets.yaml"
+  vars:
+    truenas_api_url: "https://{{ inventory_hostname }}/api/v2.0"
+    script_src: "../../scripts/truenas/backup/offsite-backup.sh"
+    script_dest: "/root/scripts/offsite-backup.sh"
+
+  tasks:
+    - name: 📁 Ensure scripts directory exists on TrueNAS
+      ansible.builtin.file:
+        path: "/root/scripts"
+        state: directory
+        mode: "0755"
+      become: true
+
+    - name: 📜 Copy backup script to TrueNAS
+      ansible.builtin.copy:
+        src: "{{ script_src }}"
+        dest: "{{ script_dest }}"
+        mode: "0700"
+      become: true
+
+    - name: 🔍 Check if cronjob already exists via TrueNAS API
+      ansible.builtin.uri:
+        url: "{{ truenas_api_url }}/cronjob"
+        method: GET
+        headers:
+          Authorization: "Bearer {{ truenas_api_key }}"
+        return_content: true
+        validate_certs: false
+      register: cronjobs_list
+      delegate_to: localhost
+
+    - name: ⏰ Setup daily Cronjob in TrueNAS UI via API
+      ansible.builtin.uri:
+        url: "{{ truenas_api_url }}/cronjob"
+        method: POST
+        headers:
+          Authorization: "Bearer {{ truenas_api_key }}"
+          Content-Type: "application/json"
+        body_format: json
+        body:
+          user: "root"
+          command: "{{ script_dest }}"
+          description: "Restic Offsite Backup"
+          enabled: true
+          stdout: false
+          stderr: false
+          schedule:
+            minute: "0"
+            hour: "0"
+            dom: "*"
+            month: "*"
+            dow: "*"
+        validate_certs: false
+      delegate_to: localhost
+      when: >
+        cronjobs_list.json | selectattr('description', 'equalto', 'Restic Offsite Backup') | list | length == 0
