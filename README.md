@@ -7,6 +7,7 @@ The goal is to never touch a server manually — if it's not in Git, it doesn't 
 [![CI - Ansible](https://github.com/hddq/homelab/actions/workflows/ci-ansible.yaml/badge.svg)](https://github.com/hddq/homelab/actions/workflows/ci-ansible.yaml)
 [![CI - Nix](https://github.com/hddq/homelab/actions/workflows/ci-nix.yaml/badge.svg)](https://github.com/hddq/homelab/actions/workflows/ci-nix.yaml)
 [![CI - Lint](https://github.com/hddq/homelab/actions/workflows/ci-lint.yaml/badge.svg)](https://github.com/hddq/homelab/actions/workflows/ci-lint.yaml)
+[![CI - ShellCheck](https://github.com/hddq/homelab/actions/workflows/ci-shellcheck.yaml/badge.svg)](https://github.com/hddq/homelab/actions/workflows/ci-shellcheck.yaml)
 [![CI - Gitleaks](https://github.com/hddq/homelab/actions/workflows/ci-gitleaks.yaml/badge.svg)](https://github.com/hddq/homelab/actions/workflows/ci-gitleaks.yaml)
 
 ---
@@ -140,10 +141,11 @@ ArgoCD will now sync everything else automatically from this repo. Done. ✅
 | Security misconfig | Trivy                        | IaC misconfiguration scan (CRITICAL/HIGH)     |
 | Ansible            | ansible-lint                 | Ansible best practices                        |
 | YAML               | yamllint                     | YAML formatting                               |
+| Shell scripts      | ShellCheck                   | POSIX/bash linting                            |
 | Nix                | alejandra + statix + deadnix | Nix formatting, linting, dead code            |
 | Secrets            | Gitleaks                     | Prevents secret leaks (pre-commit + daily CI) |
 
-Pre-commit hooks run `gitleaks` and `yamllint` on every commit locally.
+Pre-commit hooks run `gitleaks`, `yamllint`, and `shellcheck` on every commit locally.
 
 ---
 
@@ -157,4 +159,4 @@ nix develop
 direnv allow
 ```
 
-Includes: `kubectl`, `helm`, `kubeseal`, `argocd`, `kubeconform`, `trivy`, `pluto`, `gitleaks`, `yamllint`, `kubectx`, `pre-commit`, and the full Ansible stack in a venv.
+Includes: `kubectl`, `helm`, `kubeseal`, `argocd`, `kubeconform`, `trivy`, `pluto`, `gitleaks`, `yamllint`, `shellcheck`, `kubectx`, `pre-commit`, and the full Ansible stack in a venv.
