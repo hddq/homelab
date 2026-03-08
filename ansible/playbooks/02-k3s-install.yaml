@@ -56,6 +56,7 @@
         {{ '--cluster-init' if is_ha_cluster else '' }}
         {{ taint_args }}
         --disable metrics-server
+        --disable servicelb
       args:
         executable: /bin/bash
       when: current_k3s_version.rc != 0 or k3s_version not in current_k3s_version.stdout
