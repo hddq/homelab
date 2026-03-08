@@ -1,0 +1,4 @@
+{
+  "ansible.python.interpreterPath": "${workspaceFolder}/.venv/bin/python",
+  "nixEnvSelector.nixFile": "${workspaceFolder}/flake.nix"
+}
