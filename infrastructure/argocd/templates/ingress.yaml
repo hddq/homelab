@@ -13,6 +13,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: argocd-server
+                name: infrastructure-argocd-server
                 port:
                   number: 80
