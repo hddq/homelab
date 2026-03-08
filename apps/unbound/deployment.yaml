@@ -39,10 +39,10 @@ spec:
               drop:
                 - ALL
           ports:
-            - containerPort: 53
+            - containerPort: 5353
               name: dns-udp
               protocol: UDP
-            - containerPort: 53
+            - containerPort: 5353
               name: dns-tcp
               protocol: TCP
           resources:
