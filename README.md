@@ -1,3 +1,5 @@
+<div align="center">
+
 # 🏠 Homelab
 
 Personal homelab running on Proxmox, managed fully as **Infrastructure as Code**.
@@ -9,6 +11,8 @@ The goal is to never touch a server manually — if it's not in Git, it doesn't 
 [![CI - Lint](https://github.com/hddq/homelab/actions/workflows/ci-lint.yaml/badge.svg)](https://github.com/hddq/homelab/actions/workflows/ci-lint.yaml)
 [![CI - ShellCheck](https://github.com/hddq/homelab/actions/workflows/ci-shellcheck.yaml/badge.svg)](https://github.com/hddq/homelab/actions/workflows/ci-shellcheck.yaml)
 [![CI - Gitleaks](https://github.com/hddq/homelab/actions/workflows/ci-gitleaks.yaml/badge.svg)](https://github.com/hddq/homelab/actions/workflows/ci-gitleaks.yaml)
+
+</div>
 
 ---
 
@@ -26,7 +30,6 @@ The goal is to never touch a server manually — if it's not in Git, it doesn't 
 | TLS                | cert-manager + DuckDNS webhook | Wildcard Let's Encrypt cert via DNS-01         |
 | Secrets            | Bitnami Sealed Secrets         | Encrypted secrets safe to commit to Git        |
 | Monitoring         | kube-prometheus-stack          | Prometheus + Grafana                           |
-| DNS                | Unbound                        | Recursive, validating, caching DNS resolver    |
 | Dev environment    | Nix flake                      | Reproducible shell with all tools pinned       |
 | Dependency updates | Renovate                       | Automated PRs for image/chart/k3s updates      |
 
