@@ -49,4 +49,5 @@
             }
           }'
       become: true
+      changed_when: true
       when: (cronjob_check.stdout | from_json) | length == 0
