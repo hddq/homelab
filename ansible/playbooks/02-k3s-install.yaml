@@ -55,6 +55,7 @@
         curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="{{ k3s_version }}" sh -s - server
         {{ '--cluster-init' if is_ha_cluster else '' }}
         {{ taint_args }}
+        --disable metrics-server
       args:
         executable: /bin/bash
       when: current_k3s_version.rc != 0 or k3s_version not in current_k3s_version.stdout
