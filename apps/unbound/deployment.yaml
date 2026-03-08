@@ -45,6 +45,16 @@ spec:
             - containerPort: 5353
               name: dns-tcp
               protocol: TCP
+          livenessProbe:
+            tcpSocket:
+              port: 5353
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: 5353
+            initialDelaySeconds: 5
+            periodSeconds: 10
           resources:
             limits:
               memory: 512Mi
