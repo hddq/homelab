@@ -49,7 +49,7 @@
 
     - name: ⚓ Install ArgoCD
       kubernetes.core.helm:
-        name: argocd
+        name: infrastructure-argocd
         chart_ref: "{{ argocd_chart_path }}"
         release_namespace: argocd
         create_namespace: true
@@ -80,5 +80,5 @@
           - "Cluster bootstrapped successfully!"
           - "ArgoCD User: admin"
           - "ArgoCD Password: {{ argocd_pass.stdout }}"
-          - "Access via Port Forward: kubectl --kubeconfig {{ kubeconfig_path }} -n argocd port-forward service/argocd-server 8080:80"
+          - "Access via Port Forward: kubectl --kubeconfig {{ kubeconfig_path }} -n argocd port-forward service/infrastructure-argocd-server 8080:80"
           - "Then open: http://localhost:8080"
