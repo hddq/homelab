@@ -114,19 +114,13 @@ ansible-playbook playbooks/02-k3s-install.yaml
 export KUBECONFIG=$(pwd)/../kubeconfig
 ```
 
-**Step 5 — Restore Sealed Secrets master key:**
+**Step 5 — Setup Infrastructure (Sealed Secrets + ArgoCD):**
 
 ```bash
-ansible-playbook playbooks/03-restore-sealed-secrets.yaml
+ansible-playbook playbooks/03-setup-infra.yaml
 ```
 
-> ⚠️ This must happen **before** ArgoCD deploys anything, otherwise all SealedSecrets will fail to decrypt.
-
-**Step 6 — Deploy ArgoCD + bootstrap:**
-
-```bash
-ansible-playbook playbooks/04-setup-infra.yaml
-```
+> ⚠️ This installs both Sealed Secrets and ArgoCD, and restores the master key if present. This must happen **before** ArgoCD starts syncing from private repos.
 
 ArgoCD will now sync everything else automatically from this repo. Done. ✅
 
