@@ -14,7 +14,7 @@
   "customManagers": [
     {
       "customType": "regex",
-      "managerFilePatterns": ["^k3s_version\\.txt$"],
+      "managerFilePatterns": ["k3s_version.txt"],
       "matchStrings": ["(?<currentValue>v\\S+)"],
       "depNameTemplate": "k3s-io/k3s",
       "datasourceTemplate": "github-releases"
