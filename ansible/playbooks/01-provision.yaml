@@ -121,8 +121,8 @@
         # ephemeral OS data and Longhorn replicas. Persistent data is already backed
         # up via Longhorn native backups to TrueNAS NFS.
         backup: false
-        iothread: "on"
-        discard: true
+        iothread: true
+        discard: "on"
         ssd: true
         state: present
       loop: "{{ vms_to_provision }}"
