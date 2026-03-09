@@ -20,4 +20,12 @@ spec:
         - image: ganeshlab/opodsync:0.5.1-amd64
           name: opodsync
           resources: {}
+          volumeMounts:
+            - name: opodsync-storage
+              mountPath: /var/www/server/data
+      volumes:
+        - name: opodsync-storage
+          persistentVolumeClaim:
+            claimName: opodsync-pvc
+
 status: {}

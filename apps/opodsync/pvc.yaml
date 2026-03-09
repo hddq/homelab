@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: opodsync-pvc
+spec:
+  resources:
+    requests:
+      storage: 64Mi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
