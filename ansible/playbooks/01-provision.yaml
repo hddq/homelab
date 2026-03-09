@@ -55,6 +55,9 @@
         status_code: [200]
       loop: "{{ vms_to_provision }}"
       register: move_efi_results
+      failed_when:
+        - move_efi_results.status == 500
+        - "'same storage' not in (move_efi_results.json.message | default(''))"
 
     - name: ⏳ Stage 1.3 - Wait for EFI Disk Move
       ansible.builtin.uri:
@@ -68,6 +71,7 @@
       until: efi_task_status.json.data.status == 'stopped'
       retries: 30
       delay: 2
+      when: item.json.data is not none
 
     - name: 💉 Stage 2 - Inject Cloud-Init Config
       community.proxmox.proxmox_kvm:
