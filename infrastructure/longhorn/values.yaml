@@ -11,7 +11,7 @@ longhorn:
   persistence:
     defaultClass: true
     defaultClassReplicaCount: 1
-    reclaimPolicy: Delete
+    reclaimPolicy: Retain
 
   preUpgradeChecker:
     jobEnabled: false
