@@ -26,19 +26,19 @@
         state: present
       loop: "{{ vms_to_provision }}"
 
-    - name: 🚚 Stage 1.1 - Move Disk to Local Storage
+    - name: 🚚 Stage 1.1 - Move Disks to Local Storage
       community.proxmox.proxmox_disk:
         api_host: "{{ proxmox_api_host }}"
         api_user: "{{ proxmox_api_user }}"
         api_token_id: "{{ proxmox_api_token_id }}"
         api_token_secret: "{{ proxmox_api_token_secret }}"
         validate_certs: false
-        vmid: "{{ item.vmid }}"
-        disk: scsi0
-        target_storage: "{{ item.storage | default(default_vm_storage) }}"
+        vmid: "{{ item.0.vmid }}"
+        disk: "{{ item.1 }}"
+        target_storage: "{{ item.0.storage | default(default_vm_storage) }}"
         delete_moved: true
         state: moved
-      loop: "{{ vms_to_provision }}"
+      loop: "{{ vms_to_provision | product(['scsi0', 'ide2']) | list }}"
 
     - name: 🚚 Stage 1.2 - Move EFI Disk to Local Storage
       ansible.builtin.uri:
