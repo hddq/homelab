@@ -10,7 +10,9 @@ spec:
   selector:
     matchLabels:
       app: opodsync
-  strategy: {}
+  # Use Recreate strategy to avoid "Multi-Attach error" with ReadWriteOnce volumes
+  strategy:
+    type: Recreate
   template:
     metadata:
       labels:
@@ -32,7 +34,19 @@ spec:
             capabilities:
               drop:
                 - ALL
-          resources: {}
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
           volumeMounts:
             - name: opodsync-storage
               mountPath: /var/www/server/data
@@ -44,5 +58,3 @@ spec:
             claimName: opodsync-pvc
         - name: tmp
           emptyDir: {}
-
-status: {}
