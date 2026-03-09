@@ -1,5 +1,8 @@
-#!/bin/bash
-# v3.8.3
+#!/usr/bin/env bash
+
+VERSION="v3.8.4"
+
+echo -e "Offsite Backup Script ${VERSION}"
 
 set -e
 
