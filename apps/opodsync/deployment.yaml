@@ -16,16 +16,33 @@ spec:
       labels:
         app: opodsync
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 82
+        runAsGroup: 82
+        fsGroup: 82
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - image: ganeshlab/opodsync:0.5.1-amd64
           name: opodsync
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
           resources: {}
           volumeMounts:
             - name: opodsync-storage
               mountPath: /var/www/server/data
+            - name: tmp
+              mountPath: /tmp
       volumes:
         - name: opodsync-storage
           persistentVolumeClaim:
             claimName: opodsync-pvc
+        - name: tmp
+          emptyDir: {}
 
 status: {}
