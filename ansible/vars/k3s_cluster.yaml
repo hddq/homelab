@@ -2,7 +2,7 @@ k3s_version: "{{ lookup('file', '../../k3s_version.txt') | trim }}"
 
 template_id: 299
 vm_user: "hddq"
-my_ssh_key: "{{ lookup('file', '~/.ssh/hddq-key.pub') }}"
+my_ssh_key: "{{ lookup('file', '~/.ssh/hddq-ssh.pub') }}"
 target_inventory_file: "../inventory/hosts.ini"
 
 default_vm_ram: 8192
@@ -20,16 +20,20 @@ default_vm_dns:
 vms_to_provision:
   - name: "k8s-cp-1"
     vmid: 211
+    node: "z690"
     ip: "192.168.20.111"
     k3s_role: "master"
     run_workloads: false
 
   - name: "k8s-worker-1"
     vmid: 212
+    node: "z690"
     ip: "192.168.20.112"
     k3s_role: "worker"
 
   - name: "k8s-worker-2"
     vmid: 213
+    node: "b360"
+    disk: "50G"
     ip: "192.168.20.113"
     k3s_role: "worker"

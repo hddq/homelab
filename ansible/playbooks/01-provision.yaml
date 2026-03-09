@@ -15,12 +15,12 @@
         api_token_id: "{{ proxmox_api_token_id }}"
         api_token_secret: "{{ proxmox_api_token_secret }}"
         validate_certs: false
-        node: "{{ proxmox_node }}"
+        node: "{{ item.node | default(proxmox_node) }}"
         clone: yes
         vmid: "{{ template_id }}"
         newid: "{{ item.vmid }}"
         name: "{{ item.name }}"
-        target: "{{ proxmox_node }}"
+        target: "{{ item.node | default(proxmox_node) }}"
         storage: "{{ item.storage | default(default_vm_storage) }}"
         format: raw
         full: yes
@@ -35,7 +35,7 @@
         api_token_id: "{{ proxmox_api_token_id }}"
         api_token_secret: "{{ proxmox_api_token_secret }}"
         validate_certs: false
-        node: "{{ proxmox_node }}"
+        node: "{{ item.node | default(proxmox_node) }}"
         vmid: "{{ item.vmid }}"
         state: present
         update: yes
@@ -66,19 +66,40 @@
         state: resized
       loop: "{{ vms_to_provision }}"
 
-    - name: 🚀 Stage 4 - Power On
+    - name: 🛡️ Stage 4 - Configure Disk Options
+
+      community.proxmox.proxmox_disk:
+        api_host: "{{ proxmox_api_host }}"
+        api_user: "{{ proxmox_api_user }}"
+        api_token_id: "{{ proxmox_api_token_id }}"
+        api_token_secret: "{{ proxmox_api_token_secret }}"
+        validate_certs: false
+        vmid: "{{ item.vmid }}"
+        disk: "scsi0"
+        # We disable Proxmox-level backups for worker nodes because they primarily hold
+        # ephemeral OS data and Longhorn replicas. Persistent data is already backed
+        # up via Longhorn native backups to TrueNAS NFS.
+        backup: false
+        iothread: "on"
+        discard: true
+        ssd: true
+        state: present
+      loop: "{{ vms_to_provision }}"
+      when: item.k3s_role == "worker"
+
+    - name: 🚀 Stage 5 - Power On
       community.proxmox.proxmox_kvm:
         api_host: "{{ proxmox_api_host }}"
         api_user: "{{ proxmox_api_user }}"
         api_token_id: "{{ proxmox_api_token_id }}"
         api_token_secret: "{{ proxmox_api_token_secret }}"
         validate_certs: false
-        node: "{{ proxmox_node }}"
+        node: "{{ item.node | default(proxmox_node) }}"
         vmid: "{{ item.vmid }}"
         state: started
       loop: "{{ vms_to_provision }}"
 
-    - name: ⏳ Stage 5 - Wait for SSH
+    - name: ⏳ Stage 6 - Wait for SSH
       ansible.builtin.wait_for:
         host: "{{ item.ip }}"
         port: 22
@@ -88,7 +109,7 @@
       connection: local
       loop: "{{ vms_to_provision }}"
 
-    - name: 📝 Stage 6 - Add to Inventory File
+    - name: 📝 Stage 7 - Add to Inventory File
       ansible.builtin.lineinfile:
         path: "{{ target_inventory_file }}"
         insertafter: '\[k3s_new_nodes\]'
