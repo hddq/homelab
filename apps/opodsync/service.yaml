@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: opodsync-service
+  name: opodsync-service
+  namespace: opodsync
+spec:
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app: opodsync
+  type: LoadBalancer
+status:
+  loadBalancer: {}

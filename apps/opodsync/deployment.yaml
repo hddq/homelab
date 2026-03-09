@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: opodsync
+  name: opodsync-deployment
+  namespace: opodsync
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: opodsync
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: opodsync
+    spec:
+      containers:
+        - image: ganeshlab/opodsync:0.5.1-amd64
+          name: opodsync
+          resources: {}
+status: {}
