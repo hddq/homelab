@@ -8,24 +8,36 @@
     - "../vars/k3s_cluster.yaml"
 
   tasks:
-    - name: 🐑 Stage 1 - Clone VM from Template
+    - name: 🐑 Stage 1 - Linked Clone to Shared Storage
       community.proxmox.proxmox_kvm:
         api_host: "{{ proxmox_api_host }}"
         api_user: "{{ proxmox_api_user }}"
         api_token_id: "{{ proxmox_api_token_id }}"
         api_token_secret: "{{ proxmox_api_token_secret }}"
         validate_certs: false
-        node: "{{ item.node | default(proxmox_node) }}"
+        node: "{{ template_node }}"
         clone: yes
         vmid: "{{ template_id }}"
         newid: "{{ item.vmid }}"
         name: "{{ item.name }}"
         target: "{{ item.node | default(proxmox_node) }}"
-        storage: "{{ item.storage | default(default_vm_storage) }}"
-        format: raw
-        full: yes
+        full: no
         timeout: 500
         state: present
+      loop: "{{ vms_to_provision }}"
+
+    - name: 🚚 Stage 1.1 - Move Disk to Local Storage
+      community.proxmox.proxmox_disk:
+        api_host: "{{ proxmox_api_host }}"
+        api_user: "{{ proxmox_api_user }}"
+        api_token_id: "{{ proxmox_api_token_id }}"
+        api_token_secret: "{{ proxmox_api_token_secret }}"
+        validate_certs: false
+        vmid: "{{ item.vmid }}"
+        disk: scsi0
+        target_storage: "{{ item.storage | default(default_vm_storage) }}"
+        delete_moved: true
+        state: moved
       loop: "{{ vms_to_provision }}"
 
     - name: 💉 Stage 2 - Inject Cloud-Init Config
