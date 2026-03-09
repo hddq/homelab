@@ -40,6 +40,35 @@
         state: moved
       loop: "{{ vms_to_provision }}"
 
+    - name: 🚚 Stage 1.2 - Move EFI Disk to Local Storage
+      ansible.builtin.uri:
+        url: "https://{{ proxmox_api_host }}:8006/api2/json/nodes/{{ item.node | default(proxmox_node) }}/qemu/{{ item.vmid }}/move_disk"
+        method: POST
+        headers:
+          Authorization: "PVEAPIToken={{ proxmox_api_user }}!{{ proxmox_api_token_id }}={{ proxmox_api_token_secret }}"
+        body_format: form-urlencoded
+        body:
+          disk: efidisk0
+          storage: "{{ item.storage | default(default_vm_storage) }}"
+          delete: 1
+        validate_certs: false
+        status_code: [200]
+      loop: "{{ vms_to_provision }}"
+      register: move_efi_results
+
+    - name: ⏳ Stage 1.3 - Wait for EFI Disk Move
+      ansible.builtin.uri:
+        url: "https://{{ proxmox_api_host }}:8006/api2/json/nodes/{{ item.item.node | default(proxmox_node) }}/tasks/{{ item.json.data }}/status"
+        method: GET
+        headers:
+          Authorization: "PVEAPIToken={{ proxmox_api_user }}!{{ proxmox_api_token_id }}={{ proxmox_api_token_secret }}"
+        validate_certs: false
+      loop: "{{ move_efi_results.results }}"
+      register: efi_task_status
+      until: efi_task_status.json.data.status == 'stopped'
+      retries: 30
+      delay: 2
+
     - name: 💉 Stage 2 - Inject Cloud-Init Config
       community.proxmox.proxmox_kvm:
         api_host: "{{ proxmox_api_host }}"
