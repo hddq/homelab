@@ -184,7 +184,7 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: infrastructure-traefik-config
+  name: infrastructure-traefik
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -193,11 +193,13 @@ spec:
   source:
     repoURL: git@github.com:hddq/homelab.git
     targetRevision: HEAD
-    path: infrastructure/traefik-config
+    path: infrastructure/traefik
   destination:
     server: https://kubernetes.default.svc
-    namespace: kube-system
+    namespace: traefik
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

@@ -57,6 +57,7 @@
         {{ taint_args }}
         --disable metrics-server
         --disable servicelb
+        --disable traefik
       args:
         executable: /bin/bash
       when: current_k3s_version.rc != 0 or k3s_version not in current_k3s_version.stdout
@@ -91,7 +92,14 @@
       changed_when: false
 
     - name: 📥 Install K3s Server (Join HA)
-      ansible.builtin.shell: 'set -o pipefail && curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="{{ k3s_version }}" K3S_URL=https://{{ master_ip }}:6443 K3S_TOKEN={{ k3s_token }} sh -s - server'
+      ansible.builtin.shell: >
+        set -o pipefail &&
+        curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="{{ k3s_version }}"
+        K3S_URL=https://{{ master_ip }}:6443 K3S_TOKEN={{ k3s_token }}
+        sh -s - server
+        --disable metrics-server
+        --disable servicelb
+        --disable traefik
       args:
         executable: /bin/bash
       when: current_k3s_version.rc != 0 or k3s_version not in current_k3s_version.stdout
