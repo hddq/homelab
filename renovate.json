@@ -18,6 +18,15 @@
       "matchStrings": ["(?<currentValue>v\\S+)"],
       "depNameTemplate": "k3s-io/k3s",
       "datasourceTemplate": "github-releases"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["ansible/requirements.yaml"],
+      "matchStrings": [
+        "# proxy-version-for-renovate: \"(?<currentValue>\\d+\\.\\d+\\.\\d+)\""
+      ],
+      "depNameTemplate": "community.proxmox",
+      "datasourceTemplate": "galaxy-collection"
     }
   ],
   "packageRules": [
