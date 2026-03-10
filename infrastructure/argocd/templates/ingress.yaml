@@ -4,7 +4,7 @@ metadata:
   name: argocd-server-ingress
   namespace: argocd
 spec:
-  ingressClassName: traefik
+  ingressClassName: infrastructure-traefik
   rules:
     - host: argocd.hddq-k8s.duckdns.org
       http:

@@ -4,7 +4,7 @@ metadata:
   name: nginx-ingress
   namespace: playground
 spec:
-  ingressClassName: traefik
+  ingressClassName: infrastructure-traefik
   rules:
     - host: nginx.hddq-k8s.duckdns.org
       http:

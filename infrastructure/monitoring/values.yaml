@@ -23,7 +23,7 @@ kube-prometheus-stack:
       rollingUpdate: null
     ingress:
       enabled: true
-      ingressClassName: traefik
+      ingressClassName: infrastructure-traefik
       hosts:
         - grafana.hddq-k8s.duckdns.org
 

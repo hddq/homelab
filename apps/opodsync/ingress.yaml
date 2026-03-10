@@ -4,7 +4,7 @@ metadata:
   name: opodsync-ingress
   namespace: opodsync
 spec:
-  ingressClassName: traefik
+  ingressClassName: infrastructure-traefik
   rules:
     - host: opodsync.hddq-k8s.duckdns.org
       http:

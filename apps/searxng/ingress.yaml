@@ -4,7 +4,7 @@ metadata:
   name: searxng-ingress
   namespace: searxng
 spec:
-  ingressClassName: traefik
+  ingressClassName: infrastructure-traefik
   rules:
     - host: searxng.hddq-k8s.duckdns.org
       http:

@@ -6,7 +6,7 @@ metadata:
   annotations:
     traefik.ingress.kubernetes.io/router.middlewares: longhorn-system-longhorn-auth@kubernetescrd
 spec:
-  ingressClassName: traefik
+  ingressClassName: infrastructure-traefik
   rules:
     - host: longhorn.hddq-k8s.duckdns.org
       http:

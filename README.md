@@ -24,7 +24,7 @@ The goal is to never touch a server manually — if it's not in Git, it doesn't 
 | Provisioning       | Ansible + Cloud-Init           | VM cloning, k3s install, kubeconfig            |
 | Kubernetes         | k3s                            | Lightweight k8s distribution                   |
 | GitOps             | ArgoCD                         | Syncs cluster state from this repo             |
-| Ingress            | Traefik (built-in k3s)         | Reverse proxy + TLS termination                |
+| Ingress            | Traefik                        | Reverse proxy + TLS termination                |
 | Load Balancer      | MetalLB (BGP)                  | Bare-metal LoadBalancer IPs via BGP to OpenWRT |
 | Storage            | Longhorn                       | Distributed block storage with replication     |
 | TLS                | cert-manager + DuckDNS webhook | Wildcard Let's Encrypt cert via DNS-01         |
