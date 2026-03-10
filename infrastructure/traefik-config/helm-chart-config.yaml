@@ -6,4 +6,5 @@ metadata:
 spec:
   valuesContent: |-
     service:
-      loadBalancerIP: 192.168.41.10
+      annotations:
+        metallb.universe.tf/loadBalancerIPs: 192.168.41.10

@@ -3,11 +3,12 @@ kind: Service
 metadata:
   name: unbound-service
   namespace: unbound
+  annotations:
+    metallb.universe.tf/loadBalancerIPs: 192.168.41.11
 spec:
   selector:
     app: unbound
   type: LoadBalancer
-  loadBalancerIP: 192.168.41.11
   externalTrafficPolicy: Local
   ports:
     - name: dns-udp

@@ -3,11 +3,12 @@ kind: Service
 metadata:
   name: postgres-service
   namespace: playground
+  annotations:
+    metallb.universe.tf/loadBalancerIPs: 192.168.41.16
 spec:
   selector:
     app: postgres
   type: LoadBalancer
-  loadBalancerIP: 192.168.41.16
   ports:
     - port: 5432
       targetPort: 5432
