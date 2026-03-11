@@ -1,5 +1,6 @@
 victoria-metrics-single:
   server:
+    fullnameOverride: "vm-single-server"
     persistentVolume:
       enabled: true
       storageClass: "longhorn"
