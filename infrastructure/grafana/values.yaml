@@ -26,6 +26,7 @@ grafana:
           isDefault: true
           jsonData:
             prometheusType: VictoriaMetrics
+            scrapeInterval: 30s
             queryTimeout: 30s
             oauthPassThru: false
 
