@@ -1,8 +1,11 @@
 victoria-metrics-agent:
-  config:
+  rbac:
+    create: true
 
-    remoteWrite:
-      - url: "http://vm-single-server.monitoring.svc.cluster.local:8428/api/v1/write"
+  remoteWrite:
+    - url: "http://vm-single-server.monitoring.svc.cluster.local:8428/api/v1/write"
+
+  config:
     global:
       scrape_interval: 30s
     scrape_configs:
@@ -23,6 +26,3 @@ victoria-metrics-agent:
             target_label: service
           - source_labels: [__meta_kubernetes_pod_node_name]
             target_label: node
-
-  rbac:
-    create: true
