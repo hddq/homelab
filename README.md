@@ -29,7 +29,7 @@ The goal is to never touch a server manually — if it's not in Git, it doesn't 
 | Storage            | Longhorn                       | Distributed block storage with replication     |
 | TLS                | cert-manager + DuckDNS webhook | Wildcard Let's Encrypt cert via DNS-01         |
 | Secrets            | Bitnami Sealed Secrets         | Encrypted secrets safe to commit to Git        |
-| Monitoring         | kube-prometheus-stack          | Prometheus + Grafana                           |
+| Monitoring         | VictoriaMetrics Stack          | vmsingle + vmagent + node-exporter + Grafana   |
 | Dev environment    | Nix flake                      | Reproducible shell with all tools pinned       |
 | Dependency updates | Renovate                       | Automated PRs for image/chart/k3s updates      |
 
