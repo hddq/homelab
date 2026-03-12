@@ -1,0 +1,21 @@
+victoria-metrics-alert:
+  server:
+    datasource:
+      url: "http://vm-single-server.monitoring.svc.cluster.local:8428"
+
+    notifier:
+      alertmanager:
+        url: "http://alertmanager.monitoring.svc.cluster.local:9093"
+
+    config:
+      alerts:
+        groups:
+          - name: test
+            rules:
+              - alert: TestAlert
+                expr: vector(1)
+                for: 0m
+                labels:
+                  severity: info
+                annotations:
+                  summary: "Test alert"
