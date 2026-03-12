@@ -1,0 +1,10 @@
+apiVersion: v2
+name: vm-agent
+description: A Helm chart for VictoriaMetrics Agent (vmagent)
+type: application
+version: 1.0.0
+appVersion: "v1.137.0"
+dependencies:
+  - name: victoria-metrics-agent
+    version: 0.33.0
+    repository: https://victoriametrics.github.io/helm-charts
