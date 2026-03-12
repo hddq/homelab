@@ -5,7 +5,7 @@ victoria-metrics-alert:
 
     notifier:
       alertmanager:
-        url: "http://alertmanager.monitoring.svc.cluster.local:9093"
+        url: "http://infrastructure-alertmanager.monitoring.svc.cluster.local:9093"
 
     config:
       alerts:
