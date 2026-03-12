@@ -1,0 +1,26 @@
+alertmanager:
+  enabled: true
+  persistence:
+    enabled: true
+    storageClassName: longhorn
+    size: 2Gi
+  ingress:
+    enabled: true
+    className: infrastructure-traefik
+    hosts:
+      - host: alertmanager.hddq-k8s.duckdns.org
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+
+  config:
+    global:
+      resolve_timeout: 5m
+    route:
+      group_by: ['alertname']
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 12h
+      receiver: 'null'
+    receivers:
+      - name: 'null'
