@@ -38,3 +38,12 @@ victoria-metrics-alert:
                 annotations:
                   summary: "Node {{ $labels.instance }} is down"
                   description: "node-exporter scrape failed for 1 minute. The server is unreachable or the agent crashed."
+
+              - alert: HighLoad
+                expr: node_load5 > count by (instance) (node_cpu_seconds_total{mode="idle"})
+                for: 1m
+                labels:
+                  severity: warning
+                annotations:
+                  summary: "High CPU Load on {{ $labels.instance }}"
+                  description: "5-minute load average is {{ $value }}, which exceeds the total number of CPU threads. System is getting saturated."
