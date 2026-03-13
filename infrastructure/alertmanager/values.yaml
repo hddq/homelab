@@ -17,10 +17,20 @@ alertmanager:
     global:
       resolve_timeout: 5m
     route:
-      group_by: ['alertname']
+      group_by: ["alertname"]
       group_wait: 30s
       group_interval: 5m
       repeat_interval: 12h
-      receiver: 'null'
+      receiver: "telegram"
     receivers:
-      - name: 'null'
+      - name: "telegram"
+        telegram_configs:
+          - bot_token_file: /etc/alertmanager/secrets/bot-token
+            chat_id: -1003558340282
+            message_thread_id: 3
+
+  extraSecretMounts:
+    - name: telegram-secret
+      mountPath: /etc/alertmanager/secrets
+      secretName: alertmanager-telegram
+      readOnly: true
