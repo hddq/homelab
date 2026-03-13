@@ -17,9 +17,9 @@ alertmanager:
     global:
       resolve_timeout: 5m
     route:
-      group_by: ["alertname"]
-      group_wait: 30s
-      group_interval: 5m
+      group_by: ["..."]
+      group_wait: 0s
+      group_interval: 30s
       repeat_interval: 12h
       receiver: "telegram"
     receivers:
@@ -28,6 +28,21 @@ alertmanager:
           - bot_token_file: /etc/alertmanager/secrets/bot-token
             chat_id: -1003558340282
             message_thread_id: 3
+            parse_mode: HTML
+            message: |-
+              {{- if eq .Status "firing" }}🔥 <b>FIRING</b> 🔥{{ "\n" }}{{- else }}✅ <b>RESOLVED</b> ✅{{ "\n" }}{{- end }}
+              {{- range .Alerts }}
+              🚨 <b>{{ .Labels.alertname }}</b> [{{ .Labels.severity }}]
+              {{- if .Annotations.summary }}{{ "\n" }}📝 <b>Summary:</b> {{ .Annotations.summary }}{{- end }}
+              {{- if .Annotations.description }}{{ "\n" }}📄 <b>Details:</b> {{ .Annotations.description }}{{- end }}
+              {{ "\n" }}🏷️ <b>Labels:</b>
+              {{- range $key, $value := .Labels }}
+              {{- if and (ne $key "alertname") (ne $key "severity") }}
+              ├ <b>{{ $key }}:</b> <code>{{ $value }}</code>
+              {{- end }}
+              {{- end }}
+              ⏱ <b>Started:</b> <code>{{ .StartsAt.Format "2006-01-02 15:04:05" }}</code>
+              {{- end }}
 
   extraSecretMounts:
     - name: telegram-secret
