@@ -21,9 +21,17 @@ alertmanager:
       group_wait: 0s
       group_interval: 30s
       repeat_interval: 12h
-      receiver: "telegram"
+      receiver: "telegram-hardware"
+      routes:
+        - matchers:
+            - category="hardware"
+          receiver: "telegram-hardware"
+        - matchers:
+            - category="ksm"
+          receiver: "telegram-ksm"
+
     receivers:
-      - name: "telegram"
+      - name: "telegram-hardware"
         telegram_configs:
           - bot_token_file: /etc/alertmanager/secrets/bot-token
             chat_id: -1003558340282
@@ -37,7 +45,28 @@ alertmanager:
               {{- if .Annotations.description }}{{ "\n" }}📄 <b>Details:</b> {{ .Annotations.description }}{{- end }}
               {{ "\n" }}🏷️ <b>Labels:</b>
               {{- range $key, $value := .Labels }}
-              {{- if and (ne $key "alertname") (ne $key "severity") }}
+              {{- if and (ne $key "alertname") (ne $key "severity") (ne $key "category") }}
+              ├ <b>{{ $key }}:</b> <code>{{ $value }}</code>
+              {{- end }}
+              {{- end }}
+              ⏱ <b>Started:</b> <code>{{ .StartsAt.Format "2006-01-02 15:04:05" }}</code>
+              {{- end }}
+
+      - name: "telegram-ksm"
+        telegram_configs:
+          - bot_token_file: /etc/alertmanager/secrets/bot-token
+            chat_id: -1003558340282
+            message_thread_id: 28
+            parse_mode: HTML
+            message: |-
+              {{- if eq .Status "firing" }}🔥 <b>FIRING</b> 🔥{{ "\n" }}{{- else }}✅ <b>RESOLVED</b> ✅{{ "\n" }}{{- end }}
+              {{- range .Alerts }}
+              🚨 <b>{{ .Labels.alertname }}</b> [{{ .Labels.severity }}]
+              {{- if .Annotations.summary }}{{ "\n" }}📝 <b>Summary:</b> {{ .Annotations.summary }}{{- end }}
+              {{- if .Annotations.description }}{{ "\n" }}📄 <b>Details:</b> {{ .Annotations.description }}{{- end }}
+              {{ "\n" }}🏷️ <b>Labels:</b>
+              {{- range $key, $value := .Labels }}
+              {{- if and (ne $key "alertname") (ne $key "severity") (ne $key "category") }}
               ├ <b>{{ $key }}:</b> <code>{{ $value }}</code>
               {{- end }}
               {{- end }}
