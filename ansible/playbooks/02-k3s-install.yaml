@@ -12,6 +12,12 @@
       loop: "{{ vms_to_provision }}"
       when: item.ip == inventory_hostname
 
+    - name: 🧠 Set host-specific facts from vms_to_provision
+      ansible.builtin.set_fact:
+        run_workloads: "{{ item.run_workloads | default(true) }}"
+      loop: "{{ vms_to_provision }}"
+      when: item.ip == inventory_hostname
+
     - name: 📦 Install System Dependencies
       ansible.builtin.apt:
         name: [open-iscsi, nfs-common, qemu-guest-agent]
@@ -38,7 +44,7 @@
     - name: 🧠 Determine Node Taint (Control Plane Isolation)
       ansible.builtin.set_fact:
         taint_args: >-
-          {% if not hostvars[inventory_hostname].get('run_workloads', true) %}
+          {% if not run_workloads | default(true) %}
           --node-taint node-role.kubernetes.io/control-plane=true:NoSchedule
           {% else %}
           {% endif %}
@@ -85,6 +91,14 @@
     master_ip: "{{ hostvars[groups['k3s_master'][0]]['inventory_hostname'] }}"
     k3s_token: "{{ hostvars[groups['k3s_master'][0]]['k3s_token'] }}"
   tasks:
+    - name: 🧠 Determine Node Taint (Control Plane Isolation)
+      ansible.builtin.set_fact:
+        taint_args: >-
+          {% if not run_workloads | default(true) %}
+          --node-taint node-role.kubernetes.io/control-plane=true:NoSchedule
+          {% else %}
+          {% endif %}
+
     - name: 🔍 Check current K3s version
       ansible.builtin.command: k3s --version
       register: current_k3s_version
@@ -97,6 +111,7 @@
         curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="{{ k3s_version }}"
         K3S_URL=https://{{ master_ip }}:6443 K3S_TOKEN={{ k3s_token }}
         sh -s - server
+        {{ taint_args }}
         --disable metrics-server
         --disable servicelb
         --disable traefik
