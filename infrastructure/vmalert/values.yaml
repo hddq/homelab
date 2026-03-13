@@ -10,12 +10,31 @@ victoria-metrics-alert:
     config:
       alerts:
         groups:
-          - name: test
+          - name: hardware-alerts
             rules:
-              - alert: TestAlert
-                expr: vector(1)
-                for: 0m
+              - alert: HostOutOfDiskSpace
+                expr: (node_filesystem_avail_bytes{fstype=~"ext4|xfs|btrfs|zfs", mountpoint!~"/boot|/boot/efi"} / node_filesystem_size_bytes) * 100 < 15
+                for: 1m
                 labels:
-                  severity: info
+                  severity: warning
                 annotations:
-                  summary: "Test alert"
+                  summary: "Disk space running low on {{ $labels.instance }}"
+                  description: "Less than 15% free space left on volume {{ $labels.mountpoint }}."
+
+              - alert: HostOutOfMemory
+                expr: (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100 < 15
+                for: 1m
+                labels:
+                  severity: warning
+                annotations:
+                  summary: "Memory running low on {{ $labels.instance }}"
+                  description: "Available RAM is under 15%."
+
+              - alert: NodeDown
+                expr: up{job=~".*node-exporter.*"} == 0
+                for: 1m
+                labels:
+                  severity: critical
+                annotations:
+                  summary: "Node {{ $labels.instance }} is down"
+                  description: "node-exporter scrape failed for 1 minute. The server is unreachable or the agent crashed."
