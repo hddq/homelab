@@ -17,6 +17,7 @@ victoria-metrics-alert:
                 for: 1m
                 labels:
                   severity: warning
+                  category: hardware
                 annotations:
                   summary: "Disk space running low on {{ $labels.instance }}"
                   description: "Less than 15% free space left on volume {{ $labels.mountpoint }}."
@@ -26,6 +27,7 @@ victoria-metrics-alert:
                 for: 1m
                 labels:
                   severity: warning
+                  category: hardware
                 annotations:
                   summary: "Memory running low on {{ $labels.instance }}"
                   description: "Available RAM is under 15%."
@@ -35,6 +37,7 @@ victoria-metrics-alert:
                 for: 1m
                 labels:
                   severity: critical
+                  category: hardware
                 annotations:
                   summary: "Node {{ $labels.instance }} is down"
                   description: "node-exporter scrape failed for 1 minute. The server is unreachable or the agent crashed."
@@ -44,6 +47,39 @@ victoria-metrics-alert:
                 for: 1m
                 labels:
                   severity: warning
+                  category: hardware
                 annotations:
                   summary: "High CPU Load on {{ $labels.instance }}"
                   description: "5-minute load average is {{ $value }}, which exceeds the total number of CPU threads. System is getting saturated."
+
+          - name: ksm-alerts
+            rules:
+              - alert: PodCrashLooping
+                expr: kube_pod_container_status_waiting_reason{reason="CrashLoopBackOff"} > 0
+                for: 1m
+                labels:
+                  severity: critical
+                  category: ksm
+                annotations:
+                  summary: "Pod {{ $labels.pod }} is crash looping"
+                  description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} keeps crashing. Check the logs!"
+
+              - alert: DeploymentReplicasMismatch
+                expr: kube_deployment_spec_replicas != kube_deployment_status_replicas_available
+                for: 3m
+                labels:
+                  severity: warning
+                  category: ksm
+                annotations:
+                  summary: "Deployment {{ $labels.deployment }} mismatch"
+                  description: "Expected replicas don't match available ones. A node might be full or an image is missing/failing."
+
+              - alert: PVCPending
+                expr: kube_persistentvolumeclaim_status_phase{phase="Pending"} == 1
+                for: 3m
+                labels:
+                  severity: critical
+                  category: ksm
+                annotations:
+                  summary: "PVC {{ $labels.persistentvolumeclaim }} is stuck"
+                  description: "PersistentVolumeClaim in {{ $labels.namespace }} is Pending. Longhorn might have an issue provisioning the volume."
