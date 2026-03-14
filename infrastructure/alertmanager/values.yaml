@@ -33,45 +33,30 @@ alertmanager:
     receivers:
       - name: "telegram-hardware"
         telegram_configs:
-          - bot_token_file: /etc/alertmanager/secrets/bot-token
-            chat_id: -1003558340282
+          - <<: &telegram_base
+              bot_token_file: /etc/alertmanager/secrets/bot-token
+              chat_id: -1003558340282
+              parse_mode: HTML
+              message: |-
+                {{- if eq .Status "firing" }}🔥 <b>FIRING</b> 🔥{{ "\n" }}{{- else }}✅ <b>RESOLVED</b> ✅{{ "\n" }}{{- end }}
+                {{- range .Alerts }}
+                🚨 <b>{{ .Labels.alertname }}</b> [{{ .Labels.severity }}]
+                {{- if .Annotations.summary }}{{ "\n" }}📝 <b>Summary:</b> {{ .Annotations.summary }}{{- end }}
+                {{- if .Annotations.description }}{{ "\n" }}📄 <b>Details:</b> {{ .Annotations.description }}{{- end }}
+                {{ "\n" }}🏷️ <b>Labels:</b>
+                {{- range $key, $value := .Labels }}
+                {{- if and (ne $key "alertname") (ne $key "severity") (ne $key "category") }}
+                ├ <b>{{ $key }}:</b> <code>{{ $value }}</code>
+                {{- end }}
+                {{- end }}
+                ⏱ <b>Started:</b> <code>{{ .StartsAt.Format "2006-01-02 15:04:05" }}</code>
+                {{- end }}
             message_thread_id: 3
-            parse_mode: HTML
-            message: |-
-              {{- if eq .Status "firing" }}🔥 <b>FIRING</b> 🔥{{ "\n" }}{{- else }}✅ <b>RESOLVED</b> ✅{{ "\n" }}{{- end }}
-              {{- range .Alerts }}
-              🚨 <b>{{ .Labels.alertname }}</b> [{{ .Labels.severity }}]
-              {{- if .Annotations.summary }}{{ "\n" }}📝 <b>Summary:</b> {{ .Annotations.summary }}{{- end }}
-              {{- if .Annotations.description }}{{ "\n" }}📄 <b>Details:</b> {{ .Annotations.description }}{{- end }}
-              {{ "\n" }}🏷️ <b>Labels:</b>
-              {{- range $key, $value := .Labels }}
-              {{- if and (ne $key "alertname") (ne $key "severity") (ne $key "category") }}
-              ├ <b>{{ $key }}:</b> <code>{{ $value }}</code>
-              {{- end }}
-              {{- end }}
-              ⏱ <b>Started:</b> <code>{{ .StartsAt.Format "2006-01-02 15:04:05" }}</code>
-              {{- end }}
 
       - name: "telegram-ksm"
         telegram_configs:
-          - bot_token_file: /etc/alertmanager/secrets/bot-token
-            chat_id: -1003558340282
+          - <<: *telegram_base
             message_thread_id: 28
-            parse_mode: HTML
-            message: |-
-              {{- if eq .Status "firing" }}🔥 <b>FIRING</b> 🔥{{ "\n" }}{{- else }}✅ <b>RESOLVED</b> ✅{{ "\n" }}{{- end }}
-              {{- range .Alerts }}
-              🚨 <b>{{ .Labels.alertname }}</b> [{{ .Labels.severity }}]
-              {{- if .Annotations.summary }}{{ "\n" }}📝 <b>Summary:</b> {{ .Annotations.summary }}{{- end }}
-              {{- if .Annotations.description }}{{ "\n" }}📄 <b>Details:</b> {{ .Annotations.description }}{{- end }}
-              {{ "\n" }}🏷️ <b>Labels:</b>
-              {{- range $key, $value := .Labels }}
-              {{- if and (ne $key "alertname") (ne $key "severity") (ne $key "category") }}
-              ├ <b>{{ $key }}:</b> <code>{{ $value }}</code>
-              {{- end }}
-              {{- end }}
-              ⏱ <b>Started:</b> <code>{{ .StartsAt.Format "2006-01-02 15:04:05" }}</code>
-              {{- end }}
 
   extraSecretMounts:
     - name: telegram-secret
