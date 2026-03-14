@@ -8,6 +8,8 @@ victoria-metrics-agent:
   config:
     global:
       scrape_interval: 30s
+      external_labels:
+        cluster: "homelab"
     scrape_configs:
       - job_name: "node-exporter"
         kubernetes_sd_configs:
@@ -26,6 +28,7 @@ victoria-metrics-agent:
             target_label: service
           - source_labels: [__meta_kubernetes_pod_node_name]
             target_label: node
+
       - job_name: "kube-state-metrics"
         kubernetes_sd_configs:
           - role: endpoints
@@ -41,3 +44,17 @@ victoria-metrics-agent:
             target_label: namespace
           - source_labels: [__meta_kubernetes_service_name]
             target_label: service
+
+      - job_name: "kubelet-cadvisor"
+        scheme: https
+        metrics_path: /metrics/cadvisor
+        tls_config:
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        kubernetes_sd_configs:
+          - role: node
+        relabel_configs:
+          - action: labelmap
+            regex: __meta_kubernetes_node_label_(.+)
+          - source_labels: [__meta_kubernetes_node_name]
+            target_label: node
