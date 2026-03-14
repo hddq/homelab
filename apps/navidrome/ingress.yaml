@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: navidrome
+  namespace: navidrome
+spec:
+  ingressClassName: infrastructure-traefik
+  rules:
+    - host: navidrome.hddq-k8s.duckdns.org
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: navidrome
+                port:
+                  number: 4533

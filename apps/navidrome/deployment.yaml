@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: navidrome-deployment
+  namespace: navidrome
+  labels:
+    app.kubernetes.io/name: navidrome
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: navidrome
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: navidrome
+    spec:
+      containers:
+        - name: navidrome
+          image: deluan/navidrome:0.60.3
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 4533
+              protocol: TCP
+          env:
+            - name: ND_LOGLEVEL
+              value: "info"
+            - name: ND_MUSICFOLDER
+              value: "/music"
+            - name: ND_DATAFOLDER
+              value: "/data"
+            - name: ND_LASTFM_APIKEY
+              valueFrom:
+                secretKeyRef:
+                  name: navidrome-secret
+                  key: ND_LASTFM_APIKEY
+            - name: ND_LASTFM_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: navidrome-secret
+                  key: ND_LASTFM_SECRET
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          volumeMounts:
+            - name: music-nfs
+              subPath: music
+              mountPath: /music
+              readOnly: true
+            - name: navidrome-pvc
+              mountPath: /data
+      volumes:
+        - name: music-nfs
+          nfs:
+            server: 192.168.20.12
+            path: /mnt/ssd1/media
+        - name: navidrome-pvc
+          persistentVolumeClaim:
+            claimName: navidrome-pvc
