@@ -83,3 +83,60 @@ victoria-metrics-alert:
                 annotations:
                   summary: "PVC {{ $labels.persistentvolumeclaim }} is stuck"
                   description: "PersistentVolumeClaim in {{ $labels.namespace }} is Pending. Longhorn might have an issue provisioning the volume."
+
+          - name: cadvisor-alerts
+            rules:
+              - alert: ContainerOomKillDetected
+                expr: increase(container_oom_events_total{container!="", container!="POD", pod!=""}[15m]) > 0
+                labels:
+                  severity: critical
+                  category: cadvisor
+                annotations:
+                  summary: "Container {{ $labels.container }} was OOM-killed"
+                  description: "Container {{ $labels.container }} in pod {{ $labels.namespace }}/{{ $labels.pod }} triggered at least one OOM event in the last 15 minutes."
+
+              - alert: ContainerCpuThrottlingHigh
+                expr: |
+                  (
+                    sum by (namespace, pod, container, node) (
+                      increase(container_cpu_cfs_throttled_periods_total{container!="", container!="POD", pod!=""}[15m])
+                    )
+                    /
+                    sum by (namespace, pod, container, node) (
+                      increase(container_cpu_cfs_periods_total{container!="", container!="POD", pod!=""}[15m])
+                    )
+                  ) > 0.25
+                  and
+                  sum by (namespace, pod, container, node) (
+                    increase(container_cpu_cfs_periods_total{container!="", container!="POD", pod!=""}[15m])
+                  ) > 0
+                for: 10m
+                labels:
+                  severity: warning
+                  category: cadvisor
+                annotations:
+                  summary: "Container {{ $labels.container }} is being CPU-throttled"
+                  description: "More than 25% of CFS periods were throttled for pod {{ $labels.namespace }}/{{ $labels.pod }} over the last 15 minutes."
+
+              - alert: ContainerMemoryNearLimit
+                expr: |
+                  (
+                    max by (namespace, pod, container, node) (
+                      container_memory_working_set_bytes{container!="", container!="POD", pod!=""}
+                    )
+                    /
+                    max by (namespace, pod, container, node) (
+                      container_spec_memory_limit_bytes{container!="", container!="POD", pod!=""}
+                    )
+                  ) > 0.90
+                  and
+                  max by (namespace, pod, container, node) (
+                    container_spec_memory_limit_bytes{container!="", container!="POD", pod!=""}
+                  ) > 0
+                for: 10m
+                labels:
+                  severity: warning
+                  category: cadvisor
+                annotations:
+                  summary: "Container {{ $labels.container }} is close to its memory limit"
+                  description: "Container {{ $labels.container }} in pod {{ $labels.namespace }}/{{ $labels.pod }} is using more than 90% of its configured memory limit."

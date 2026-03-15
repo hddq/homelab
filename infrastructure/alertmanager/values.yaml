@@ -29,6 +29,9 @@ alertmanager:
         - matchers:
             - category="ksm"
           receiver: "telegram-ksm"
+        - matchers:
+            - category="cadvisor"
+          receiver: "telegram-cadvisor"
 
     receivers:
       - name: "telegram-hardware"
@@ -57,6 +60,11 @@ alertmanager:
         telegram_configs:
           - <<: *telegram_base
             message_thread_id: 28
+
+      - name: "telegram-cadvisor"
+        telegram_configs:
+          - <<: *telegram_base
+            message_thread_id: 58
 
   extraSecretMounts:
     - name: telegram-secret
