@@ -4,7 +4,7 @@
   become: true
   gather_facts: true
   vars_files:
-    - ../vars/k3s_cluster.yaml
+    - ../../vars/k3s_cluster.yaml
   tasks:
     - name: 🏷️ Group hosts by K3s role dynamically
       ansible.builtin.group_by:
@@ -35,7 +35,7 @@
   hosts: k3s_master[0]
   become: true
   vars_files:
-    - ../vars/k3s_cluster.yaml
+    - ../../vars/k3s_cluster.yaml
   tasks:
     - name: 🧠 Determine if HA (etcd) is needed
       ansible.builtin.set_fact:
@@ -86,7 +86,7 @@
   hosts: k3s_master[1:]
   become: true
   vars_files:
-    - ../vars/k3s_cluster.yaml
+    - ../../vars/k3s_cluster.yaml
   vars:
     master_ip: "{{ hostvars[groups['k3s_master'][0]]['inventory_hostname'] }}"
     k3s_token: "{{ hostvars[groups['k3s_master'][0]]['k3s_token'] }}"
@@ -124,7 +124,7 @@
   hosts: k3s_worker
   become: true
   vars_files:
-    - ../vars/k3s_cluster.yaml
+    - ../../vars/k3s_cluster.yaml
   vars:
     master_ip: "{{ hostvars[groups['k3s_master'][0]]['inventory_hostname'] }}"
     k3s_token: "{{ hostvars[groups['k3s_master'][0]]['k3s_token'] }}"
@@ -149,14 +149,14 @@
     - name: 📥 Fetch Kubeconfig from First Master
       ansible.builtin.fetch:
         src: /etc/rancher/k3s/k3s.yaml
-        dest: ../../kubeconfig
+        dest: ../../../kubeconfig
         flat: yes
       delegate_to: "{{ groups['k3s_master'][0] }}"
       become: true
 
     - name: 📝 Update Kubeconfig Server Address
       ansible.builtin.replace:
-        path: ../../kubeconfig
+        path: ../../../kubeconfig
         regexp: "127.0.0.1"
         replace: "{{ hostvars[groups['k3s_master'][0]]['inventory_hostname'] }}"
 

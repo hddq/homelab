@@ -3,9 +3,9 @@
   hosts: localhost
   gather_facts: false
   vars_files:
-    - "../secrets.yaml"
-    - "../vars/proxmox_infra.yaml"
-    - "../vars/k3s_cluster.yaml"
+    - "../../secrets.yaml"
+    - "../../vars/proxmox_infra.yaml"
+    - "../../vars/k3s_cluster.yaml"
 
   tasks:
     - name: 🐑 Stage 1 - Linked Clone to Shared Storage

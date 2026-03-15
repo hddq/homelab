@@ -3,10 +3,10 @@
   hosts: localhost
   gather_facts: false
   vars:
-    kubeconfig_path: "../../kubeconfig"
-    master_key_path: "../../sealed-secrets-master-key.yaml"
-    argocd_chart_path: "../../infrastructure/argocd"
-    sealed_secrets_chart_path: "../../infrastructure/sealed-secrets"
+    kubeconfig_path: "../../../kubeconfig"
+    master_key_path: "../../../sealed-secrets-master-key.yaml"
+    argocd_chart_path: "../../../infrastructure/argocd"
+    sealed_secrets_chart_path: "../../../infrastructure/sealed-secrets"
 
   tasks:
     - name: 📁 Ensure kube-system namespace exists
@@ -71,7 +71,7 @@
     - name: 🌱 Apply Bootstrap Application
       kubernetes.core.k8s:
         kubeconfig: "{{ kubeconfig_path }}"
-        src: "../../bootstrap.yaml"
+        src: "../../../bootstrap.yaml"
         state: present
 
     - name: Show ArgoCD Credentials

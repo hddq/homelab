@@ -106,13 +106,13 @@ cp ansible/secrets.example.yaml ansible/secrets.yaml
 
 ```bash
 cd ansible
-ansible-playbook playbooks/01-provision.yaml
+ansible-playbook playbooks/kubernetes/01-provision.yaml
 ```
 
 **Step 4 — Install k3s:**
 
 ```bash
-ansible-playbook playbooks/02-k3s-install.yaml
+ansible-playbook playbooks/kubernetes/02-k3s-install.yaml
 # kubeconfig is saved to ./kubeconfig
 export KUBECONFIG=$(pwd)/../kubeconfig
 ```
@@ -120,7 +120,7 @@ export KUBECONFIG=$(pwd)/../kubeconfig
 **Step 5 — Setup Infrastructure (Sealed Secrets + ArgoCD):**
 
 ```bash
-ansible-playbook playbooks/03-setup-infra.yaml
+ansible-playbook playbooks/kubernetes/03-setup-infra.yaml
 ```
 
 > ⚠️ This installs both Sealed Secrets and ArgoCD, and restores the master key if present. This must happen **before** ArgoCD starts syncing from private repos.
