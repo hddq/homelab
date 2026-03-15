@@ -124,7 +124,7 @@
     - name: 📝 Stage 7 - Add to Inventory File
       ansible.builtin.lineinfile:
         path: "{{ target_inventory_file }}"
-        insertafter: '\[k3s_new_nodes\]'
+        insertafter: '\[k8s_prod\]'
         line: "{{ item.ip }} ansible_user={{ vm_user }}"
         state: present
       check_mode: no

@@ -1,6 +1,6 @@
 ---
 - name: 🛠️ Prepare Nodes & Group Dynamically
-  hosts: k3s_new_nodes
+  hosts: k8s_prod
   become: true
   gather_facts: true
   vars_files:
