@@ -7,7 +7,7 @@ victoria-metrics-agent:
 
   config:
     global:
-      scrape_interval: 30s
+      scrape_interval: 15s
       external_labels:
         cluster: "homelab"
     scrape_configs:
