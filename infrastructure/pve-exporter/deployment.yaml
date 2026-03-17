@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pve-exporter
+  namespace: monitoring
+  labels:
+    app: pve-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pve-exporter
+  template:
+    metadata:
+      labels:
+        app: pve-exporter
+    spec:
+      containers:
+        - name: pve-exporter
+          image: prompve/prometheus-pve-exporter:3.8.1
+          ports:
+            - containerPort: 9221
+              name: metrics
+          volumeMounts:
+            - name: config
+              mountPath: /etc/prometheus/pve.yml
+              subPath: pve.yml
+              readOnly: true
+      volumes:
+        - name: config
+          secret:
+            secretName: pve-exporter-secret
