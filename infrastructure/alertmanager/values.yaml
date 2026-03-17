@@ -27,6 +27,9 @@ alertmanager:
             - category="hardware"
           receiver: "telegram-hardware"
         - matchers:
+            - category="proxmox"
+          receiver: "telegram-proxmox"
+        - matchers:
             - category="ksm"
           receiver: "telegram-ksm"
         - matchers:
@@ -55,6 +58,11 @@ alertmanager:
                 ⏱ <b>Started:</b> <code>{{ .StartsAt.Format "2006-01-02 15:04:05" }}</code>
                 {{- end }}
             message_thread_id: 3
+
+      - name: "telegram-proxmox"
+        telegram_configs:
+          - <<: *telegram_base
+            message_thread_id: 87
 
       - name: "telegram-ksm"
         telegram_configs:
