@@ -1,0 +1,89 @@
+---
+- name: Setup Node Exporter on Proxmox
+  hosts: proxmox
+  become: true
+  vars:
+    node_exporter_version: "1.10.2"
+
+  tasks:
+    - name: Check current Node Exporter version
+      ansible.builtin.command: /usr/local/bin/node_exporter --version
+      register: current_version
+      failed_when: false
+      changed_when: false
+
+    - name: Create dedicated system user
+      ansible.builtin.user:
+        name: node_exporter
+        system: true
+        shell: /bin/false
+        create_home: false
+
+    - name: Install or update Node Exporter
+      when: >
+        current_version.rc != 0 or
+        node_exporter_version not in (current_version.stdout + current_version.stderr)
+      block:
+        - name: Fetch Node Exporter checksum
+          ansible.builtin.uri:
+            url: "https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/sha256sums.txt"
+            return_content: true
+          register: checksums_file
+
+        - name: Set checksum fact
+          ansible.builtin.set_fact:
+            node_exporter_checksum: "sha256:{{ checksums_file.content | regex_search('([a-f0-9]+)\\s+node_exporter-' + node_exporter_version + '.linux-amd64.tar.gz', '\\1') | first }}"
+
+        - name: Download Node Exporter archive
+          ansible.builtin.get_url:
+            url: "https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz"
+            dest: /tmp/node_exporter.tar.gz
+            checksum: "{{ node_exporter_checksum }}"
+            mode: "0644"
+
+        - name: Extract Node Exporter archive
+          ansible.builtin.unarchive:
+            src: /tmp/node_exporter.tar.gz
+            dest: /tmp/
+            remote_src: true
+
+        - name: Move binary to /usr/local/bin
+          ansible.builtin.copy:
+            src: "/tmp/node_exporter-{{ node_exporter_version }}.linux-amd64/node_exporter"
+            dest: /usr/local/bin/node_exporter
+            owner: node_exporter
+            group: node_exporter
+            mode: "0755"
+            remote_src: true
+          notify: Restart Node Exporter
+
+    - name: Create systemd service file
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/node_exporter.service
+        mode: "0644"
+        content: |
+          [Unit]
+          Description=Prometheus Node Exporter
+          Wants=network-online.target
+          After=network-online.target
+
+          [Service]
+          User=node_exporter
+          Group=node_exporter
+          Type=simple
+          ExecStart=/usr/local/bin/node_exporter \
+            --collector.systemd \
+            --collector.processes
+          Restart=always
+
+          [Install]
+          WantedBy=multi-user.target
+      notify: Restart Node Exporter
+
+  handlers:
+    - name: Restart Node Exporter
+      ansible.builtin.systemd:
+        daemon_reload: true
+        name: node_exporter
+        enabled: true
+        state: restarted
