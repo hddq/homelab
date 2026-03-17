@@ -27,6 +27,14 @@
       ],
       "depNameTemplate": "community.proxmox",
       "datasourceTemplate": "galaxy-collection"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["ansible/playbooks/proxmox/monitoring.yaml"],
+      "matchStrings": ["node_exporter_version: \"(?<currentValue>[\\d.]+)\""],
+      "depNameTemplate": "prometheus/node_exporter",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v(?<version>.+)$"
     }
   ],
   "packageRules": [
