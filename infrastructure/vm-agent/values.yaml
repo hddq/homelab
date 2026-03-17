@@ -100,6 +100,9 @@ victoria-metrics-agent:
               [__meta_kubernetes_namespace, __meta_kubernetes_service_name]
             regex: kube-system;kube-dns
             action: keep
+          - source_labels: [__meta_kubernetes_endpoint_port_name]
+            regex: metrics
+            action: keep
       - job_name: "pve-exporter"
         static_configs:
           - targets:
