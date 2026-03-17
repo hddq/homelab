@@ -100,3 +100,15 @@ victoria-metrics-agent:
               [__meta_kubernetes_namespace, __meta_kubernetes_service_name]
             regex: kube-system;kube-dns
             action: keep
+      - job_name: "pve-exporter"
+        static_configs:
+          - targets:
+              - "192.168.20.10"
+        metrics_path: /pve
+        relabel_configs:
+          - source_labels: [__address__]
+            target_label: __param_target
+          - source_labels: [__param_target]
+            target_label: instance
+          - target_label: __address__
+            replacement: "pve-exporter.monitoring.svc.cluster.local:9221"

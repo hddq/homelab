@@ -57,6 +57,12 @@ grafana:
         gnetId: 1860
         revision: 42
         datasource: VictoriaMetrics
+      proxmox-pve:
+        gnetId: 10347
+        revision: 5
+        datasource:
+          - name: DS_PROMETHEUS
+            value: VictoriaMetrics
     grafana-dashboards-kubernetes:
       k8s-system-api-server:
         url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-system-api-server.json
