@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-VERSION="v1.0.0"
+VERSION="v1.0.1"
 
 # Colors for output
 GREEN='\033[0;32m'
@@ -43,12 +43,13 @@ if ! kubectl get pvc "$PVC_NAME" -n "$NAMESPACE" >/dev/null 2>&1; then
 fi
 
 # Check Deployment and Capture Replicas
-DEPLOYMENT_NAME="${APP_NAME}-deployment"
-ORIGINAL_REPLICAS=$(kubectl get deployment "$DEPLOYMENT_NAME" -n "$NAMESPACE" -o jsonpath='{.spec.replicas}' 2>/dev/null || echo "1")
+DEPLOYMENT_NAME="$APP_NAME"
+
 if ! kubectl get deployment "$DEPLOYMENT_NAME" -n "$NAMESPACE" >/dev/null 2>&1; then
     echo -e "${YELLOW}Warning:${NC} Deployment $DEPLOYMENT_NAME not found. Skipping scaling.${NC}"
     SKIP_SCALING=true
 else
+    ORIGINAL_REPLICAS=$(kubectl get deployment "$DEPLOYMENT_NAME" -n "$NAMESPACE" -o jsonpath='{.spec.replicas}' 2>/dev/null || echo "1")
     SKIP_SCALING=false
     echo -e "${BLUE}📊 Current replicas for $DEPLOYMENT_NAME: $ORIGINAL_REPLICAS${NC}"
 fi
