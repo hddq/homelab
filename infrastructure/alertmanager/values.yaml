@@ -21,11 +21,19 @@ alertmanager:
       group_wait: 0s
       group_interval: 30s
       repeat_interval: 12h
-      receiver: "telegram-hardware"
+      receiver: "telegram-k8s-hardware"
       routes:
         - matchers:
             - category="hardware"
-          receiver: "telegram-hardware"
+            - job="k8s-node-exporter"
+          receiver: "telegram-k8s-hardware"
+        - matchers:
+            - category="hardware"
+            - job="proxmox-node-exporter"
+          receiver: "telegram-pve-hardware"
+        - matchers:
+            - category="hardware"
+          receiver: "telegram-k8s-hardware"
         - matchers:
             - category="proxmox"
           receiver: "telegram-proxmox"
@@ -37,7 +45,7 @@ alertmanager:
           receiver: "telegram-cadvisor"
 
     receivers:
-      - name: "telegram-hardware"
+      - name: "telegram-k8s-hardware"
         telegram_configs:
           - <<: &telegram_base
               bot_token_file: /etc/alertmanager/secrets/bot-token
@@ -58,6 +66,11 @@ alertmanager:
                 ⏱ <b>Started:</b> <code>{{ .StartsAt.Format "2006-01-02 15:04:05" }}</code>
                 {{- end }}
             message_thread_id: 3
+
+      - name: "telegram-pve-hardware"
+        telegram_configs:
+          - <<: *telegram_base
+            message_thread_id: 133
 
       - name: "telegram-proxmox"
         telegram_configs:

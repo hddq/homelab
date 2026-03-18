@@ -43,7 +43,7 @@ victoria-metrics-alert:
                   description: "node-exporter scrape failed for 1 minute. The server is unreachable or the agent crashed."
 
               - alert: HighLoad
-                expr: node_load5 > count by (instance) (node_cpu_seconds_total{mode="idle"})
+                expr: node_load5 > count by (instance, job) (node_cpu_seconds_total{mode="idle"})
                 for: 1m
                 labels:
                   severity: warning
