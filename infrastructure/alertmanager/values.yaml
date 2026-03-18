@@ -21,7 +21,7 @@ alertmanager:
       group_wait: 0s
       group_interval: 30s
       repeat_interval: 12h
-      receiver: "telegram-k8s-hardware"
+      receiver: "telegram-default"
       routes:
         - matchers:
             - category="hardware"
@@ -45,7 +45,7 @@ alertmanager:
           receiver: "telegram-cadvisor"
 
     receivers:
-      - name: "telegram-k8s-hardware"
+      - name: "telegram-default"
         telegram_configs:
           - <<: &telegram_base
               bot_token_file: /etc/alertmanager/secrets/bot-token
@@ -65,6 +65,11 @@ alertmanager:
                 {{- end }}
                 ⏱ <b>Started:</b> <code>{{ .StartsAt.Format "2006-01-02 15:04:05" }}</code>
                 {{- end }}
+            message_thread_id: 164
+
+      - name: "telegram-k8s-hardware"
+        telegram_configs:
+          - <<: *telegram_base
             message_thread_id: 3
 
       - name: "telegram-pve-hardware"
