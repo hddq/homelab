@@ -6,5 +6,5 @@ version: 1.0.0
 appVersion: "v1.137.0"
 dependencies:
   - name: victoria-metrics-alert
-    version: 0.34.0
+    version: 0.35.0
     repository: https://victoriametrics.github.io/helm-charts
