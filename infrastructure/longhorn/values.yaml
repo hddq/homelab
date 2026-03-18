@@ -1,4 +1,17 @@
 longhorn:
+  longhornManager:
+    tolerations:
+      - key: "node-role.kubernetes.io/control-plane"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
+  longhornDriver:
+    tolerations:
+      - key: "node-role.kubernetes.io/control-plane"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
+
   persistence:
     defaultClass: true
     defaultClassReplicaCount: 1
@@ -10,6 +23,7 @@ longhorn:
   defaultSettings:
     createDefaultDiskLabeledNodes: true
     # kubectl label node NODE_NAME node.longhorn.io/create-default-disk=true
+    taintToleration: "node-role.kubernetes.io/control-plane=true:NoSchedule"
 
   ingress:
     enabled: false
