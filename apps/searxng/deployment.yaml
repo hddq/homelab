@@ -22,7 +22,7 @@ spec:
         runAsGroup: 977
         fsGroup: 977
       containers:
-        - image: searxng/searxng
+        - image: searxng/searxng:2026.3.17-2bb8ac17c
           name: searxng
           securityContext:
             readOnlyRootFilesystem: true
