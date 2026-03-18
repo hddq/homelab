@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: navidrome-deployment
+  name: navidrome
   namespace: navidrome
   labels:
     app.kubernetes.io/name: navidrome

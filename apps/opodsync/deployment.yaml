@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   labels:
     app: opodsync
-  name: opodsync-deployment
+  name: opodsync
   namespace: opodsync
 spec:
   replicas: 1
