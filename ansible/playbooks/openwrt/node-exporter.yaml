@@ -1,0 +1,35 @@
+---
+- name: 📶 Install and configure Prometheus Node Exporter on OpenWrt
+  hosts: openwrt
+  gather_facts: false
+  become: true
+  vars:
+    node_exporter_packages:
+      - prometheus-node-exporter-lua
+      - prometheus-node-exporter-lua-nat_traffic
+      - prometheus-node-exporter-lua-netstat
+      - prometheus-node-exporter-lua-openwrt
+      - prometheus-node-exporter-lua-wifi
+      - prometheus-node-exporter-lua-wifi_stations
+  tasks:
+    - name: 🔄 Update apk package list
+      ansible.builtin.raw: apk update
+      changed_when: false
+
+    - name: 📦 Install node exporter packages
+      ansible.builtin.raw: "apk add {{ item }}"
+      loop: "{{ node_exporter_packages }}"
+      register: apk_install
+      changed_when: "'OK' not in apk_install.stdout or 'Installing' in apk_install.stdout"
+
+    - name: ⚙️ Configure node exporter listen interface
+      ansible.builtin.raw: uci set prometheus-node-exporter-lua.main.listen_interface='SERVERS'
+      changed_when: false
+
+    - name: 💾 Commit uci changes
+      ansible.builtin.raw: uci commit prometheus-node-exporter-lua
+      changed_when: false
+
+    - name: 🔄 Restart node exporter service
+      ansible.builtin.raw: /etc/init.d/prometheus-node-exporter-lua restart
+      changed_when: true
