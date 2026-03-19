@@ -3,9 +3,9 @@
   hosts: truenas
   gather_facts: false
   vars_files:
-    - "../../ansible/secrets.yaml"
+    - "../../../ansible/secrets.yaml"
   vars:
-    script_src: "../../scripts/truenas/backup/offsite-backup.sh"
+    script_src: "../../../scripts/truenas/backup/offsite-backup.sh"
     script_dest: "/root/scripts/offsite-backup.sh"
 
   tasks:
