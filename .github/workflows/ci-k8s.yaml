@@ -31,7 +31,7 @@ jobs:
           args: >-
             -summary -strict
             -ignore-missing-schemas
-            -ignore-filename-pattern Chart.yaml|values.yaml|.trivyignore.yaml
+            -ignore-filename-pattern Chart.yaml|values.*\.yaml|.trivyignore.yaml
             -schema-location default
             -schema-location https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json
             apps/ infrastructure/ bootstrap/
