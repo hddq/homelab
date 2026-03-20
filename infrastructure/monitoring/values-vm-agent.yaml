@@ -123,3 +123,19 @@ victoria-metrics-agent:
             target_label: instance
           - target_label: __address__
             replacement: "pve-exporter.monitoring.svc.cluster.local:9221"
+
+      - job_name: "graphite-exporter"
+        kubernetes_sd_configs:
+          - role: endpoints
+        relabel_configs:
+          - source_labels:
+              [__meta_kubernetes_service_label_app]
+            regex: graphite-exporter
+            action: keep
+          - source_labels: [__meta_kubernetes_endpoint_port_name]
+            regex: metrics
+            action: keep
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_service_name]
+            target_label: service
