@@ -89,7 +89,7 @@ jobs:
           for dir in infrastructure/*/; do
             if [ -f "${dir}Chart.yaml" ]; then
               echo "Linting $dir"
-              helm dependency update "$dir"
+              helm dependency build "$dir"
               helm lint "$dir"
             fi
           done
