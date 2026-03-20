@@ -15,8 +15,18 @@ spec:
       labels:
         app: graphite-exporter
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: graphite-exporter
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
           image: prom/graphite-exporter:v0.16.0
           args:
             - "--graphite.listen-address=:9109"
@@ -37,3 +47,9 @@ spec:
             requests:
               cpu: 10m
               memory: 32Mi
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}

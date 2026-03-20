@@ -15,8 +15,18 @@ spec:
       labels:
         app: pve-exporter
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: pve-exporter
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
           image: prompve/prometheus-pve-exporter:3.8.1
           ports:
             - containerPort: 9221
@@ -26,7 +36,11 @@ spec:
               mountPath: /etc/prometheus/pve.yml
               subPath: pve.yml
               readOnly: true
+            - name: tmp
+              mountPath: /tmp
       volumes:
         - name: config
           secret:
             secretName: pve-exporter-secret
+        - name: tmp
+          emptyDir: {}
