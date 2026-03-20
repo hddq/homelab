@@ -143,16 +143,6 @@ victoria-metrics-alert:
 
           - name: proxmox-alerts
             rules:
-              - alert: ProxmoxNodeDown
-                expr: pve_up{id=~"node/.+"} == 0
-                for: 2m
-                labels:
-                  severity: critical
-                  category: proxmox
-                annotations:
-                  summary: "Proxmox node {{ $labels.id }} is down"
-                  description: "The Proxmox exporter has reported the node as unavailable for at least 2 minutes."
-
               - alert: ProxmoxNodeHighCpu
                 expr: pve_cpu_usage_ratio{id=~"node/.+"} > 0.90
                 for: 5m
