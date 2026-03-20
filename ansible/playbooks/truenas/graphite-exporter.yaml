@@ -1,0 +1,56 @@
+---
+- name: 📈 Configure Graphite Reporting on TrueNAS
+  hosts: truenas
+  gather_facts: false
+  become: true
+  vars:
+    graphite_exporter_ip: "192.168.41.12"
+    graphite_exporter_port: 9109
+
+  tasks:
+    - name: 🔍 Check if Graphite exporter already exists
+      ansible.builtin.command:
+        cmd: midclt call reporting.exporters.query '[["name", "=", "graphite_exporter"]]'
+      register: exporter_check
+      changed_when: false
+
+    - name: ➕ Create Graphite exporter if missing
+      ansible.builtin.command:
+        cmd: >
+          midclt call reporting.exporters.create '{
+            "name": "graphite_exporter",
+            "enabled": true,
+            "attributes": {
+              "exporter_type": "GRAPHITE",
+              "destination_ip": "{{ graphite_exporter_ip }}",
+              "destination_port": {{ graphite_exporter_port }},
+              "prefix": "truenas",
+              "namespace": "metrics",
+              "update_every": 1,
+              "buffer_on_failures": 10,
+              "send_names_instead_of_ids": true,
+              "matching_charts": "*"
+            }
+          }'
+      when: (exporter_check.stdout | from_json) | length == 0
+      changed_when: true
+
+    - name: 🆙 Update Graphite exporter if exists
+      ansible.builtin.command:
+        cmd: >
+          midclt call reporting.exporters.update {{ (exporter_check.stdout | from_json)[0].id }} '{
+            "enabled": true,
+            "attributes": {
+              "exporter_type": "GRAPHITE",
+              "destination_ip": "{{ graphite_exporter_ip }}",
+              "destination_port": {{ graphite_exporter_port }},
+              "prefix": "truenas",
+              "namespace": "metrics",
+              "update_every": 1,
+              "buffer_on_failures": 10,
+              "send_names_instead_of_ids": true,
+              "matching_charts": "*"
+            }
+          }'
+      when: (exporter_check.stdout | from_json) | length > 0
+      changed_when: true
