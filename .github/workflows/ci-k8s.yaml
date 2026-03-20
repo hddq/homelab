@@ -86,6 +86,13 @@ jobs:
 
       - name: Run Helm Lint
         run: |
+          mapfile -t repos < <(awk '/repository:/ { print $2 }' infrastructure/*/Chart.yaml | sort -u)
+          for i in "${!repos[@]}"; do
+            helm repo add "repo-$i" "${repos[$i]}"
+          done
+
+          helm repo update
+
           for dir in infrastructure/*/; do
             if [ -f "${dir}Chart.yaml" ]; then
               echo "Linting $dir"
