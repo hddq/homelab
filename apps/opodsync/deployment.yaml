@@ -26,7 +26,7 @@ spec:
         seccompProfile:
           type: RuntimeDefault
       containers:
-        - image: ganeshlab/opodsync:0.5.2-amd64
+        - image: ganeshlab/opodsync:0.5.2-amd64@sha256:9f3465d60b00bd425f58b5577a31258d5d04dd244167ef236c33c5bcae60c269
           name: opodsync
           securityContext:
             readOnlyRootFilesystem: true

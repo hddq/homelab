@@ -27,7 +27,7 @@ spec:
             allowPrivilegeEscalation: false
             capabilities:
               drop: ["ALL"]
-          image: prom/graphite-exporter:v0.16.0
+          image: prom/graphite-exporter:v0.16.0@sha256:e54bca6645ea8a9e8c52312a8540de98ad08819d38476c021d77a0eae75bc797
           args:
             - "--graphite.listen-address=:9109"
             - "--web.listen-address=:9108"

@@ -27,7 +27,7 @@ spec:
             allowPrivilegeEscalation: false
             capabilities:
               drop: ["ALL"]
-          image: prompve/prometheus-pve-exporter:3.8.1
+          image: prompve/prometheus-pve-exporter:3.8.1@sha256:c0a6d578f116b6a26670f03a33f8949bc6036caa71d4ec3c199fd490c1b71644
           ports:
             - containerPort: 9221
               name: metrics
