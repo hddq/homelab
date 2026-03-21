@@ -40,6 +40,18 @@ spec:
             - containerPort: 9109
               name: graphite-udp
               protocol: UDP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: metrics
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: metrics
+            initialDelaySeconds: 5
+            periodSeconds: 10
           resources:
             limits:
               cpu: 100m
