@@ -45,7 +45,26 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Run Trivy vulnerability scanner in IaC mode
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+
+      - name: Build Helm dependencies for infrastructure/
+        run: |
+          mapfile -t repos < <(awk '/repository:/ { print $2 }' infrastructure/*/Chart.yaml | sort -u)
+          for i in "${!repos[@]}"; do
+            helm repo add "repo-$i" "${repos[$i]}"
+          done
+
+          helm repo update
+
+          for dir in infrastructure/*/; do
+            if [ -f "${dir}Chart.yaml" ]; then
+              echo "Building dependencies for $dir"
+              helm dependency build "$dir"
+            fi
+          done
+
+      - name: Run Trivy on apps/
         uses: aquasecurity/trivy-action@0.35.0
         env:
           TRIVY_IGNOREFILE: apps/.trivyignore.yaml
@@ -57,6 +76,19 @@ jobs:
           ignore-unfixed: true
           severity: "CRITICAL,HIGH"
           scan-ref: "apps/"
+
+      - name: Run Trivy on infrastructure/
+        uses: aquasecurity/trivy-action@0.35.0
+        env:
+          TRIVY_IGNOREFILE: infrastructure/.trivyignore.yaml
+        with:
+          scan-type: "config"
+          hide-progress: true
+          format: "table"
+          exit-code: "1"
+          ignore-unfixed: true
+          severity: "CRITICAL,HIGH"
+          scan-ref: "infrastructure/"
 
   pluto:
     name: ♇ Pluto (API Deprecations)
