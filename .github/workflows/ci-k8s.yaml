@@ -38,8 +38,8 @@ jobs:
             -schema-location https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json
             apps/ infrastructure/ bootstrap/
 
-  trivy:
-    name: 🛡️ Security Scan (Trivy)
+  helm-build:
+    name: ⎈ Build Helm Dependencies
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -63,6 +63,26 @@ jobs:
               helm dependency build "$dir"
             fi
           done
+
+      - name: Upload built infrastructure charts
+        uses: actions/upload-artifact@v4
+        with:
+          name: helm-dependencies
+          path: infrastructure/
+
+  trivy:
+    name: 🛡️ Security Scan (Trivy)
+    runs-on: ubuntu-latest
+    needs: [helm-build]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Download built infrastructure charts
+        uses: actions/download-artifact@v4
+        with:
+          name: helm-dependencies
+          path: infrastructure/
 
       - name: Run Trivy on apps/
         uses: aquasecurity/trivy-action@0.35.0
@@ -109,26 +129,25 @@ jobs:
   helm-lint:
     name: ⎈ Helm Lint
     runs-on: ubuntu-latest
+    needs: [helm-build]
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
+
+      - name: Download built infrastructure charts
+        uses: actions/download-artifact@v4
+        with:
+          name: helm-dependencies
+          path: infrastructure/
 
       - name: Install Helm
         uses: azure/setup-helm@v4
 
       - name: Run Helm Lint
         run: |
-          mapfile -t repos < <(awk '/repository:/ { print $2 }' infrastructure/*/Chart.yaml | sort -u)
-          for i in "${!repos[@]}"; do
-            helm repo add "repo-$i" "${repos[$i]}"
-          done
-
-          helm repo update
-
           for dir in infrastructure/*/; do
             if [ -f "${dir}Chart.yaml" ]; then
               echo "Linting $dir"
-              helm dependency build "$dir"
               helm lint "$dir"
             fi
           done
