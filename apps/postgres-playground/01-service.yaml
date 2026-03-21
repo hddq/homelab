@@ -4,7 +4,7 @@ metadata:
   name: postgres-service
   namespace: playground
   annotations:
-    metallb.universe.tf/loadBalancerIPs: 192.168.41.16
+    metallb.io/loadBalancerIPs: 192.168.41.16
 spec:
   selector:
     app: postgres

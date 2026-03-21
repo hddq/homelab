@@ -4,7 +4,7 @@ metadata:
   name: unbound-service
   namespace: unbound
   annotations:
-    metallb.universe.tf/loadBalancerIPs: 192.168.41.11
+    metallb.io/loadBalancerIPs: 192.168.41.11
 spec:
   selector:
     app: unbound
