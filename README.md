@@ -29,7 +29,7 @@ The goal is to never touch a server manually — if it's not in Git, it doesn't 
 | Storage            | Longhorn                       | Distributed block storage with replication     |
 | TLS                | cert-manager + DuckDNS webhook | Wildcard Let's Encrypt cert via DNS-01         |
 | Secrets            | Bitnami Sealed Secrets         | Encrypted secrets safe to commit to Git        |
-| Monitoring         | VictoriaMetrics Stack          | vmsingle + vmagent + node-exporter + Grafana   |
+| Monitoring         | VictoriaMetrics Stack          | Metrics collection, storage, alerting and dashboards   |
 | Dev environment    | Nix flake                      | Reproducible shell with all tools pinned       |
 | Dependency updates | Renovate                       | Automated PRs for image/chart/k3s updates      |
 
@@ -125,6 +125,16 @@ ansible-playbook playbooks/kubernetes/03-setup-infra.yaml
 
 > ⚠️ This installs both Sealed Secrets and ArgoCD, and restores the master key if present. This must happen **before** ArgoCD starts syncing from private repos.
 
+**Step 6 — Label Longhorn nodes:**
+
+After ArgoCD syncs Longhorn, label each node intended to serve as a Longhorn storage node.
+
+```bash
+kubectl label node NODE_NAME node.longhorn.io/create-default-disk=true
+```
+
+**Step 7 — Confirm ArgoCD sync:**
+
 ArgoCD will now sync everything else automatically from this repo. Done. ✅
 
 ---
@@ -155,5 +165,7 @@ nix develop
 # or with direnv:
 direnv allow
 ```
+
+The `shellHook` sets up the Python venv, installs Ansible dependencies and collections, and configures `pre-commit`.
 
 Includes: `kubectl`, `helm`, `kubeseal`, `argocd`, `kubeconform`, `trivy`, `pluto`, `gitleaks`, `yamllint`, `shellcheck`, `kubectx`, `pre-commit`, and the full Ansible stack in a venv.
