@@ -10,7 +10,6 @@ spec:
   selector:
     matchLabels:
       app: searxng
-  strategy: {}
   template:
     metadata:
       labels:
@@ -70,5 +69,3 @@ spec:
           emptyDir: {}
         - name: certs
           emptyDir: {}
-
-status: {}

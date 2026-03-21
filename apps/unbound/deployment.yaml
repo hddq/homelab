@@ -9,7 +9,6 @@ spec:
   selector:
     matchLabels:
       app: unbound
-  strategy: {}
   template:
     metadata:
       labels:
@@ -75,4 +74,3 @@ spec:
             name: unbound-config
         - name: unbound-data
           emptyDir: {}
-status: {}
