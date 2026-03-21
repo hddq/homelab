@@ -7,3 +7,16 @@ cert-manager-duckdns-webhook:
 
   token:
     existingSecretName: duckdns-secret
+
+  securityContext:
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+
+  podSecurityContext:
+    runAsUser: 1000
+    runAsGroup: 1000
+    fsGroup: 1000
