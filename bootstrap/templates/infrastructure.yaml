@@ -1,0 +1,49 @@
+{{- $targetRevision := .Values.targetRevision -}}
+{{- $repoURL := "git@github.com:hddq/homelab.git" -}}
+{{- $server := "https://kubernetes.default.svc" -}}
+{{- range $app := list
+    (dict "name" "cert-manager" "path" "infrastructure/cert-manager" "namespace" "cert-manager" "syncOptions" (list "CreateNamespace=true"))
+    (dict "name" "cert-manager-webhook" "path" "infrastructure/cert-manager-webhook" "namespace" "cert-manager" "syncOptions" (list "CreateNamespace=true"))
+    (dict "name" "metallb" "path" "infrastructure/metallb" "namespace" "metallb-system" "syncOptions" (list "CreateNamespace=true"))
+    (dict "name" "longhorn" "path" "infrastructure/longhorn" "namespace" "longhorn-system" "syncOptions" (list "CreateNamespace=true"))
+    (dict "name" "argocd" "path" "infrastructure/argocd" "namespace" "argocd" "syncOptions" (list "ServerSideApply=true"))
+    (dict "name" "metrics-server" "path" "infrastructure/metrics-server" "namespace" "kube-system")
+    (dict "name" "sealed-secrets" "path" "infrastructure/sealed-secrets" "namespace" "kube-system" "syncOptions" (list "CreateNamespace=true"))
+    (dict "name" "traefik" "path" "infrastructure/traefik" "namespace" "traefik" "syncOptions" (list "CreateNamespace=true"))
+    (dict "name" "monitoring" "path" "infrastructure/monitoring" "namespace" "monitoring" "syncOptions" (list "CreateNamespace=true") "helmValueFiles" (list "values.yaml" "values-alertmanager.yaml" "values-grafana.yaml" "values-kube-state-metrics.yaml" "values-node-exporter.yaml" "values-vm-agent.yaml" "values-vm-single.yaml" "values-vmalert.yaml"))
+}}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: infrastructure-{{ $app.name }}
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: {{ $repoURL }}
+    targetRevision: {{ $targetRevision }}
+    path: {{ $app.path }}
+    {{- with $app.helmValueFiles }}
+    helm:
+      valueFiles:
+        {{- range . }}
+        - {{ . }}
+        {{- end }}
+    {{- end }}
+  destination:
+    server: {{ $server }}
+    namespace: {{ $app.namespace }}
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    {{- with $app.syncOptions }}
+    syncOptions:
+      {{- range . }}
+      - {{ . }}
+      {{- end }}
+    {{- end }}
+{{- end }}

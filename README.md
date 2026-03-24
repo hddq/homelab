@@ -46,7 +46,7 @@ Git push
               └─▶ Applies changes to cluster
 ```
 
-ArgoCD uses the **App of Apps** pattern: a single root `Application` in `bootstrap.yaml` manages all other applications defined in `bootstrap/`. Each app points to its own directory in `apps/` or `infrastructure/`.
+ArgoCD uses the **App of Apps** pattern: a single root `Application` in `bootstrap.yaml` points at the `bootstrap/` Helm chart, which renders the child Argo applications for `apps/` and `infrastructure/`.
 
 ### Cluster Topology
 
@@ -71,7 +71,7 @@ Secrets are encrypted with `kubeseal` using the cluster's public key and stored 
 ```
 .
 ├── ansible/                # VM provisioning + k3s install playbooks
-├── bootstrap/              # ArgoCD App of Apps definitions
+├── bootstrap/              # ArgoCD App of Apps Helm chart
 ├── apps/                   # User-facing workloads
 ├── infrastructure/         # Cluster-level infrastructure (Helm wrappers)
 ├── scripts/                # One-off jobs (e.g. data migrations)
