@@ -6,7 +6,7 @@
     - "../../vars/k3s_cluster.yaml"
   vars:
     env_seed_host: "{{ groups['proxmox'][0] }}"
-    env_git_branch: "{{ hostvars[env_seed_host]['git_branch'] | default('HEAD') }}"
+    env_git_branch: "{{ git_branch | default(hostvars[env_seed_host]['git_branch'] | default('HEAD')) }}"
     kubeconfig_path: "{{ playbook_dir }}/../../../{{ hostvars[env_seed_host]['kubeconfig_path'] }}"
     master_key_path: "../../../sealed-secrets-master-key.yaml"
     argocd_chart_path: "../../../infrastructure/argocd"
