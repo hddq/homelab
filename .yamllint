@@ -13,5 +13,6 @@ rules:
 ignore: |
   .git/
   .venv/
+  bootstrap/templates/
   infrastructure/*/charts/
   .ansible
