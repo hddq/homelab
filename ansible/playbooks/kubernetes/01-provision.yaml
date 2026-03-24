@@ -6,6 +6,10 @@
     - "../../secrets.yaml"
     - "../../vars/proxmox_infra.yaml"
     - "../../vars/k3s_cluster.yaml"
+  vars:
+    env_seed_host: "{{ groups['proxmox'][0] }}"
+    env_target_inventory_file: "{{ playbook_dir }}/../../{{ hostvars[env_seed_host]['target_inventory_file'] }}"
+    env_vms_to_provision: "{{ hostvars[env_seed_host]['vms_to_provision'] }}"
 
   tasks:
     - name: 🐑 Stage 1 - Linked Clone to Shared Storage
@@ -24,7 +28,7 @@
         full: no
         timeout: 500
         state: present
-      loop: "{{ vms_to_provision }}"
+      loop: "{{ env_vms_to_provision }}"
 
     - name: 🚚 Stage 1.1 - Move Disks to Local Storage
       community.proxmox.proxmox_disk:
@@ -38,7 +42,7 @@
         target_storage: "{{ item.0.storage | default(default_vm_storage) }}"
         delete_moved: true
         state: moved
-      loop: "{{ vms_to_provision | product(['scsi0', 'ide2', 'efidisk0']) | list }}"
+      loop: "{{ env_vms_to_provision | product(['scsi0', 'ide2', 'efidisk0']) | list }}"
 
     - name: 💉 Stage 2 - Inject Cloud-Init Config
       community.proxmox.proxmox_kvm:
@@ -63,7 +67,7 @@
         balloon: "{{ item.balloon | default(default_vm_balloon) }}"
         shares: "{{ item.shares | default(default_vm_balloon_shares) }}"
         cores: "{{ item.cores | default(default_vm_cores) }}"
-      loop: "{{ vms_to_provision }}"
+      loop: "{{ env_vms_to_provision }}"
 
     - name: 💿 Stage 3 - Resize Disk
       community.proxmox.proxmox_disk:
@@ -76,7 +80,7 @@
         disk: "scsi0"
         size: "{{ item.disk | default(default_vm_disk) }}"
         state: resized
-      loop: "{{ vms_to_provision }}"
+      loop: "{{ env_vms_to_provision }}"
 
     - name: 🛡️ Stage 4 - Configure Disk Options
 
@@ -96,7 +100,7 @@
         discard: "on"
         ssd: true
         state: present
-      loop: "{{ vms_to_provision }}"
+      loop: "{{ env_vms_to_provision }}"
       when: item.k3s_role == "worker"
 
     - name: 🚀 Stage 5 - Power On
@@ -109,7 +113,7 @@
         node: "{{ item.node | default(proxmox_node) }}"
         vmid: "{{ item.vmid }}"
         state: started
-      loop: "{{ vms_to_provision }}"
+      loop: "{{ env_vms_to_provision }}"
 
     - name: ⏳ Stage 6 - Wait for SSH
       ansible.builtin.wait_for:
@@ -119,13 +123,13 @@
         timeout: 300
         search_regex: OpenSSH
       connection: local
-      loop: "{{ vms_to_provision }}"
+      loop: "{{ env_vms_to_provision }}"
 
     - name: 📝 Stage 7 - Add to Inventory File
       ansible.builtin.lineinfile:
-        path: "{{ target_inventory_file }}"
-        insertafter: '\[k8s_prod\]'
+        path: "{{ env_target_inventory_file }}"
+        insertafter: '\[k8s\]'
         line: "{{ item.ip }} ansible_user={{ vm_user }}"
         state: present
       check_mode: no
-      loop: "{{ vms_to_provision }}"
+      loop: "{{ env_vms_to_provision }}"

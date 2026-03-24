@@ -2,8 +2,11 @@
 - name: 🚀 Bootstrap Cluster (Sealed Secrets + ArgoCD)
   hosts: localhost
   gather_facts: false
+  vars_files:
+    - "../../vars/k3s_cluster.yaml"
   vars:
-    kubeconfig_path: "../../../kubeconfig"
+    env_seed_host: "{{ groups['proxmox'][0] }}"
+    kubeconfig_path: "{{ playbook_dir }}/../../../{{ hostvars[env_seed_host]['kubeconfig_path'] }}"
     master_key_path: "../../../sealed-secrets-master-key.yaml"
     argocd_chart_path: "../../../infrastructure/argocd"
     sealed_secrets_chart_path: "../../../infrastructure/sealed-secrets"

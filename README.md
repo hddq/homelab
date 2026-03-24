@@ -87,6 +87,19 @@ Secrets are encrypted with `kubeseal` using the cluster's public key and stored 
 
 Full cluster rebuild order using the Ansible playbooks. Assumes Proxmox is up with a VM template at ID `299`.
 
+Select the target environment by inventory:
+
+```bash
+cd ansible
+# production
+ansible-playbook -i inventory/production/hosts.ini ...
+
+# staging
+ansible-playbook -i inventory/staging/hosts.ini ...
+```
+
+Each environment has its own `group_vars` under `inventory/<env>/group_vars/`. This is also where cluster-specific metadata such as `git_branch` lives for future bootstrap/Argo work.
+
 > 🔑 **Before you start:** Make sure the Sealed Secrets master key backup is somewhere safe and accessible. Without it, all `SealedSecret` manifests in the repo are unrecoverable after step 5.
 
 **Step 1 — Enter dev shell:**
@@ -106,21 +119,21 @@ cp ansible/secrets.example.yaml ansible/secrets.yaml
 
 ```bash
 cd ansible
-ansible-playbook playbooks/kubernetes/01-provision.yaml
+ansible-playbook -i inventory/production/hosts.ini playbooks/kubernetes/01-provision.yaml
 ```
 
 **Step 4 — Install k3s:**
 
 ```bash
-ansible-playbook playbooks/kubernetes/02-k3s-install.yaml
-# kubeconfig is saved to ./kubeconfig
-export KUBECONFIG=$(pwd)/../kubeconfig
+ansible-playbook -i inventory/production/hosts.ini playbooks/kubernetes/02-k3s-install.yaml
+# kubeconfig is saved to ./kubeconfig-production
+export KUBECONFIG=$(pwd)/../kubeconfig-production
 ```
 
 **Step 5 — Setup Infrastructure (Sealed Secrets + ArgoCD):**
 
 ```bash
-ansible-playbook playbooks/kubernetes/03-setup-infra.yaml
+ansible-playbook -i inventory/production/hosts.ini playbooks/kubernetes/03-setup-infra.yaml
 ```
 
 > ⚠️ This installs both Sealed Secrets and ArgoCD, and restores the master key if present. This must happen **before** ArgoCD starts syncing from private repos.
