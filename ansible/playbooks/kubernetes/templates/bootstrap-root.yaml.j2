@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: git@github.com:hddq/homelab.git
-    targetRevision: HEAD
+    targetRevision: "{{ git_branch | default('HEAD') }}"
     path: bootstrap/
     helm:
       parameters:
