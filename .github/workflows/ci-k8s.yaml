@@ -26,17 +26,26 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
+      - name: Install Helm
+        uses: azure/setup-helm@v5
+
+      - name: Render bootstrap chart
+        run: |
+          mkdir -p .ci/rendered
+          helm template homelab-bootstrap ./bootstrap > .ci/rendered/bootstrap.yaml
+
       - name: Run kubeconform
-        uses: docker://ghcr.io/yannh/kubeconform:v0.7.0-alpine
-        with:
-          entrypoint: /kubeconform
-          args: >-
-            -summary -strict
-            -ignore-missing-schemas
-            -ignore-filename-pattern Chart.yaml|values.*\.yaml|.trivyignore.yaml
-            -schema-location default
-            -schema-location https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json
-            apps/ infrastructure/ bootstrap/
+        run: |
+          docker run --rm \
+            -v "$PWD:/work" \
+            -w /work \
+            ghcr.io/yannh/kubeconform:v0.7.0-alpine \
+            -summary -strict \
+            -ignore-missing-schemas \
+            -ignore-filename-pattern 'Chart.yaml|values.*\.yaml|.trivyignore.yaml' \
+            -schema-location default \
+            -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
+            apps/ infrastructure/ .ci/rendered/bootstrap.yaml
 
   helm-build:
     name: ⎈ Build Helm Dependencies
