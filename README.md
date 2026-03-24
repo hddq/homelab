@@ -46,18 +46,22 @@ Git push
               └─▶ Applies changes to cluster
 ```
 
-ArgoCD uses the **App of Apps** pattern: a single root `Application` in `bootstrap.yaml` points at the `bootstrap/` Helm chart, which renders the child Argo applications for `apps/` and `infrastructure/`.
+ArgoCD uses the **App of Apps** pattern: Ansible installs a single root `Application` from a Jinja template, and that root app points at the `bootstrap/` Helm chart. The chart renders the child Argo applications for `apps/` and `infrastructure/`.
 
 ### Cluster Topology
 
 ```
-Proxmox (z690)
+Production
   ├── k8s-cp-1  (192.168.20.111) — control plane only, tainted NoSchedule
   ├── k8s-worker-1 (192.168.20.112) — worker
   └── k8s-worker-2 (192.168.20.113) — worker
 
-MetalLB IP pool: 192.168.41.10 - 192.168.41.250 (BGP → OpenWRT)
-Traefik LoadBalancer: 192.168.41.10
+MetalLB IP pool: 192.168.41.10 - 192.168.41.250
+
+Staging
+  └── k8s-staging-1 (192.168.20.120) — single-node control plane + workloads
+
+MetalLB IP pool: 192.168.42.10 - 192.168.42.250
 ```
 
 ### Secret Management
@@ -76,7 +80,6 @@ Secrets are encrypted with `kubeseal` using the cluster's public key and stored 
 ├── infrastructure/         # Cluster-level infrastructure (Helm wrappers)
 ├── scripts/                # One-off jobs (e.g. data migrations)
 ├── flake.nix               # Nix dev shell (all CLI tools pinned)
-├── bootstrap.yaml          # Root ArgoCD Application (App of Apps entry point)
 ├── k3s_version.txt         # Single source of truth for k3s version (used by Ansible + Renovate)
 └── renovate.json           # Renovate bot config
 ```
@@ -98,7 +101,9 @@ ansible-playbook -i inventory/production/hosts.ini ...
 ansible-playbook -i inventory/staging/hosts.ini ...
 ```
 
-Each environment has its own `group_vars` under `inventory/<env>/group_vars/`. This is also where cluster-specific metadata such as `git_branch` lives for future bootstrap/Argo work.
+Each environment has its own `group_vars` under `inventory/<env>/group_vars/`.
+- Production should keep `git_branch: master`.
+- Staging can set a default branch there, but you can also override it per run with `-e git_branch=<branch>`.
 
 > 🔑 **Before you start:** Make sure the Sealed Secrets master key backup is somewhere safe and accessible. Without it, all `SealedSecret` manifests in the repo are unrecoverable after step 5.
 
@@ -149,6 +154,26 @@ kubectl label node NODE_NAME node.longhorn.io/create-default-disk=true
 **Step 7 — Confirm ArgoCD sync:**
 
 ArgoCD will now sync everything else automatically from this repo. Done. ✅
+
+### Staging Cluster
+
+The staging cluster uses the same playbooks with the staging inventory.
+
+```bash
+cd ansible
+ansible-playbook -i inventory/staging/hosts.ini playbooks/kubernetes/01-provision.yaml
+ansible-playbook -i inventory/staging/hosts.ini playbooks/kubernetes/02-k3s-install.yaml
+export KUBECONFIG=$(pwd)/../kubeconfig-staging
+ansible-playbook -i inventory/staging/hosts.ini playbooks/kubernetes/03-setup-infra.yaml
+```
+
+Set the branch Argo should watch by editing `git_branch` in `inventory/staging/group_vars/all.yaml` before running `03-setup-infra.yaml`. The bootstrap playbook injects that value into the root Argo application, which then passes it into the `bootstrap/` Helm chart as `targetRevision`.
+
+For one-off staging tests, prefer a CLI override:
+
+```bash
+ansible-playbook -i inventory/staging/hosts.ini playbooks/kubernetes/03-setup-infra.yaml -e git_branch=feat-x
+```
 
 ---
 
