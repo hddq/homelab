@@ -7,6 +7,7 @@
   vars:
     env_seed_host: "{{ groups['proxmox'][0] }}"
     env_git_branch: "{{ git_branch | default(hostvars[env_seed_host]['git_branch'] | default('HEAD')) }}"
+    env_deployment_environment: "{{ hostvars[env_seed_host]['deployment_environment'] | default('production') }}"
     kubeconfig_path: "{{ playbook_dir }}/../../../{{ hostvars[env_seed_host]['kubeconfig_path'] }}"
     master_key_path: "../../../sealed-secrets-master-key.yaml"
     argocd_chart_path: "../../../infrastructure/argocd"
@@ -75,7 +76,7 @@
     - name: 🌱 Apply Bootstrap Root Application
       kubernetes.core.k8s:
         kubeconfig: "{{ kubeconfig_path }}"
-        definition: "{{ lookup('template', 'templates/bootstrap-root.yaml.j2', template_vars={'git_branch': env_git_branch}) | from_yaml }}"
+        definition: "{{ lookup('template', 'templates/bootstrap-root.yaml.j2', template_vars={'git_branch': env_git_branch, 'deployment_environment': env_deployment_environment}) | from_yaml }}"
         state: present
 
     - name: Show ArgoCD Credentials

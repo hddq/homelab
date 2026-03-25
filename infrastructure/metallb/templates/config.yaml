@@ -3,9 +3,9 @@ kind: BGPPeer
 metadata:
   name: openwrt-router
 spec:
-  myASN: 65001
-  peerASN: 65000
-  peerAddress: 192.168.20.1
+  myASN: {{ .Values.homelab.metallb.myASN }}
+  peerASN: {{ .Values.homelab.metallb.peerASN }}
+  peerAddress: {{ .Values.homelab.metallb.peerAddress }}
 ---
 apiVersion: metallb.io/v1beta1
 kind: IPAddressPool
@@ -13,7 +13,9 @@ metadata:
   name: default-pool
 spec:
   addresses:
-    - 192.168.41.10-192.168.41.250
+    {{- range .Values.homelab.metallb.addressPool }}
+    - {{ . }}
+    {{- end }}
 ---
 apiVersion: metallb.io/v1beta1
 kind: BGPAdvertisement

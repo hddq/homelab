@@ -6,7 +6,7 @@ metadata:
   labels:
     app: graphite-exporter
   annotations:
-    metallb.io/loadBalancerIPs: "192.168.41.12"
+    metallb.io/loadBalancerIPs: "{{ .Values.homelab.serviceIps.graphiteExporter }}"
 spec:
   type: LoadBalancer
   ports:

@@ -14,8 +14,6 @@ grafana:
   ingress:
     enabled: true
     ingressClassName: infrastructure-traefik
-    hosts:
-      - grafana.hddq-k8s.duckdns.org
     path: /
 
   datasources:

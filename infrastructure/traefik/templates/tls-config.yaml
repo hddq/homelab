@@ -5,4 +5,4 @@ metadata:
   namespace: traefik
 spec:
   defaultCertificate:
-    secretName: hddq-k8s-wildcard-tls
+    secretName: {{ .Values.homelab.wildcardCert.secretName }}

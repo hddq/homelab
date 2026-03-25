@@ -1,0 +1,11 @@
+homelab:
+  baseDomain: hddq-k8s.duckdns.org
+  wildcardCert:
+    name: hddq-k8s-wildcard
+    secretName: hddq-k8s-wildcard-tls
+    issuerName: duckdns-letsencrypt-prod
+
+traefik:
+  service:
+    annotations:
+      metallb.io/loadBalancerIPs: "192.168.41.10"

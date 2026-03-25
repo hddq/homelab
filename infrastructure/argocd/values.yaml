@@ -52,3 +52,6 @@ argo-cd:
       capabilities:
         drop:
           - ALL
+
+homelab:
+  baseDomain: hddq-k8s.duckdns.org

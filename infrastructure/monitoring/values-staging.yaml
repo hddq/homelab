@@ -1,0 +1,17 @@
+homelab:
+  baseDomain: hddq-staging.duckdns.org
+  serviceIps:
+    graphiteExporter: 192.168.42.12
+
+grafana:
+  ingress:
+    hosts:
+      - grafana.hddq-staging.duckdns.org
+
+alertmanager:
+  ingress:
+    hosts:
+      - host: alertmanager.hddq-staging.duckdns.org
+        paths:
+          - path: /
+            pathType: ImplementationSpecific

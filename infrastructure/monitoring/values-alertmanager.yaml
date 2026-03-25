@@ -7,11 +7,6 @@ alertmanager:
   ingress:
     enabled: true
     className: infrastructure-traefik
-    hosts:
-      - host: alertmanager.hddq-k8s.duckdns.org
-        paths:
-          - path: /
-            pathType: ImplementationSpecific
 
   config:
     global:

@@ -1,16 +1,17 @@
 {{- $targetRevision := .Values.targetRevision -}}
+{{- $environment := .Values.environment | default "production" -}}
 {{- $repoURL := "git@github.com:hddq/homelab.git" -}}
 {{- $server := "https://kubernetes.default.svc" -}}
 {{- range $app := list
     (dict "name" "cert-manager" "path" "infrastructure/cert-manager" "namespace" "cert-manager" "syncOptions" (list "CreateNamespace=true"))
     (dict "name" "cert-manager-webhook" "path" "infrastructure/cert-manager-webhook" "namespace" "cert-manager" "syncOptions" (list "CreateNamespace=true"))
-    (dict "name" "metallb" "path" "infrastructure/metallb" "namespace" "metallb-system" "syncOptions" (list "CreateNamespace=true"))
-    (dict "name" "longhorn" "path" "infrastructure/longhorn" "namespace" "longhorn-system" "syncOptions" (list "CreateNamespace=true"))
-    (dict "name" "argocd" "path" "infrastructure/argocd" "namespace" "argocd" "syncOptions" (list "ServerSideApply=true"))
+    (dict "name" "metallb" "path" "infrastructure/metallb" "namespace" "metallb-system" "syncOptions" (list "CreateNamespace=true") "helmValueFiles" (list "values.yaml" (printf "values-%s.yaml" $environment)))
+    (dict "name" "longhorn" "path" "infrastructure/longhorn" "namespace" "longhorn-system" "syncOptions" (list "CreateNamespace=true") "helmValueFiles" (list "values.yaml" (printf "values-%s.yaml" $environment)))
+    (dict "name" "argocd" "path" "infrastructure/argocd" "namespace" "argocd" "syncOptions" (list "ServerSideApply=true") "helmValueFiles" (list "values.yaml" (printf "values-%s.yaml" $environment)))
     (dict "name" "metrics-server" "path" "infrastructure/metrics-server" "namespace" "kube-system")
     (dict "name" "sealed-secrets" "path" "infrastructure/sealed-secrets" "namespace" "kube-system" "syncOptions" (list "CreateNamespace=true"))
-    (dict "name" "traefik" "path" "infrastructure/traefik" "namespace" "traefik" "syncOptions" (list "CreateNamespace=true"))
-    (dict "name" "monitoring" "path" "infrastructure/monitoring" "namespace" "monitoring" "syncOptions" (list "CreateNamespace=true") "helmValueFiles" (list "values.yaml" "values-alertmanager.yaml" "values-grafana.yaml" "values-kube-state-metrics.yaml" "values-node-exporter.yaml" "values-vm-agent.yaml" "values-vm-single.yaml" "values-vmalert.yaml"))
+    (dict "name" "traefik" "path" "infrastructure/traefik" "namespace" "traefik" "syncOptions" (list "CreateNamespace=true") "helmValueFiles" (list "values.yaml" (printf "values-%s.yaml" $environment)))
+    (dict "name" "monitoring" "path" "infrastructure/monitoring" "namespace" "monitoring" "syncOptions" (list "CreateNamespace=true") "helmValueFiles" (list "values.yaml" "values-alertmanager.yaml" "values-grafana.yaml" "values-kube-state-metrics.yaml" "values-node-exporter.yaml" "values-vm-agent.yaml" "values-vm-single.yaml" "values-vmalert.yaml" (printf "values-%s.yaml" $environment)))
 }}
 ---
 apiVersion: argoproj.io/v1alpha1
