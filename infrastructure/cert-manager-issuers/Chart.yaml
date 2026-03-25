@@ -1,0 +1,6 @@
+apiVersion: v2
+name: cert-manager-issuers
+description: Cluster issuers that depend on cert-manager and external webhook solvers
+type: application
+version: 1.0.0
+appVersion: "1.0.0"

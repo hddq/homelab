@@ -1,0 +1,10 @@
+clusterIssuer:
+  name: duckdns-letsencrypt-prod
+  email: example@gmail.com
+  server: https://acme-v02.api.letsencrypt.org/directory
+  privateKeySecretName: letsencrypt-prod-account-key
+  solver:
+    groupName: cert-manager.webhook.duckdns.org
+    solverName: duckdns
+    apiTokenSecretName: duckdns-secret
+    apiTokenSecretKey: token
