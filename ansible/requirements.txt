@@ -1,5 +1,5 @@
 proxmoxer==2.3.0
-requests==2.32.5
+requests==2.33.0
 kubernetes==35.0.0
 ansible-core==2.20.3
 ansible-lint==26.3.0
