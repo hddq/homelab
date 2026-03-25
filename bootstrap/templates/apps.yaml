@@ -1,3 +1,4 @@
+{{- if ne .Values.environment "staging" -}}
 {{- $targetRevision := .Values.targetRevision -}}
 {{- $repoURL := "git@github.com:hddq/homelab.git" -}}
 {{- $server := "https://kubernetes.default.svc" -}}
@@ -32,3 +33,4 @@ spec:
       prune: true
       selfHeal: true
 {{- end }}
+{{- end -}}
