@@ -34,8 +34,8 @@
         state: present
       when: master_key_file.stat.exists
 
-    - name: 📦 Update Helm Dependencies for Infrastructure
-      ansible.builtin.command: helm dependency update
+    - name: 📦 Build Helm Dependencies for Infrastructure
+      ansible.builtin.command: helm dependency build
       args:
         chdir: "{{ item }}"
       loop:
