@@ -52,9 +52,10 @@ alertmanager:
                 🚨 <b>{{ .Labels.alertname }}</b> [{{ .Labels.severity }}]
                 {{- if .Annotations.summary }}{{ "\n" }}📝 <b>Summary:</b> {{ .Annotations.summary }}{{- end }}
                 {{- if .Annotations.description }}{{ "\n" }}📄 <b>Details:</b> {{ .Annotations.description }}{{- end }}
+                {{- if .Labels.cluster }}{{ "\n" }}🌐 <b>Cluster:</b> <code>{{ .Labels.cluster }}</code>{{- end }}
                 {{ "\n" }}🏷️ <b>Labels:</b>
                 {{- range $key, $value := .Labels }}
-                {{- if and (ne $key "alertname") (ne $key "severity") (ne $key "category") }}
+                {{- if and (ne $key "alertname") (ne $key "severity") (ne $key "category") (ne $key "cluster") }}
                 ├ <b>{{ $key }}:</b> <code>{{ $value }}</code>
                 {{- end }}
                 {{- end }}

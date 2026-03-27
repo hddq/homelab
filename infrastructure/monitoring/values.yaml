@@ -2,3 +2,6 @@ homelab:
   baseDomain: hddq-k8s.duckdns.org
   serviceIps:
     graphiteExporter: 192.168.41.12
+
+pveExporter:
+  enabled: true

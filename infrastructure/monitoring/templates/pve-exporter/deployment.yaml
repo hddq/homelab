@@ -1,3 +1,4 @@
+{{- if .Values.pveExporter.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -56,3 +57,4 @@ spec:
             secretName: pve-exporter-secret
         - name: tmp
           emptyDir: {}
+{{- end }}

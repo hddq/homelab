@@ -3,6 +3,9 @@ homelab:
   serviceIps:
     graphiteExporter: 192.168.42.12
 
+pveExporter:
+  enabled: false
+
 grafana:
   ingress:
     hosts:

@@ -18,7 +18,7 @@
     (dict "name" "metrics-server" "path" "infrastructure/metrics-server" "namespace" "kube-system")
     (dict "name" "sealed-secrets" "path" "infrastructure/sealed-secrets" "namespace" "kube-system" "syncOptions" (list "CreateNamespace=true"))
     (dict "name" "traefik" "path" "infrastructure/traefik" "namespace" "traefik" "syncOptions" (list "CreateNamespace=true") "helmValueFiles" (list "values.yaml" (printf "values-%s.yaml" $environment)))
-    (dict "name" "monitoring" "path" "infrastructure/monitoring" "namespace" "monitoring" "syncOptions" (list "CreateNamespace=true") "helmValueFiles" (list "values.yaml" "values-alertmanager.yaml" "values-grafana.yaml" "values-kube-state-metrics.yaml" "values-node-exporter.yaml" "values-vm-agent.yaml" "values-vm-single.yaml" "values-vmalert.yaml" (printf "values-%s.yaml" $environment)))
+    (dict "name" "monitoring" "path" "infrastructure/monitoring" "namespace" "monitoring" "syncOptions" (list "CreateNamespace=true") "helmValueFiles" (list "values.yaml" "values-alertmanager.yaml" "values-grafana.yaml" "values-kube-state-metrics.yaml" "values-node-exporter.yaml" "values-vm-agent.yaml" (printf "values-vm-agent-%s.yaml" $environment) "values-vm-single.yaml" "values-vmalert.yaml" (printf "values-vmalert-%s.yaml" $environment) (printf "values-%s.yaml" $environment)))
 }}
 ---
 apiVersion: argoproj.io/v1alpha1
