@@ -15,5 +15,7 @@ ignore: |
   .venv/
   bootstrap/templates/
   infrastructure/*/templates/
+  infrastructure/*/*/templates/
   infrastructure/*/charts/
+  infrastructure/*/*/charts/
   .ansible

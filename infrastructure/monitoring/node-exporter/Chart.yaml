@@ -1,0 +1,10 @@
+apiVersion: v2
+name: monitoring-node-exporter
+description: node-exporter for monitoring
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+dependencies:
+  - name: prometheus-node-exporter
+    version: 4.52.1
+    repository: https://prometheus-community.github.io/helm-charts

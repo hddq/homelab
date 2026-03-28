@@ -18,7 +18,15 @@
     (dict "name" "metrics-server" "path" "infrastructure/metrics-server" "namespace" "kube-system")
     (dict "name" "sealed-secrets" "path" "infrastructure/sealed-secrets" "namespace" "kube-system" "syncOptions" (list "CreateNamespace=true"))
     (dict "name" "traefik" "path" "infrastructure/traefik" "namespace" "traefik" "syncOptions" (list "CreateNamespace=true") "helmValueFiles" (list "values.yaml" (printf "values-%s.yaml" $environment)))
-    (dict "name" "monitoring" "path" "infrastructure/monitoring" "namespace" "monitoring" "syncOptions" (list "CreateNamespace=true") "helmValueFiles" (list "values.yaml" "values-alertmanager.yaml" "values-grafana.yaml" "values-kube-state-metrics.yaml" "values-node-exporter.yaml" "values-vm-agent.yaml" (printf "values-vm-agent-%s.yaml" $environment) "values-vm-single.yaml" "values-vmalert.yaml" (printf "values-vmalert-%s.yaml" $environment) (printf "values-%s.yaml" $environment)))
+    (dict "name" "monitoring-vm-single" "path" "infrastructure/monitoring/vm-single" "namespace" "monitoring" "syncWave" "0" "syncOptions" (list "CreateNamespace=true"))
+    (dict "name" "monitoring-alertmanager" "path" "infrastructure/monitoring/alertmanager" "namespace" "monitoring" "syncWave" "0" "syncOptions" (list "CreateNamespace=true") "helmValueFiles" (list "values.yaml" (printf "values-%s.yaml" $environment)))
+    (dict "name" "monitoring-kube-state-metrics" "path" "infrastructure/monitoring/kube-state-metrics" "namespace" "monitoring" "syncWave" "0" "syncOptions" (list "CreateNamespace=true"))
+    (dict "name" "monitoring-node-exporter" "path" "infrastructure/monitoring/node-exporter" "namespace" "monitoring" "syncWave" "0" "syncOptions" (list "CreateNamespace=true"))
+    (dict "name" "monitoring-graphite-exporter" "path" "infrastructure/monitoring/graphite-exporter" "namespace" "monitoring" "syncWave" "0" "syncOptions" (list "CreateNamespace=true") "helmValueFiles" (list "values.yaml" (printf "values-%s.yaml" $environment)))
+    (dict "name" "monitoring-pve-exporter" "path" "infrastructure/monitoring/pve-exporter" "namespace" "monitoring" "syncWave" "0" "syncOptions" (list "CreateNamespace=true") "helmValueFiles" (list "values.yaml" (printf "values-%s.yaml" $environment)))
+    (dict "name" "monitoring-vm-agent" "path" "infrastructure/monitoring/vm-agent" "namespace" "monitoring" "syncWave" "1" "syncOptions" (list "CreateNamespace=true") "helmValueFiles" (list "values.yaml" (printf "values-%s.yaml" $environment)))
+    (dict "name" "monitoring-vmalert" "path" "infrastructure/monitoring/vmalert" "namespace" "monitoring" "syncWave" "2" "syncOptions" (list "CreateNamespace=true") "helmValueFiles" (list "values.yaml" (printf "values-%s.yaml" $environment)))
+    (dict "name" "monitoring-grafana" "path" "infrastructure/monitoring/grafana" "namespace" "monitoring" "syncWave" "2" "syncOptions" (list "CreateNamespace=true") "helmValueFiles" (list "values.yaml" (printf "values-%s.yaml" $environment)))
 }}
 ---
 apiVersion: argoproj.io/v1alpha1

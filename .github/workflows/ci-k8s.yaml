@@ -31,19 +31,19 @@ jobs:
 
       - name: Build Helm dependencies for infrastructure/
         run: |
-          mapfile -t repos < <(awk '/repository:/ { print $2 }' infrastructure/*/Chart.yaml | sort -u)
+          mapfile -t charts < <(find infrastructure -name Chart.yaml | sort)
+          mapfile -t repos < <(awk '/repository:/ { print $2 }' "${charts[@]}" | sort -u)
           for i in "${!repos[@]}"; do
             helm repo add "repo-$i" "${repos[$i]}"
           done
 
           helm repo update
 
-          for dir in infrastructure/*/; do
-            if [ -f "${dir}Chart.yaml" ]; then
-              echo "Building dependencies for $dir"
-              helm dependency build "$dir"
-            fi
-          done
+          while IFS= read -r chart_file; do
+            dir="$(dirname "$chart_file")"
+            echo "Building dependencies for $dir"
+            helm dependency build "$dir"
+          done < <(printf '%s\n' "${charts[@]}")
 
       - name: Upload built infrastructure charts
         uses: actions/upload-artifact@v7
@@ -76,31 +76,22 @@ jobs:
       - name: Render infrastructure charts
         run: |
           mkdir -p .ci/rendered/infrastructure
-          for chart_dir in infrastructure/*; do
-            [ -f "$chart_dir/Chart.yaml" ] || continue
-            chart="$(basename "$chart_dir")"
-            release="infrastructure-$chart"
+          while IFS= read -r chart_file; do
+            chart_dir="$(dirname "$chart_file")"
+            chart_id="${chart_dir#infrastructure/}"
+            chart_id="${chart_id//\//-}"
+            release="infrastructure-$chart_id"
 
-            # Identify value files shared across environments.
-            # Exclude both root env files and component env overlays such as values-vm-agent-staging.yaml.
-            mapfile -t common_values < <(find "$chart_dir" -maxdepth 1 -name "values*.yaml" ! -name "*-staging.yaml" ! -name "*-production.yaml" | sort)
-
-            # Prepare base arguments
-            base_args=()
-            for v in "${common_values[@]}"; do base_args+=(-f "$v"); done
-
-            # Render each environment with the shared values plus any matching env-specific overlays.
             for env in staging production; do
-              args=("${base_args[@]}")
+              args=()
+              [ -f "$chart_dir/values.yaml" ] && args+=(-f "$chart_dir/values.yaml")
+              [ -f "$chart_dir/values-$env.yaml" ] && args+=(-f "$chart_dir/values-$env.yaml")
 
-              mapfile -t env_values < <(find "$chart_dir" -maxdepth 1 -name "values*-$env.yaml" | sort)
-              for v in "${env_values[@]}"; do args+=(-f "$v"); done
-
-              echo "Rendering $chart for $env environment"
+              echo "Rendering $chart_id for $env environment"
               helm template "$release" "$chart_dir" "${args[@]}" \
-                > ".ci/rendered/infrastructure/${chart}-${env}.yaml"
+                > ".ci/rendered/infrastructure/${chart_id}-${env}.yaml"
             done
-          done
+          done < <(find infrastructure -name Chart.yaml | sort)
 
       - name: Run kubeconform
         run: |
@@ -190,9 +181,8 @@ jobs:
 
       - name: Run Helm Lint
         run: |
-          for dir in infrastructure/*/; do
-            if [ -f "${dir}Chart.yaml" ]; then
-              echo "Linting $dir"
-              helm lint "$dir"
-            fi
-          done
+          while IFS= read -r chart_file; do
+            dir="$(dirname "$chart_file")"
+            echo "Linting $dir"
+            helm lint "$dir"
+          done < <(find infrastructure -name Chart.yaml | sort)
