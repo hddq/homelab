@@ -30,20 +30,7 @@ jobs:
         uses: azure/setup-helm@v5
 
       - name: Build Helm dependencies for infrastructure/
-        run: |
-          mapfile -t charts < <(find infrastructure -name Chart.yaml | sort)
-          mapfile -t repos < <(awk '/repository:/ { print $2 }' "${charts[@]}" | sort -u)
-          for i in "${!repos[@]}"; do
-            helm repo add "repo-$i" "${repos[$i]}"
-          done
-
-          helm repo update
-
-          while IFS= read -r chart_file; do
-            dir="$(dirname "$chart_file")"
-            echo "Building dependencies for $dir"
-            helm dependency build "$dir"
-          done < <(printf '%s\n' "${charts[@]}")
+        run: bash scripts/ci/infrastructure-charts.sh build-deps
 
       - name: Upload built infrastructure charts
         uses: actions/upload-artifact@v7
@@ -75,23 +62,7 @@ jobs:
 
       - name: Render infrastructure charts
         run: |
-          mkdir -p .ci/rendered/infrastructure
-          while IFS= read -r chart_file; do
-            chart_dir="$(dirname "$chart_file")"
-            chart_id="${chart_dir#infrastructure/}"
-            chart_id="${chart_id//\//-}"
-            release="infrastructure-$chart_id"
-
-            for env in staging production; do
-              args=()
-              [ -f "$chart_dir/values.yaml" ] && args+=(-f "$chart_dir/values.yaml")
-              [ -f "$chart_dir/values-$env.yaml" ] && args+=(-f "$chart_dir/values-$env.yaml")
-
-              echo "Rendering $chart_id for $env environment"
-              helm template "$release" "$chart_dir" "${args[@]}" \
-                > ".ci/rendered/infrastructure/${chart_id}-${env}.yaml"
-            done
-          done < <(find infrastructure -name Chart.yaml | sort)
+          bash scripts/ci/infrastructure-charts.sh render .ci/rendered/infrastructure
 
       - name: Run kubeconform
         run: |
@@ -180,9 +151,4 @@ jobs:
         uses: azure/setup-helm@v5
 
       - name: Run Helm Lint
-        run: |
-          while IFS= read -r chart_file; do
-            dir="$(dirname "$chart_file")"
-            echo "Linting $dir"
-            helm lint "$dir"
-          done < <(find infrastructure -name Chart.yaml | sort)
+        run: bash scripts/ci/infrastructure-charts.sh lint
