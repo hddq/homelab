@@ -1,5 +1,7 @@
 alertmanager:
   enabled: true
+  securityContext:
+    readOnlyRootFilesystem: true
   persistence:
     enabled: true
     storageClassName: longhorn

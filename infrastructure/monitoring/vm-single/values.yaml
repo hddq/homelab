@@ -1,5 +1,18 @@
 victoria-metrics-single:
   server:
+    securityContext:
+      enabled: true
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+      runAsUser: 65534
+      runAsGroup: 65534
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+    podSecurityContext:
+      enabled: true
+      fsGroup: 65534
     fullnameOverride: "vm-single-server"
     persistentVolume:
       enabled: true

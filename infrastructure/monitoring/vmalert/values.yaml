@@ -1,5 +1,18 @@
 victoria-metrics-alert:
   server:
+    podSecurityContext:
+      enabled: true
+      fsGroup: 65534
+    securityContext:
+      enabled: true
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+      runAsUser: 65534
+      runAsGroup: 65534
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
     datasource:
       url: "http://vm-single-server.monitoring.svc.cluster.local:8428"
 
