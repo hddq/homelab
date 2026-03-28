@@ -1,0 +1,35 @@
+---
+- name: 🌐 Configure FRR BGP on OpenWrt
+  hosts: openwrt
+  gather_facts: false
+  become: true
+  vars:
+    # Production K8s
+    bgp_prod_neighbors:
+      - 192.168.20.111
+      - 192.168.20.112
+      - 192.168.20.113
+
+    # Staging K8s
+    bgp_staging_neighbors:
+      - 192.168.20.120
+
+  tasks:
+    - name: 📦 Install FRR package
+      ansible.builtin.raw: apk add frr
+      register: apk_install
+      changed_when: "'OK' not in apk_install.stdout or 'Installing' in apk_install.stdout"
+
+    - name: 📝 Deploy FRR configuration
+      ansible.builtin.raw: "cat << 'EOF' > /etc/frr/frr.conf\n{{ lookup('template', 'templates/frr.conf.j2') }}\nEOF"
+      changed_when: true
+      notify: 🔄 Restart FRR service
+
+    - name: ⚙️ Ensure FRR is enabled and started
+      ansible.builtin.raw: /etc/init.d/frr enable && /etc/init.d/frr start
+      changed_when: false
+
+  handlers:
+    - name: 🔄 Restart FRR service
+      ansible.builtin.raw: /etc/init.d/frr restart
+      changed_when: true

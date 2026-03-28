@@ -1,6 +1,6 @@
 ---
 - name: 🛠️ Prepare Nodes & Group Dynamically
-  hosts: k8s_prod
+  hosts: k8s
   become: true
   gather_facts: true
   vars_files:
@@ -145,21 +145,24 @@
 - name: ⚙️ Configure Local Access
   hosts: localhost
   gather_facts: false
+  vars:
+    env_seed_host: "{{ groups['proxmox'][0] }}"
+    env_kubeconfig_path: "{{ playbook_dir }}/../../../{{ hostvars[env_seed_host]['kubeconfig_path'] }}"
   tasks:
     - name: 📥 Fetch Kubeconfig from First Master
       ansible.builtin.fetch:
         src: /etc/rancher/k3s/k3s.yaml
-        dest: ../../../kubeconfig
+        dest: "{{ env_kubeconfig_path }}"
         flat: yes
       delegate_to: "{{ groups['k3s_master'][0] }}"
       become: true
 
     - name: 📝 Update Kubeconfig Server Address
       ansible.builtin.replace:
-        path: ../../../kubeconfig
+        path: "{{ env_kubeconfig_path }}"
         regexp: "127.0.0.1"
         replace: "{{ hostvars[groups['k3s_master'][0]]['inventory_hostname'] }}"
 
     - name: Instructions
       ansible.builtin.debug:
-        msg: "Cluster provisioned successfully! Config saved to 'kubeconfig'."
+        msg: "Cluster provisioned successfully! Config saved to '{{ env_kubeconfig_path }}'."

@@ -81,3 +81,18 @@ misconfigurations:
     statement: Longhorn components require privileged access to manage physical disks, mount points, and block devices on the host nodes.
     paths:
       - "longhorn/charts/longhorn/templates/daemonset-sa.yaml"
+
+  - id: KSV-0009
+    statement: node-exporter must use hostNetwork to expose node metrics from the host namespace.
+    paths:
+      - "monitoring/node-exporter/charts/prometheus-node-exporter/templates/daemonset.yaml"
+
+  - id: KSV-0010
+    statement: node-exporter uses hostPID to observe host process and kernel metrics as designed.
+    paths:
+      - "monitoring/node-exporter/charts/prometheus-node-exporter/templates/daemonset.yaml"
+
+  - id: KSV-0121
+    statement: node-exporter intentionally mounts host root, proc, and sys filesystems to export host metrics.
+    paths:
+      - "monitoring/node-exporter/charts/prometheus-node-exporter/templates/daemonset.yaml"

@@ -1,0 +1,17 @@
+{{- if .Values.pveExporter.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: pve-exporter
+  namespace: monitoring
+  labels:
+    app: pve-exporter
+spec:
+  ports:
+    - port: 9221
+      targetPort: metrics
+      protocol: TCP
+      name: metrics
+  selector:
+    app: pve-exporter
+{{- end }}

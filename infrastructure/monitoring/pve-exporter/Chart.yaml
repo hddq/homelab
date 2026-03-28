@@ -1,0 +1,6 @@
+apiVersion: v2
+name: monitoring-pve-exporter
+description: Proxmox VE exporter for monitoring
+type: application
+version: 1.0.0
+appVersion: "1.0.0"

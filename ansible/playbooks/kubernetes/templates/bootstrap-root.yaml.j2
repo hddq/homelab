@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root-app
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: git@github.com:hddq/homelab.git
+    targetRevision: "{{ git_branch | default('HEAD') }}"
+    path: bootstrap/
+    helm:
+      parameters:
+        - name: targetRevision
+          value: "{{ git_branch | default('HEAD') }}"
+        - name: environment
+          value: "{{ deployment_environment | default('production') }}"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

@@ -1,0 +1,7 @@
+alertmanager:
+  ingress:
+    hosts:
+      - host: alertmanager.hddq-k8s.duckdns.org
+        paths:
+          - path: /
+            pathType: ImplementationSpecific

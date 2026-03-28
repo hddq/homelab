@@ -1,0 +1,11 @@
+homelab:
+  baseDomain: hddq-staging.duckdns.org
+  wildcardCert:
+    name: hddq-staging-wildcard
+    secretName: hddq-staging-wildcard-tls
+    issuerName: duckdns-letsencrypt-prod
+
+traefik:
+  service:
+    annotations:
+      metallb.io/loadBalancerIPs: "192.168.42.10"

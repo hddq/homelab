@@ -5,7 +5,6 @@ template_node: "z690"
 shared_storage: "truenas"
 vm_user: "hddq"
 my_ssh_key: "{{ lookup('file', '~/.ssh/hddq-ssh.pub') }}"
-target_inventory_file: "../../inventory/hosts.ini"
 
 default_vm_ram: 8192
 default_vm_balloon: 6144
@@ -18,24 +17,3 @@ default_vm_vlan: 20
 default_vm_dns:
   - "1.1.1.1"
   - "8.8.8.8"
-
-vms_to_provision:
-  - name: "k8s-cp-1"
-    vmid: 211
-    node: "z690"
-    ip: "192.168.20.111"
-    k3s_role: "master"
-    run_workloads: false
-
-  - name: "k8s-worker-1"
-    vmid: 212
-    node: "z690"
-    ip: "192.168.20.112"
-    k3s_role: "worker"
-
-  - name: "k8s-worker-2"
-    vmid: 213
-    node: "b360"
-    disk: "50G"
-    ip: "192.168.20.113"
-    k3s_role: "worker"

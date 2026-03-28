@@ -27,3 +27,6 @@ longhorn:
 
   ingress:
     enabled: false
+
+homelab:
+  baseDomain: hddq-k8s.duckdns.org

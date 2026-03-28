@@ -1,0 +1,52 @@
+frr version 10.4.1
+frr defaults traditional
+hostname OpenWrt
+log syslog
+!
+ip prefix-list K8S_PROD seq 10 permit 192.168.41.0/24 le 32
+!
+ip prefix-list K8S_STAGING seq 10 permit 192.168.42.0/24 le 32
+!
+route-map RM_K8S_PROD_IN permit 10
+ match ip address prefix-list K8S_PROD
+exit
+!
+route-map RM_K8S_STAGING_IN permit 10
+ match ip address prefix-list K8S_STAGING
+exit
+!
+route-map RM_K8S_OUT deny 10
+exit
+!
+password zebra
+!
+router bgp 65000
+ bgp router-id 192.168.20.1
+ 
+ {% for ip in bgp_prod_neighbors %}
+ neighbor {{ ip }} remote-as 65001
+ {% endfor %}
+ 
+ {% for ip in bgp_staging_neighbors %}
+ neighbor {{ ip }} remote-as 65002
+ {% endfor %}
+ !
+ address-family ipv4 unicast
+  {% for ip in bgp_prod_neighbors %}
+  neighbor {{ ip }} route-map RM_K8S_PROD_IN in
+  neighbor {{ ip }} route-map RM_K8S_OUT out
+  {% endfor %}
+  
+  {% for ip in bgp_staging_neighbors %}
+  neighbor {{ ip }} route-map RM_K8S_STAGING_IN in
+  neighbor {{ ip }} route-map RM_K8S_OUT out
+  {% endfor %}
+ exit-address-family
+exit
+!
+access-list vty seq 5 permit 127.0.0.0/8
+access-list vty seq 10 deny any
+!
+line vty
+ access-class vty
+exit

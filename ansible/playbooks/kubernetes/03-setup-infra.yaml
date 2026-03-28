@@ -2,8 +2,13 @@
 - name: 🚀 Bootstrap Cluster (Sealed Secrets + ArgoCD)
   hosts: localhost
   gather_facts: false
+  vars_files:
+    - "../../vars/k3s_cluster.yaml"
   vars:
-    kubeconfig_path: "../../../kubeconfig"
+    env_seed_host: "{{ groups['proxmox'][0] }}"
+    env_git_branch: "{{ git_branch | default(hostvars[env_seed_host]['git_branch'] | default('HEAD')) }}"
+    env_deployment_environment: "{{ hostvars[env_seed_host]['deployment_environment'] | default('production') }}"
+    kubeconfig_path: "{{ playbook_dir }}/../../../{{ hostvars[env_seed_host]['kubeconfig_path'] }}"
     master_key_path: "../../../sealed-secrets-master-key.yaml"
     argocd_chart_path: "../../../infrastructure/argocd"
     sealed_secrets_chart_path: "../../../infrastructure/sealed-secrets"
@@ -29,8 +34,8 @@
         state: present
       when: master_key_file.stat.exists
 
-    - name: 📦 Update Helm Dependencies for Infrastructure
-      ansible.builtin.command: helm dependency update
+    - name: 📦 Build Helm Dependencies for Infrastructure
+      ansible.builtin.command: helm dependency build
       args:
         chdir: "{{ item }}"
       loop:
@@ -68,10 +73,10 @@
       register: argocd_pass
       changed_when: false
 
-    - name: 🌱 Apply Bootstrap Application
+    - name: 🌱 Apply Bootstrap Root Application
       kubernetes.core.k8s:
         kubeconfig: "{{ kubeconfig_path }}"
-        src: "../../../bootstrap.yaml"
+        definition: "{{ lookup('template', 'templates/bootstrap-root.yaml.j2', template_vars={'git_branch': env_git_branch, 'deployment_environment': env_deployment_environment}) | from_yaml }}"
         state: present
 
     - name: Show ArgoCD Credentials

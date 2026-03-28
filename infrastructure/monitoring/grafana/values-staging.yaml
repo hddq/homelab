@@ -1,0 +1,4 @@
+grafana:
+  ingress:
+    hosts:
+      - grafana.hddq-staging.duckdns.org
