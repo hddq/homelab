@@ -7,6 +7,8 @@ metadata:
     app.kubernetes.io/name: navidrome
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app.kubernetes.io/name: navidrome
@@ -61,6 +63,8 @@ spec:
               readOnly: true
             - name: navidrome-pvc
               mountPath: /data
+            - name: tmp-dir
+              mountPath: /tmp
       volumes:
         - name: music-nfs
           nfs:
@@ -69,3 +73,5 @@ spec:
         - name: navidrome-pvc
           persistentVolumeClaim:
             claimName: navidrome-pvc
+        - name: tmp-dir
+          emptyDir: {}
