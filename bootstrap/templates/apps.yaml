@@ -1,6 +1,6 @@
 {{- if ne .Values.environment "staging" -}}
 {{- $targetRevision := .Values.targetRevision -}}
-{{- $repoURL := "git@github.com:hddq/homelab.git" -}}
+{{- $repoURL := "ssh://git@ssh.github.com:443/hddq/homelab.git" -}}
 {{- $server := "https://kubernetes.default.svc" -}}
 {{- range $app := list
     (dict "name" "nginx-playground" "path" "apps/nginx-playground" "namespace" "playground")

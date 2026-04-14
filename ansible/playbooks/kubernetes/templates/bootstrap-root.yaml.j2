@@ -8,7 +8,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: git@github.com:hddq/homelab.git
+    repoURL: ssh://git@ssh.github.com:443/hddq/homelab.git
     targetRevision: "{{ git_branch | default('HEAD') }}"
     path: bootstrap/
     helm:

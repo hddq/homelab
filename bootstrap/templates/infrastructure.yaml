@@ -1,6 +1,6 @@
 {{- $targetRevision := .Values.targetRevision -}}
 {{- $environment := .Values.environment | default "production" -}}
-{{- $repoURL := "git@github.com:hddq/homelab.git" -}}
+{{- $repoURL := "ssh://git@ssh.github.com:443/hddq/homelab.git" -}}
 {{- $server := "https://kubernetes.default.svc" -}}
 {{- range $app := list
     (dict "name" "cert-manager" "path" "infrastructure/cert-manager" "namespace" "cert-manager" "syncWave" "-2" "syncOptions" (list "CreateNamespace=true" "RespectIgnoreDifferences=true") "ignoreDifferences" (list
