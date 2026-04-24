@@ -92,7 +92,7 @@ jobs:
           path: infrastructure/
 
       - name: Run Trivy on apps/
-        uses: aquasecurity/trivy-action@0.35.0
+        uses: aquasecurity/trivy-action@v0.36.0
         env:
           TRIVY_IGNOREFILE: apps/.trivyignore.yaml
         with:
@@ -105,7 +105,7 @@ jobs:
           scan-ref: "apps/"
 
       - name: Run Trivy on infrastructure/
-        uses: aquasecurity/trivy-action@0.35.0
+        uses: aquasecurity/trivy-action@v0.36.0
         env:
           TRIVY_IGNOREFILE: infrastructure/.trivyignore.yaml
         with:
