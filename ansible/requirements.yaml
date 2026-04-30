@@ -1,9 +1,9 @@
 collections:
   - name: community.general
-    version: "12.5.0"
+    version: "12.6.0"
 
   - name: kubernetes.core
-    version: "6.3.0"
+    version: "6.4.0"
 
     # proxy-version-for-renovate: "1.6.0"
     # TODO: Revert to upstream 'community.proxmox' when 1.7.0 is released and contains my PR for efidisk
