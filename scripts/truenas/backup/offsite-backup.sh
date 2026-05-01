@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-VERSION="v3.8.4"
+VERSION="v3.8.5"
 
 echo -e "Offsite Backup Script ${VERSION}"
 
@@ -15,7 +15,7 @@ BLACKLISTED_DATASETS=("ssd1/ix-apps" "ssd1/bitmonero")
 SNAP_NAME="restic-backup-$$"
 TMP_ROOT="/tmp/restic-backup"
 
-REPO="rclone:gdrive-union:/nas-backup/"
+REPO="rclone:gdrive3:/nas-backup/"
 CONFIG_DIR="/root/.config/restic"
 export RESTIC_PASSWORD_FILE="$CONFIG_DIR/password"
 export RCLONE_BWLIMIT="1.25M:12.5M"
