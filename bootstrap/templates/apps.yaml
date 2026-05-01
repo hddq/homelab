@@ -10,6 +10,7 @@
     (dict "name" "opodsync" "path" "apps/opodsync" "namespace" "opodsync")
     (dict "name" "navidrome" "path" "apps/navidrome" "namespace" "navidrome")
     (dict "name" "feishin" "path" "apps/feishin" "namespace" "feishin")
+    (dict "name" "restic-rest-server" "path" "apps/restic-rest-server" "namespace" "restic")
 }}
 ---
 apiVersion: argoproj.io/v1alpha1

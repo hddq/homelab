@@ -1,0 +1,20 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: restic-rest-server
+  namespace: restic-rest-server
+  labels:
+    app.kubernetes.io/name: restic-rest-server
+spec:
+  ingressClassName: infrastructure-traefik
+  rules:
+    - host: restic.hddq-k8s.duckdns.org
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: restic-rest-server
+                port:
+                  number: 8000
