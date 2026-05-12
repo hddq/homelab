@@ -92,6 +92,9 @@ spec:
               subPath: music
               mountPath: /music
               readOnly: true
+            - name: lyrics-nfs
+              mountPath: /music/_lyrics
+              readOnly: false
             - name: navidrome-pvc
               mountPath: /data
             - name: tmp-dir
@@ -101,6 +104,10 @@ spec:
           nfs:
             server: 192.168.20.12
             path: /mnt/ssd1/media
+        - name: lyrics-nfs
+          nfs:
+            server: 192.168.20.12
+            path: /mnt/ssd1/media/music/_lyrics
         - name: navidrome-pvc
           persistentVolumeClaim:
             claimName: navidrome-pvc
