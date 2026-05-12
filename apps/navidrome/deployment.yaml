@@ -22,6 +22,33 @@ spec:
         runAsUser: 1000
         runAsGroup: 1000
         fsGroup: 1000
+      initContainers:
+        - name: install-lyrics-plugin
+          image: curlimages/curl:8.20.0
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
+          command:
+            - sh
+            - -c
+            - |
+              PLUGIN_VERSION="5.0.1"
+              PLUGIN_PATH="/data/plugins/nd-lyrics.ndp"
+              EXPECTED_VERSION_FILE="/data/plugins/.nd-lyrics-version"
+
+              if [ -f "$EXPECTED_VERSION_FILE" ] && [ "$(cat $EXPECTED_VERSION_FILE)" = "$PLUGIN_VERSION" ]; then
+                echo "Plugin already at version $PLUGIN_VERSION, skipping download"
+                exit 0
+              fi
+
+              mkdir -p /data/plugins
+              curl -fsSL -o "$PLUGIN_PATH" \
+                "https://github.com/J0R6IT0/navidrome-lyrics-plugin/releases/download/v${PLUGIN_VERSION}/nd-lyrics.ndp"
+              echo "$PLUGIN_VERSION" > "$EXPECTED_VERSION_FILE"
+              echo "Plugin installed successfully"
+          volumeMounts:
+            - name: navidrome-pvc
+              mountPath: /data
       containers:
         - name: navidrome
           image: deluan/navidrome:0.61.2@sha256:9fa40b3d8dec43ceb2213d1fa551da3dcfef6ac6d19c2e534efb92527c2bafd2
@@ -49,6 +76,10 @@ spec:
                 secretKeyRef:
                   name: navidrome-secret
                   key: ND_LASTFM_SECRET
+            - name: ND_PLUGINS_ENABLED
+              value: "true"
+            - name: ND_LYRICSPRIORITY
+              value: "embedded,.lrc,nd-lyrics"
           resources:
             requests:
               cpu: 100m
