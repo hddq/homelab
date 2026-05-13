@@ -35,6 +35,14 @@
       "depNameTemplate": "prometheus/node_exporter",
       "datasourceTemplate": "github-releases",
       "extractVersionTemplate": "^v(?<version>.+)$"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["apps/**/deployment.yaml"],
+      "matchStrings": ["PLUGIN_VERSION=\"(?<currentValue>\\d+\\.\\d+\\.\\d+)\""],
+      "depNameTemplate": "J0R6IT0/navidrome-lyrics-plugin",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v(?<version>.+)$"
     }
   ],
   "packageRules": [
