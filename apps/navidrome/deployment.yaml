@@ -24,7 +24,7 @@ spec:
         fsGroup: 1000
       initContainers:
         - name: install-lyrics-plugin
-          image: curlimages/curl:8.20.0
+          image: curlimages/curl:8.20.0@sha256:b3f1fb2a51d923260350d21b8654bbc607164a987e2f7c84a0ac199a67df812a
           securityContext:
             runAsUser: 1000
             runAsGroup: 1000
