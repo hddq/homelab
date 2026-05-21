@@ -7,6 +7,8 @@
   vars:
     script_src: "../../../scripts/truenas/backup/offsite-backup.sh"
     script_dest: "/root/scripts/offsite-backup.sh"
+    server_src: "../../../scripts/truenas/backup/offsite-backup-server.py"
+    server_dest: "/root/scripts/offsite-backup-server.py"
 
   tasks:
     - name: 📁 Ensure scripts directory exists on TrueNAS
@@ -23,6 +25,13 @@
         mode: "0700"
       become: true
 
+    - name: 📜 Copy backup server script to TrueNAS
+      ansible.builtin.copy:
+        src: "{{ server_src }}"
+        dest: "{{ server_dest }}"
+        mode: "0700"
+      become: true
+
     - name: 🔍 Check if cronjob already exists via midclt
       ansible.builtin.command:
         cmd: midclt call cronjob.query '[["description", "=", "Restic Offsite Backup"]]'
@@ -30,12 +39,16 @@
       changed_when: false
       become: true
 
+    - name: 🧾 Parse cronjob query results
+      ansible.builtin.set_fact:
+        cronjob_existing: "{{ cronjob_check.stdout | from_json }}"
+
     - name: ⏰ Setup daily Cronjob in TrueNAS UI via midclt
       ansible.builtin.command:
         cmd: >
           midclt call cronjob.create '{
             "user": "root",
-            "command": "{{ script_dest }}",
+            "command": "{{ server_dest }}",
             "description": "Restic Offsite Backup",
             "enabled": true,
             "stdout": false,
@@ -50,4 +63,16 @@
           }'
       become: true
       changed_when: true
-      when: (cronjob_check.stdout | from_json) | length == 0
+      when: cronjob_existing | length == 0
+
+    - name: ⏰ Update existing Cronjob command
+      ansible.builtin.command:
+        cmd: >
+          midclt call cronjob.update {{ cronjob_existing[0].id }} '{
+            "command": "{{ server_dest }}"
+          }'
+      become: true
+      changed_when: true
+      when:
+        - cronjob_existing | length > 0
+        - cronjob_existing[0].command != server_dest
