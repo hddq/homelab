@@ -11,6 +11,7 @@ from urllib.parse import urlparse, parse_qs
 
 HOST = "0.0.0.0"
 PORT = 8787
+VERSION = "1.0.0"
 ENDPOINT = "/offsite-backup"
 POLL_SECONDS = 1
 READ_SIZE = 1024
@@ -38,10 +39,14 @@ def build_html():
 <html>
 <head>
   <meta charset="utf-8">
-  <title>offsite-backup</title>
-  <style>body {{ background: black; color: white; }}</style>
+  <title>offsite-backup v{VERSION}</title>
+  <style>
+    body {{ background: black; color: white; font-family: monospace; }}
+    h1 {{ font-size: 1.2em; border-bottom: 1px solid #333; padding-bottom: 5px; }}
+  </style>
 </head>
 <body>
+<h1>offsite-backup v{VERSION}</h1>
 <pre id="log">loading...</pre>
 <script>
 (function() {{
@@ -281,6 +286,7 @@ def main():
     if not os.path.exists(script_path):
         raise SystemExit(f"missing script: {script_path}")
 
+    print(f"Starting offsite-backup-server v{VERSION} on {HOST}:{PORT}")
     server = ThreadingHTTPServer((HOST, PORT), Handler)
     backup_thread = threading.Thread(target=run_backup, args=(script_path, server), daemon=True)
     backup_thread.start()
