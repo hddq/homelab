@@ -1,7 +1,6 @@
 homelab:
   metallb:
     myASN: 65001
-    peerASN: 65000
     peerAddress: 192.168.20.1
     addressPool:
       - 192.168.41.10-192.168.41.250
