@@ -2,14 +2,12 @@
 
 import os
 import pty
-import re
 import select
 import subprocess
 import sys
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse, parse_qs
-
 
 HOST = "0.0.0.0"
 PORT = 8787
@@ -18,113 +16,33 @@ POLL_SECONDS = 1
 READ_SIZE = 1024
 MAX_HTTP_LINES = 5000
 TRIM_MARKER = "[older output trimmed]"
-RESTIC_PROGRESS_RE = re.compile(
-    r"^\[\d+:\d+(?::\d+)?\]\s+"
-    r"(?:\d+(?:\.\d+)?%\s+)?"
-    r"\d+\s+files\b"
-)
-
+STDOUT_EXCLUDE_PREFIXES = ("/tmp/restic-backup/", "[")
 
 state_lock = threading.Lock()
 state = {
     "lines": [""],
     "row": 0,
     "col": 0,
+    "stdout_lines": [],
 }
 
 
 def build_raw_text():
     with state_lock:
         lines = list(state["lines"])
-
     return "\n".join(lines) + "\n"
-
-
-class StdoutSanitizer:
-    def __init__(self):
-        self.line = ""
-        self.pending_cr = False
-        self.esc = False
-        self.csi = None
-
-    def emit_line(self):
-        line = self.line.rstrip()
-        if self.should_emit(line):
-            sys.stdout.write(line + "\n")
-            sys.stdout.flush()
-        self.line = ""
-
-    def should_emit(self, line):
-        stripped = line.strip()
-        if stripped.startswith("/tmp/restic-backup/"):
-            return False
-        if RESTIC_PROGRESS_RE.match(stripped):
-            return False
-        return True
-
-    def feed(self, data):
-        chunk = data.decode("utf-8", errors="replace")
-
-        for ch in chunk:
-            if self.pending_cr:
-                self.pending_cr = False
-                if ch == "\n":
-                    self.emit_line()
-                    continue
-
-                self.line = ""
-
-            if self.esc:
-                if self.csi is None:
-                    if ch == "[":
-                        self.csi = ""
-                    else:
-                        self.esc = False
-                else:
-                    if "@" <= ch <= "~":
-                        self.esc = False
-                        self.csi = None
-                    else:
-                        self.csi += ch
-                continue
-
-            if ch == "\x1b":
-                self.esc = True
-                self.csi = None
-                continue
-
-            if ch == "\r":
-                self.pending_cr = True
-                continue
-
-            if ch == "\n":
-                self.emit_line()
-                continue
-
-            if ch == "\b":
-                self.line = self.line[:-1]
-                continue
-
-            self.line += ch
-
-    def finish(self):
-        if self.pending_cr:
-            self.pending_cr = False
-            self.line = ""
-        if self.line:
-            self.emit_line()
 
 
 def build_html():
     return f"""<!doctype html>
 <html>
 <head>
-  <meta charset=\"utf-8\">
+  <meta charset="utf-8">
   <title>offsite-backup</title>
   <style>body {{ background: black; color: white; }}</style>
 </head>
 <body>
-<pre id=\"log\">loading...</pre>
+<pre id="log">loading...</pre>
 <script>
 (function() {{
   const pre = document.getElementById('log');
@@ -187,13 +105,11 @@ def trim_http_lines(state_data):
     overflow = len(lines) - MAX_HTTP_LINES
     if overflow <= 0:
         return
-
     del lines[:overflow]
     if lines:
         lines[0] = TRIM_MARKER
     else:
         lines.append(TRIM_MARKER)
-
     state_data["row"] = max(0, state_data["row"] - overflow)
 
 
@@ -201,7 +117,7 @@ def put_char(lines, row, col, ch):
     ensure_line(lines, row)
     line = lines[row]
     if col < len(line):
-        line = line[:col] + ch + line[col + 1 :]
+        line = line[:col] + ch + line[col + 1:]
     else:
         line = line + (" " * (col - len(line))) + ch
     lines[row] = line
@@ -218,19 +134,12 @@ def handle_erase_in_line(state_data, mode):
     col = state_data["col"]
     ensure_line(lines, row)
     line = lines[row]
-
     if mode == 2:
         lines[row] = ""
-        return
-
-    if mode == 1:
-        if col <= 0:
-            lines[row] = line
-        else:
-            lines[row] = (" " * col) + line[col:]
-        return
-
-    lines[row] = line[:col]
+    elif mode == 1:
+        lines[row] = (" " * col) + line[col:]
+    else:
+        lines[row] = line[:col]
 
 
 def handle_erase_display(state_data, mode):
@@ -248,13 +157,10 @@ def apply_csi(state_data, csi):
     values = []
     if params:
         for part in params.split(";"):
-            if part == "":
+            try:
+                values.append(int(part) if part else 0)
+            except ValueError:
                 values.append(0)
-            else:
-                try:
-                    values.append(int(part))
-                except ValueError:
-                    values.append(0)
     else:
         values = [0]
 
@@ -272,8 +178,6 @@ def apply_csi(state_data, csi):
         handle_erase_in_line(state_data, value)
     elif final == "J":
         handle_erase_display(state_data, value)
-    elif final == "m":
-        return
 
 
 def process_chunk(state_data, chunk, parser_state):
@@ -306,6 +210,9 @@ def process_chunk(state_data, chunk, parser_state):
             continue
 
         if ch == "\n":
+            committed = state_data["lines"][state_data["row"]].rstrip()
+            if not any(committed.startswith(p) for p in STDOUT_EXCLUDE_PREFIXES):
+                state_data["stdout_lines"].append(committed)
             state_data["row"] += 1
             state_data["col"] = 0
             ensure_line(state_data["lines"], state_data["row"])
@@ -326,7 +233,6 @@ def process_chunk(state_data, chunk, parser_state):
 def run_backup(script_path, server):
     master_fd, slave_fd = pty.openpty()
     process = None
-    stdout_sanitizer = StdoutSanitizer()
 
     try:
         try:
@@ -348,22 +254,25 @@ def run_backup(script_path, server):
                     data = os.read(master_fd, READ_SIZE)
                 except OSError:
                     break
-
                 if not data:
                     break
-
-                stdout_sanitizer.feed(data)
                 chunk = data.decode("utf-8", errors="replace")
                 with state_lock:
                     process_chunk(state, chunk, parser_state)
-
             if process.poll() is not None and not ready:
                 break
     finally:
-        stdout_sanitizer.finish()
         os.close(master_fd)
         if process is not None:
             process.wait()
+
+        with state_lock:
+            stdout_lines = list(state["stdout_lines"])
+
+        for line in stdout_lines:
+            sys.stdout.write(line + "\n")
+        sys.stdout.flush()
+
         server.shutdown()
 
 
