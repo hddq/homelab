@@ -22,21 +22,29 @@ misconfigurations:
       - "longhorn/charts/longhorn/templates/clusterrole.yaml"
 
   - id: KSV-0118
-    statement: Third-party Helm charts often use default security contexts; fixing requires specific chart support in values.yaml.
+    statement: Third-party Helm charts often use default security contexts; fixing requires specific chart support in values.yaml. frr-k8s uses default contexts for several helper containers.
     paths:
       - "longhorn/charts/longhorn/templates/daemonset-sa.yaml"
       - "longhorn/charts/longhorn/templates/deployment-ui.yaml"
       - "metallb/charts/metallb/templates/speaker.yaml"
+      - "metallb/charts/metallb/charts/frr-k8s/templates/controller.yaml"
+      - "metallb/charts/metallb/charts/frr-k8s/templates/status-cleaner.yaml"
       - "cert-manager-webhook/charts/cert-manager-duckdns-webhook/templates/deployment.yaml"
+      - "charts/metallb/templates/speaker.yaml"
+      - "charts/metallb/charts/frr-k8s/templates/controller.yaml"
+      - "charts/metallb/charts/frr-k8s/templates/status-cleaner.yaml"
 
   - id: KSV-0014
-    statement: Components (Longhorn, MetalLB) may require a writable root FS for legacy reasons or specific operations.
+    statement: Components (Longhorn, MetalLB, frr-k8s) may require a writable root FS for legacy reasons or specific operations (e.g. copying scripts/binaries to shared volumes).
     paths:
       - "longhorn/charts/longhorn/templates/deployment-driver.yaml"
       - "longhorn/charts/longhorn/templates/deployment-ui.yaml"
       - "metallb/charts/metallb/templates/speaker.yaml"
+      - "metallb/charts/metallb/charts/frr-k8s/templates/controller.yaml"
       - "cert-manager-webhook/charts/cert-manager-duckdns-webhook/templates/deployment.yaml"
       - "longhorn/charts/longhorn/templates/daemonset-sa.yaml"
+      - "charts/metallb/templates/speaker.yaml"
+      - "charts/metallb/charts/frr-k8s/templates/controller.yaml"
 
   - id: KSV-0045
     statement: Longhorn roles require broad permissions to manage storage resources, volumes, and their lifecycle.
@@ -59,33 +67,43 @@ misconfigurations:
     statement: MetalLB, Cert-Manager, and Longhorn manage their own mutating/validating webhooks for configuration and validation.
     paths:
       - "metallb/charts/metallb/templates/rbac.yaml"
+      - "metallb/charts/metallb/charts/frr-k8s/templates/rbac.yaml"
       - "cert-manager/charts/cert-manager/templates/cainjector-rbac.yaml"
       - "longhorn/charts/longhorn/templates/clusterrole.yaml"
+      - "charts/metallb/templates/rbac.yaml"
+      - "charts/metallb/charts/frr-k8s/templates/rbac.yaml"
 
   - id: KSV-0005
-    statement: MetalLB speaker requires low-level host access for network stack operations and inter-process communication on the node.
+    statement: MetalLB speaker and frr-k8s controller require low-level host access (SYS_ADMIN) for network stack operations and inter-process communication on the node.
     paths:
       - "metallb/charts/metallb/templates/speaker.yaml"
+      - "metallb/charts/metallb/charts/frr-k8s/templates/controller.yaml"
+      - "charts/metallb/templates/speaker.yaml"
+      - "charts/metallb/charts/frr-k8s/templates/controller.yaml"
 
   - id: KSV-0009
-    statement: MetalLB speaker MUST use hostNetwork to respond to ARP/NDP requests on node interfaces and manage BGP sessions.
+    statement: MetalLB speaker and frr-k8s components MUST use hostNetwork to respond to ARP/NDP requests on node interfaces and manage BGP sessions.
     paths:
       - "metallb/charts/metallb/templates/speaker.yaml"
+      - "metallb/charts/metallb/charts/frr-k8s/templates/controller.yaml"
+      - "metallb/charts/metallb/charts/frr-k8s/templates/status-cleaner.yaml"
+      - "monitoring/node-exporter/charts/prometheus-node-exporter/templates/daemonset.yaml"
+      - "charts/metallb/templates/speaker.yaml"
+      - "charts/metallb/charts/frr-k8s/templates/controller.yaml"
+      - "charts/metallb/charts/frr-k8s/templates/status-cleaner.yaml"
 
   - id: KSV-0119
-    statement: AppArmor profiles are not standard across all k8s distributions or nodes; missing in many third-party Helm charts.
+    statement: MetalLB speaker and frr-k8s controller require NET_RAW to send/receive raw BGP/ARP packets. AppArmor profiles are not standard across all k8s distributions.
     paths:
       - "metallb/charts/metallb/templates/speaker.yaml"
+      - "metallb/charts/metallb/charts/frr-k8s/templates/controller.yaml"
+      - "charts/metallb/templates/speaker.yaml"
+      - "charts/metallb/charts/frr-k8s/templates/controller.yaml"
 
   - id: KSV-0017
     statement: Longhorn components require privileged access to manage physical disks, mount points, and block devices on the host nodes.
     paths:
       - "longhorn/charts/longhorn/templates/daemonset-sa.yaml"
-
-  - id: KSV-0009
-    statement: node-exporter must use hostNetwork to expose node metrics from the host namespace.
-    paths:
-      - "monitoring/node-exporter/charts/prometheus-node-exporter/templates/daemonset.yaml"
 
   - id: KSV-0010
     statement: node-exporter uses hostPID to observe host process and kernel metrics as designed.
