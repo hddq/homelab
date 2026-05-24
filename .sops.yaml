@@ -1,3 +1,6 @@
+stores:
+  yaml:
+    indent: 2
 creation_rules:
   - path_regex: .*(secret|secrets)\.yaml$
     encrypted_regex: ^(data|stringData)$
