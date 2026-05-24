@@ -4,7 +4,7 @@ metadata:
   name: openwrt-router
 spec:
   myASN: {{ .Values.homelab.metallb.myASN }}
-  dynamicASN: "external"
+  peerASN: {{ .Values.homelab.metallb.peerASN }}
   peerAddress: {{ .Values.homelab.metallb.peerAddress }}
 ---
 apiVersion: metallb.io/v1beta1
