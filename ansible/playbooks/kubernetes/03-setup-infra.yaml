@@ -10,6 +10,7 @@
     env_deployment_environment: "{{ hostvars[env_seed_host]['deployment_environment'] | default('production') }}"
     kubeconfig_path: "{{ playbook_dir }}/../../../{{ hostvars[env_seed_host]['kubeconfig_path'] }}"
     age_sops_key_path: "{{ playbook_dir }}/../../../homelab.key"
+    argocd_repo_secret_path: "{{ playbook_dir }}/../../../infrastructure/argocd/repo-secret.yaml"
     argocd_chart_path: "../../../infrastructure/argocd"
 
   tasks:
@@ -43,6 +44,32 @@
           type: Opaque
           stringData:
             keys.txt: "{{ lookup('ansible.builtin.file', age_sops_key_path) }}"
+        state: present
+      no_log: true
+
+    - name: 🔑 Check if ArgoCD repo secret exists
+      ansible.builtin.stat:
+        path: "{{ argocd_repo_secret_path }}"
+      register: argocd_repo_secret_file
+
+    - name: 🔑 Require ArgoCD repo secret
+      ansible.builtin.fail:
+        msg: "ArgoCD repo secret not found at {{ argocd_repo_secret_path }}"
+      when: not argocd_repo_secret_file.stat.exists
+
+    - name: 🔑 Decrypt ArgoCD repo secret
+      ansible.builtin.command:
+        cmd: sops --decrypt "{{ argocd_repo_secret_path }}"
+      register: argocd_repo_secret_yaml
+      changed_when: false
+      no_log: true
+      environment:
+        SOPS_AGE_KEY_FILE: "{{ age_sops_key_path }}"
+
+    - name: 🔑 Apply ArgoCD repo secret
+      kubernetes.core.k8s:
+        kubeconfig: "{{ kubeconfig_path }}"
+        definition: "{{ argocd_repo_secret_yaml.stdout | from_yaml }}"
         state: present
       no_log: true
 
