@@ -8,6 +8,7 @@
       (dict "group" "admissionregistration.k8s.io" "kind" "ValidatingWebhookConfiguration" "name" "infrastructure-cert-manager-webhook" "jqPathExpressions" (list ".webhooks[]?.clientConfig.caBundle"))
       (dict "group" "apiextensions.k8s.io" "kind" "CustomResourceDefinition" "jqPathExpressions" (list ".spec.conversion.webhook.clientConfig.caBundle"))
     ))
+    (dict "name" "cert-manager-webhook-secrets" "path" "infrastructure/cert-manager-webhook-secrets" "namespace" "cert-manager" "syncWave" "-2" "syncOptions" (list "CreateNamespace=true"))
     (dict "name" "cert-manager-webhook" "path" "infrastructure/cert-manager-webhook" "namespace" "cert-manager" "syncWave" "-1" "syncOptions" (list "CreateNamespace=true" "SkipDryRunOnMissingResource=true" "RespectIgnoreDifferences=true") "ignoreDifferences" (list
       (dict "group" "apiregistration.k8s.io" "kind" "APIService" "name" "v1alpha1.cert-manager.webhook.duckdns.org" "jqPathExpressions" (list ".spec.caBundle"))
     ))
