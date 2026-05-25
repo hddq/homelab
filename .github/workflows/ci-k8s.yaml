@@ -66,6 +66,8 @@ jobs:
 
       - name: Run kubeconform
         run: |
+          mapfile -t manifest_files < <(bash scripts/ci/kubeconform-files.sh apps .ci/rendered)
+
           docker run --rm \
             -v "$PWD:/work" \
             -w /work \
@@ -75,7 +77,7 @@ jobs:
             -ignore-filename-pattern 'Chart.yaml|values.*\.yaml|.trivyignore.yaml' \
             -schema-location default \
             -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
-            apps/ .ci/rendered/
+            "${manifest_files[@]}"
 
   trivy:
     name: 🛡️ Security Scan (Trivy)
