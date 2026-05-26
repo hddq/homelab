@@ -14,6 +14,7 @@
     ))
     (dict "name" "cert-manager-issuers" "path" "infrastructure/cert-manager-issuers" "namespace" "cert-manager" "syncWave" "0" "syncOptions" (list "CreateNamespace=true" "SkipDryRunOnMissingResource=true"))
     (dict "name" "metallb" "path" "infrastructure/metallb" "namespace" "metallb-system" "syncOptions" (list "CreateNamespace=true") "helmValueFiles" (list "values.yaml" (printf "values-%s.yaml" $environment)))
+    (dict "name" "longhorn-secrets" "path" "infrastructure/longhorn-secrets" "namespace" "longhorn-system" "syncWave" "-1" "syncOptions" (list "CreateNamespace=true"))
     (dict "name" "longhorn" "path" "infrastructure/longhorn" "namespace" "longhorn-system" "syncOptions" (list "CreateNamespace=true") "helmValueFiles" (list "values.yaml" (printf "values-%s.yaml" $environment)))
     (dict "name" "argocd" "path" "infrastructure/argocd" "namespace" "argocd" "syncOptions" (list "ServerSideApply=true") "helmValueFiles" (list "values.yaml" (printf "values-%s.yaml" $environment)))
     (dict "name" "metrics-server" "path" "infrastructure/metrics-server" "namespace" "kube-system")
