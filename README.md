@@ -28,7 +28,7 @@ The goal is to never touch a server manually — if it's not in Git, it doesn't 
 | Load Balancer      | MetalLB (BGP)                  | Bare-metal LoadBalancer IPs via BGP to OpenWRT |
 | Storage            | Longhorn                       | Distributed block storage with replication     |
 | TLS                | cert-manager + DuckDNS webhook | Wildcard Let's Encrypt cert via DNS-01         |
-| Secrets            | Bitnami Sealed Secrets         | Encrypted secrets safe to commit to Git        |
+| Secrets            | SOPS + age + ksops             | Encrypted secrets safe to commit to Git        |
 | Monitoring         | VictoriaMetrics Stack          | Metrics collection, storage, alerting and dashboards   |
 | Dev environment    | Nix flake                      | Reproducible shell with all tools pinned       |
 | Dependency updates | Renovate                       | Automated PRs for image/chart/k3s updates      |
@@ -66,7 +66,7 @@ MetalLB IP pool: 192.168.42.10 - 192.168.42.250
 
 ### Secret Management
 
-Secrets are encrypted with `kubeseal` using the cluster's public key and stored as `SealedSecret` manifests in Git. The controller decrypts them at runtime — no plaintext secrets ever touch the repo.
+Secrets are encrypted with `sops` using an `age` key and stored as encrypted manifests in Git. ArgoCD uses the `ksops` plugin to decrypt them at runtime — no plaintext secrets ever touch the repo.
 
 ---
 
@@ -105,7 +105,7 @@ Each environment has its own `group_vars` under `inventory/<env>/group_vars/`.
 - Production should keep `git_branch: master`.
 - Staging can set a default branch there, but you can also override it per run with `-e git_branch=<branch>`.
 
-> 🔑 **Before you start:** Make sure the Sealed Secrets master key backup is somewhere safe and accessible. Without it, all `SealedSecret` manifests in the repo are unrecoverable after step 5.
+> 🔑 **Before you start:** Make sure the SOPS `age` private key backup is somewhere safe and accessible. Without it, all encrypted manifests in the repo are unrecoverable.
 
 **Step 1 — Enter dev shell:**
 
@@ -135,13 +135,13 @@ ansible-playbook -i inventory/production/hosts.ini playbooks/kubernetes/02-k3s-i
 export KUBECONFIG=$(pwd)/../kubeconfig-production
 ```
 
-**Step 5 — Setup Infrastructure (Sealed Secrets + ArgoCD):**
+**Step 5 — Setup Infrastructure (SOPS/age + ArgoCD):**
 
 ```bash
 ansible-playbook -i inventory/production/hosts.ini playbooks/kubernetes/03-setup-infra.yaml
 ```
 
-> ⚠️ This installs both Sealed Secrets and ArgoCD, and restores the master key if present. This must happen **before** ArgoCD starts syncing from private repos.
+> ⚠️ This installs ArgoCD and the `age` key for `ksops`. This must happen **before** ArgoCD starts syncing from private repos.
 
 **Step 6 — Label Longhorn nodes:**
 
@@ -206,4 +206,4 @@ direnv allow
 
 The `shellHook` sets up the Python venv, installs Ansible dependencies and collections, and configures `pre-commit`.
 
-Includes: `kubectl`, `helm`, `kubeseal`, `argocd`, `kubeconform`, `trivy`, `pluto`, `gitleaks`, `yamllint`, `shellcheck`, `kubectx`, `pre-commit`, and the full Ansible stack in a venv.
+Includes: `kubectl`, `helm`, `sops`, `age`, `argocd`, `kubeconform`, `trivy`, `pluto`, `gitleaks`, `yamllint`, `shellcheck`, `kubectx`, `pre-commit`, and the full Ansible stack in a venv.
