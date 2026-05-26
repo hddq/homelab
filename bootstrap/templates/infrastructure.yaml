@@ -20,6 +20,7 @@
     (dict "name" "metrics-server" "path" "infrastructure/metrics-server" "namespace" "kube-system")
     (dict "name" "traefik" "path" "infrastructure/traefik" "namespace" "traefik" "syncOptions" (list "CreateNamespace=true") "helmValueFiles" (list "values.yaml" (printf "values-%s.yaml" $environment)))
     (dict "name" "monitoring-vm-single" "path" "infrastructure/monitoring/vm-single" "namespace" "monitoring" "syncWave" "0" "syncOptions" (list "CreateNamespace=true"))
+    (dict "name" "monitoring-alertmanager-secrets" "path" "infrastructure/monitoring/alertmanager-secrets" "namespace" "monitoring" "syncWave" "-1" "syncOptions" (list "CreateNamespace=true"))
     (dict "name" "monitoring-alertmanager" "path" "infrastructure/monitoring/alertmanager" "namespace" "monitoring" "syncWave" "0" "syncOptions" (list "CreateNamespace=true") "helmValueFiles" (list "values.yaml" (printf "values-%s.yaml" $environment)))
     (dict "name" "monitoring-kube-state-metrics" "path" "infrastructure/monitoring/kube-state-metrics" "namespace" "monitoring" "syncWave" "0" "syncOptions" (list "CreateNamespace=true"))
     (dict "name" "monitoring-node-exporter" "path" "infrastructure/monitoring/node-exporter" "namespace" "monitoring" "syncWave" "0" "syncOptions" (list "CreateNamespace=true"))
