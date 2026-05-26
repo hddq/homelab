@@ -24,6 +24,7 @@ longhorn:
     createDefaultDiskLabeledNodes: true
     # kubectl label node NODE_NAME node.longhorn.io/create-default-disk=true
     taintToleration: "node-role.kubernetes.io/control-plane=true:NoSchedule"
+    storageMinimalAvailablePercentage: 10
 
   ingress:
     enabled: false
