@@ -29,6 +29,7 @@
     (dict "name" "monitoring-pve-exporter" "path" "infrastructure/monitoring/pve-exporter" "namespace" "monitoring" "syncWave" "0" "syncOptions" (list "CreateNamespace=true") "helmValueFiles" (list "values.yaml" (printf "values-%s.yaml" $environment)))
     (dict "name" "monitoring-vm-agent" "path" "infrastructure/monitoring/vm-agent" "namespace" "monitoring" "syncWave" "1" "syncOptions" (list "CreateNamespace=true") "helmValueFiles" (list "values.yaml" (printf "values-%s.yaml" $environment)))
     (dict "name" "monitoring-vmalert" "path" "infrastructure/monitoring/vmalert" "namespace" "monitoring" "syncWave" "2" "syncOptions" (list "CreateNamespace=true") "helmValueFiles" (list "values.yaml" (printf "values-%s.yaml" $environment)))
+    (dict "name" "monitoring-grafana-secrets" "path" "infrastructure/monitoring/grafana-secrets" "namespace" "monitoring" "syncWave" "1" "syncOptions" (list "CreateNamespace=true"))
     (dict "name" "monitoring-grafana" "path" "infrastructure/monitoring/grafana" "namespace" "monitoring" "syncWave" "2" "syncOptions" (list "CreateNamespace=true") "helmValueFiles" (list "values.yaml" (printf "values-%s.yaml" $environment)))
 }}
 ---
