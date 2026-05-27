@@ -1,5 +1,5 @@
 ---
-- name: 🚀 Bootstrap Cluster (Sealed Secrets + ArgoCD)
+- name: 🚀 Bootstrap Cluster (SOPS + ArgoCD)
   hosts: localhost
   gather_facts: false
   vars_files:
@@ -9,48 +9,77 @@
     env_git_branch: "{{ git_branch | default(hostvars[env_seed_host]['git_branch'] | default('HEAD')) }}"
     env_deployment_environment: "{{ hostvars[env_seed_host]['deployment_environment'] | default('production') }}"
     kubeconfig_path: "{{ playbook_dir }}/../../../{{ hostvars[env_seed_host]['kubeconfig_path'] }}"
-    master_key_path: "../../../sealed-secrets-master-key.yaml"
+    age_sops_key_path: "{{ playbook_dir }}/../../../homelab.key"
+    argocd_repo_secret_path: "{{ playbook_dir }}/../../../infrastructure/argocd/repo-secret.yaml"
     argocd_chart_path: "../../../infrastructure/argocd"
-    sealed_secrets_chart_path: "../../../infrastructure/sealed-secrets"
 
   tasks:
-    - name: 📁 Ensure kube-system namespace exists
+    - name: 📁 Ensure argocd namespace exists
       kubernetes.core.k8s:
         kubeconfig: "{{ kubeconfig_path }}"
-        name: kube-system
+        name: argocd
         api_version: v1
         kind: Namespace
         state: present
 
-    - name: 🔑 Check if Sealed Secrets master key exists
+    - name: 🔑 Check if SOPS age key exists
       ansible.builtin.stat:
-        path: "{{ master_key_path }}"
-      register: master_key_file
+        path: "{{ age_sops_key_path }}"
+      register: age_sops_key_file
 
-    - name: 🔑 Apply the old master key secret
+    - name: 🔑 Require SOPS age key
+      ansible.builtin.fail:
+        msg: "SOPS age key not found at {{ age_sops_key_path }}"
+      when: not age_sops_key_file.stat.exists
+
+    - name: 🔑 Apply SOPS age key
       kubernetes.core.k8s:
         kubeconfig: "{{ kubeconfig_path }}"
-        src: "{{ master_key_path }}"
+        definition:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: sops-age
+            namespace: argocd
+          type: Opaque
+          stringData:
+            keys.txt: "{{ lookup('ansible.builtin.file', age_sops_key_path) }}"
         state: present
-      when: master_key_file.stat.exists
+      no_log: true
+
+    - name: 🔑 Check if ArgoCD repo secret exists
+      ansible.builtin.stat:
+        path: "{{ argocd_repo_secret_path }}"
+      register: argocd_repo_secret_file
+
+    - name: 🔑 Require ArgoCD repo secret
+      ansible.builtin.fail:
+        msg: "ArgoCD repo secret not found at {{ argocd_repo_secret_path }}"
+      when: not argocd_repo_secret_file.stat.exists
+
+    - name: 🔑 Decrypt ArgoCD repo secret
+      ansible.builtin.command:
+        cmd: sops --decrypt "{{ argocd_repo_secret_path }}"
+      register: argocd_repo_secret_yaml
+      changed_when: false
+      no_log: true
+      environment:
+        SOPS_AGE_KEY_FILE: "{{ age_sops_key_path }}"
+
+    - name: 🔑 Apply ArgoCD repo secret
+      kubernetes.core.k8s:
+        kubeconfig: "{{ kubeconfig_path }}"
+        definition: "{{ argocd_repo_secret_yaml.stdout | from_yaml }}"
+        state: present
+      no_log: true
 
     - name: 📦 Build Helm Dependencies for Infrastructure
       ansible.builtin.command: helm dependency build
       args:
         chdir: "{{ item }}"
       loop:
-        - "{{ sealed_secrets_chart_path }}"
         - "{{ argocd_chart_path }}"
       changed_when: false
-
-    - name: 🔐 Install Sealed Secrets Controller
-      kubernetes.core.helm:
-        name: sealed-secrets
-        chart_ref: "{{ sealed_secrets_chart_path }}"
-        release_namespace: kube-system
-        kubeconfig: "{{ kubeconfig_path }}"
-        wait: true
-        wait_timeout: 10m
 
     - name: ⚓ Install ArgoCD
       kubernetes.core.helm:

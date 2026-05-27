@@ -14,7 +14,8 @@
         python3
         kubectl
         kubernetes-helm
-        kubeseal
+        age
+        sops
         argocd
         yamllint
         kubeconform

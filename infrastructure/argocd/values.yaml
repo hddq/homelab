@@ -6,6 +6,9 @@ argo-cd:
       fsGroup: 999
       seccompProfile:
         type: RuntimeDefault
+  configs:
+    cm:
+      kustomize.buildOptions: --enable-alpha-plugins --enable-exec
   server:
     ingress:
       enabled: false
@@ -18,6 +21,50 @@ argo-cd:
         drop:
           - ALL
   repoServer:
+    env:
+      - name: XDG_CONFIG_HOME
+        value: /home/argocd/.config
+      - name: SOPS_AGE_KEY_FILE
+        value: /home/argocd/.config/sops/age/keys.txt
+    initContainers:
+      - name: install-ksops
+        image: viaductoss/ksops:v4.5.1
+        imagePullPolicy: IfNotPresent
+        command:
+          - /usr/local/bin/ksops
+        args:
+          - install
+          - --with-kustomize
+          - /custom-tools
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 999
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          seccompProfile:
+            type: RuntimeDefault
+          capabilities:
+            drop:
+              - ALL
+        volumeMounts:
+          - name: custom-tools
+            mountPath: /custom-tools
+    volumeMounts:
+      - name: custom-tools
+        mountPath: /usr/local/bin/kustomize
+        subPath: kustomize
+      - name: custom-tools
+        mountPath: /usr/local/bin/ksops
+        subPath: ksops
+      - name: sops-age
+        mountPath: /home/argocd/.config/sops/age
+        readOnly: true
+    volumes:
+      - name: custom-tools
+        emptyDir: {}
+      - name: sops-age
+        secret:
+          secretName: sops-age
     containerSecurityContext:
       readOnlyRootFilesystem: true
       allowPrivilegeEscalation: false

@@ -6,3 +6,5 @@ ansible/secrets.yaml
 .direnv
 *.tgz
 sealed-secrets-master-key.yaml
+homelab.key
+.decrypted~*secret.yaml
