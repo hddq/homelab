@@ -28,7 +28,7 @@ argo-cd:
         value: /home/argocd/.config/sops/age/keys.txt
     initContainers:
       - name: install-ksops
-        image: viaductoss/ksops:v4.5.1
+        image: viaductoss/ksops:v4.5.1@sha256:4def9fdd4e2f850265740ebe9592c5455d19b76891e88e602df8b52d74b95334
         imagePullPolicy: IfNotPresent
         command:
           - /usr/local/bin/ksops
