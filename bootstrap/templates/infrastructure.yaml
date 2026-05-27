@@ -16,6 +16,7 @@
     (dict "name" "metallb" "path" "infrastructure/metallb" "namespace" "metallb-system" "syncOptions" (list "CreateNamespace=true") "helmValueFiles" (list "values.yaml" (printf "values-%s.yaml" $environment)))
     (dict "name" "longhorn-secrets" "path" "infrastructure/longhorn-secrets" "namespace" "longhorn-system" "syncWave" "-1" "syncOptions" (list "CreateNamespace=true"))
     (dict "name" "longhorn" "path" "infrastructure/longhorn" "namespace" "longhorn-system" "syncOptions" (list "CreateNamespace=true") "helmValueFiles" (list "values.yaml" (printf "values-%s.yaml" $environment)))
+    (dict "name" "argocd-secrets" "path" "infrastructure/argocd-secrets" "namespace" "argocd" "syncWave" "-1" "syncOptions" (list "CreateNamespace=true"))
     (dict "name" "argocd" "path" "infrastructure/argocd" "namespace" "argocd" "syncOptions" (list "ServerSideApply=true") "helmValueFiles" (list "values.yaml" (printf "values-%s.yaml" $environment)))
     (dict "name" "metrics-server" "path" "infrastructure/metrics-server" "namespace" "kube-system")
     (dict "name" "traefik" "path" "infrastructure/traefik" "namespace" "traefik" "syncOptions" (list "CreateNamespace=true") "helmValueFiles" (list "values.yaml" (printf "values-%s.yaml" $environment)))

@@ -10,7 +10,7 @@
     env_deployment_environment: "{{ hostvars[env_seed_host]['deployment_environment'] | default('production') }}"
     kubeconfig_path: "{{ playbook_dir }}/../../../{{ hostvars[env_seed_host]['kubeconfig_path'] }}"
     age_sops_key_path: "{{ playbook_dir }}/../../../homelab.key"
-    argocd_repo_secret_path: "{{ playbook_dir }}/../../../infrastructure/argocd/repo-secret.yaml"
+    argocd_repo_secret_path: "{{ playbook_dir }}/../../../infrastructure/argocd-secrets/secret.yaml"
     argocd_chart_path: "../../../infrastructure/argocd"
 
   tasks:
