@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-VERSION="v3.8.5"
+VERSION="v3.8.6"
 
 echo -e "Offsite Backup Script ${VERSION}"
 
@@ -84,7 +84,7 @@ mount_pool_datasets() {
     zfs snapshot -r "${pool}@${SNAP_NAME}"
 
     local dataset_list
-    dataset_list=$(zfs list -r -H -o name "$pool" | grep -v "/\.")
+    dataset_list=$(zfs list -r -H -o name -t filesystem "$pool" | grep -v "/\.")
 
     for item in "${BLACKLISTED_DATASETS[@]}"; do
         dataset_list=$(echo "$dataset_list" | grep -v "^${item}")
