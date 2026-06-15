@@ -1,0 +1,132 @@
+---
+# ─────────────────────────────────────────────────────────────────────────────
+# Provision LineageOS Build VM on Proxmox
+# ─────────────────────────────────────────────────────────────────────────────
+- name: 🏗️ Provision New VM on Proxmox
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - "../../secrets.yaml"
+    - "../../vars/proxmox_infra.yaml"
+    - "../../vars/lineage_vm.yaml"
+
+  tasks:
+    - name: 🐑 Stage 1 - Linked Clone to Shared Storage
+      community.proxmox.proxmox_kvm:
+        api_host: "{{ proxmox_api_host }}"
+        api_user: "{{ proxmox_api_user }}"
+        api_token_id: "{{ proxmox_api_token_id }}"
+        api_token_secret: "{{ proxmox_api_token_secret }}"
+        validate_certs: false
+        node: "{{ template_node }}"
+        clone: yes
+        vmid: "{{ template_id }}"
+        newid: "{{ item.vmid }}"
+        name: "{{ item.name }}"
+        target: "{{ item.node }}"
+        full: no
+        timeout: 500
+        state: present
+      loop: "{{ lineage_vms }}"
+
+    - name: 🚚 Stage 1.1 - Move Disks to Local Storage
+      community.proxmox.proxmox_disk:
+        api_host: "{{ proxmox_api_host }}"
+        api_user: "{{ proxmox_api_user }}"
+        api_token_id: "{{ proxmox_api_token_id }}"
+        api_token_secret: "{{ proxmox_api_token_secret }}"
+        validate_certs: false
+        vmid: "{{ item.0.vmid }}"
+        disk: "{{ item.1 }}"
+        target_storage: "{{ item.0.storage }}"
+        delete_moved: true
+        state: moved
+      loop: "{{ lineage_vms | product(['scsi0', 'ide2', 'efidisk0']) | list }}"
+
+    - name: 💉 Stage 2 - Inject Cloud-Init Config
+      community.proxmox.proxmox_kvm:
+        api_host: "{{ proxmox_api_host }}"
+        api_user: "{{ proxmox_api_user }}"
+        api_token_id: "{{ proxmox_api_token_id }}"
+        api_token_secret: "{{ proxmox_api_token_secret }}"
+        validate_certs: false
+        node: "{{ item.node }}"
+        vmid: "{{ item.vmid }}"
+        state: present
+        update: yes
+        ciuser: "{{ vm_user }}"
+        sshkeys: "{{ vm_ssh_key }}"
+        update_unsafe: true
+        net:
+          net0: "virtio,bridge=vmbr0,tag={{ item.vlan }}"
+        ipconfig:
+          ipconfig0: "ip={{ item.ip }}/24,gw={{ item.gateway }}"
+        nameservers: "{{ item.dns }}"
+        memory: "{{ item.ram }}"
+        balloon: "{{ item.balloon }}"
+        cores: "{{ item.cores }}"
+      loop: "{{ lineage_vms }}"
+
+    - name: 💿 Stage 3 - Resize Disk
+      community.proxmox.proxmox_disk:
+        api_host: "{{ proxmox_api_host }}"
+        api_user: "{{ proxmox_api_user }}"
+        api_token_id: "{{ proxmox_api_token_id }}"
+        api_token_secret: "{{ proxmox_api_token_secret }}"
+        validate_certs: false
+        vmid: "{{ item.vmid }}"
+        disk: "scsi0"
+        size: "{{ item.disk }}"
+        state: resized
+      loop: "{{ lineage_vms }}"
+
+    - name: 🛡️ Stage 4 - Configure Disk Options
+      community.proxmox.proxmox_disk:
+        api_host: "{{ proxmox_api_host }}"
+        api_user: "{{ proxmox_api_user }}"
+        api_token_id: "{{ proxmox_api_token_id }}"
+        api_token_secret: "{{ proxmox_api_token_secret }}"
+        validate_certs: false
+        vmid: "{{ item.vmid }}"
+        disk: "scsi0"
+        backup: false
+        replicate: false
+        iothread: true
+        discard: "on"
+        state: present
+      loop: "{{ lineage_vms }}"
+
+    - name: 🛑 Stage 4.1 - Disable ZFS Sync for VM Disk
+      ansible.builtin.command: "zfs set sync=disabled rpool/data/vm-{{ item.vmid }}-disk-0"
+      delegate_to: "{{ proxmox_api_host }}"
+      remote_user: root
+      loop: "{{ lineage_vms }}"
+
+    - name: 🚀 Stage 5 - Start VM
+      community.proxmox.proxmox_kvm:
+        api_host: "{{ proxmox_api_host }}"
+        api_user: "{{ proxmox_api_user }}"
+        api_token_id: "{{ proxmox_api_token_id }}"
+        api_token_secret: "{{ proxmox_api_token_secret }}"
+        validate_certs: false
+        node: "{{ item.node }}"
+        vmid: "{{ item.vmid }}"
+        state: started
+      loop: "{{ lineage_vms }}"
+
+    - name: ⏳ Stage 6 - Wait for SSH
+      ansible.builtin.wait_for:
+        host: "{{ item.ip }}"
+        port: 22
+        delay: 15
+        timeout: 300
+        state: started
+      loop: "{{ lineage_vms }}"
+
+    - name: 📝 Stage 7 - Update inventory file
+      ansible.builtin.lineinfile:
+        path: "{{ playbook_dir }}/../../inventory/production/hosts.ini"
+        insertafter: '\[lineage\]'
+        line: "{{ item.ip }} ansible_user={{ vm_user }}"
+        state: present
+      loop: "{{ lineage_vms }}"

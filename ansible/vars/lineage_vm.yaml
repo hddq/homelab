@@ -1,0 +1,42 @@
+---
+# Proxmox Template Settings
+template_id: 299
+template_node: "z690"
+
+# VM Settings
+vm_user: "hddq"
+vm_ssh_key: "{{ lookup('file', '~/.ssh/hddq-ssh.pub') }}"
+
+# LineageOS Builder VM Configuration
+lineage_vms:
+  - name: "lineage-builder"
+    vmid: 700
+    node: "z690"
+    ram: 32768
+    balloon: 32768
+    cores: 8
+    disk: "60G"
+    storage: "local-zfs"
+    ip: "192.168.20.15"
+    gateway: "192.168.20.1"
+    vlan: 20
+    dns: "192.168.40.11 192.168.40.12"
+
+# Build Environment Variables
+build_user: "hddq"
+git_user_name: "hddq"
+git_user_email: "125512521+hddq@users.noreply.github.com"
+
+# ccache Configuration
+ccache_enabled: true
+ccache_dir: "/home/{{ build_user }}/.ccache"
+ccache_max_size: "50G"
+
+# iSCSI Settings
+iscsi_portal: "192.168.20.12"
+iscsi_iqn: "iqn.2005-10.org.freenas.ctl:android"
+iscsi_filesystem: "ext4"
+iscsi_mountpoint: "/home/{{ build_user }}/android"
+
+iscsi_out_iqn: "iqn.2005-10.org.freenas.ctl:android-out"
+iscsi_out_mountpoint: "/home/{{ build_user }}/android-out"

@@ -1,0 +1,284 @@
+---
+# ─────────────────────────────────────────────────────────────────────────────
+# Configure LineageOS build environment and iSCSI disk inside the VM
+# ─────────────────────────────────────────────────────────────────────────────
+- name: 🔧 Configure LineageOS build environment
+  hosts: "{{ lineage_vms[0].ip }}"
+  gather_facts: true
+  become: true
+  vars_files:
+    - "../../secrets.yaml"
+    - "../../vars/proxmox_infra.yaml"
+    - "../../vars/lineage_vm.yaml"
+
+  tasks:
+    # ── APT updates & deps ────────────────────────────────────────────────
+    - name: 🔄 Update apt cache and upgrade packages
+      ansible.builtin.apt:
+        update_cache: yes
+        upgrade: dist
+        cache_valid_time: 3600
+
+    - name: 📦 Install LineageOS build packages and open-iscsi
+      ansible.builtin.apt:
+        name:
+          - bc
+          - bison
+          - build-essential
+          - ccache
+          - curl
+          - flex
+          - g++-multilib
+          - gcc-multilib
+          - git
+          - git-lfs
+          - gnupg
+          - gperf
+          - imagemagick
+          - lib32readline-dev
+          - lib32z1-dev
+          - libelf-dev
+          - lz4
+          - libsdl1.2-dev
+          - libssl-dev
+          - libxml2
+          - libxml2-utils
+          - lzop
+          - pngcrush
+          - rsync
+          - schedtool
+          - squashfs-tools
+          - xsltproc
+          - zip
+          - zlib1g-dev
+          - python3
+          - open-iscsi
+          - lsscsi
+          - protobuf-compiler
+          - python3-protobuf
+          - libdw-dev
+          - xxd
+          - libgnutls28-dev
+          - qemu-guest-agent
+          - tmux
+        state: present
+
+    - name: 🚀 Enable and start qemu-guest-agent
+      ansible.builtin.systemd:
+        name: qemu-guest-agent
+        enabled: true
+        state: started
+
+    # ── iSCSI Configuration ──────────────────────────────────────────────
+    - name: 🔌 Discover iSCSI target
+      ansible.builtin.command:
+        cmd: "iscsiadm -m discovery -t sendtargets -p {{ iscsi_portal }}"
+      register: iscsi_discovery
+      changed_when: false
+
+    - name: 🔌 Login to iSCSI targets
+      ansible.builtin.command:
+        cmd: "iscsiadm -m node -T {{ item.iqn }} -p {{ iscsi_portal }} --login"
+      register: iscsi_login
+      changed_when: "'successful' in iscsi_login.stdout | default('')"
+      failed_when:
+        - iscsi_login.rc != 0
+        - "'already present' not in iscsi_login.stderr | default('')"
+      loop:
+        - {iqn: "{{ iscsi_iqn }}", mountpoint: "{{ iscsi_mountpoint }}"}
+        - {iqn: "{{ iscsi_out_iqn }}", mountpoint: "{{ iscsi_out_mountpoint }}"}
+
+    - name: 🔄 Enable automatic iSCSI reconnect on boot
+      ansible.builtin.command:
+        cmd: "iscsiadm -m node -T {{ item.iqn }} -p {{ iscsi_portal }} -o update -n node.startup -v automatic"
+      changed_when: true
+      loop:
+        - {iqn: "{{ iscsi_iqn }}", mountpoint: "{{ iscsi_mountpoint }}"}
+        - {iqn: "{{ iscsi_out_iqn }}", mountpoint: "{{ iscsi_out_mountpoint }}"}
+
+    - name: 🔍 Wait for iSCSI block devices to appear
+      ansible.builtin.shell:
+        cmd: "ls /dev/disk/by-path/*{{ item.iqn }}* | head -n1"
+      register: iscsi_devices
+      changed_when: false
+      until: iscsi_devices.stdout | length > 0
+      retries: 10
+      delay: 2
+      loop:
+        - {iqn: "{{ iscsi_iqn }}", mountpoint: "{{ iscsi_mountpoint }}"}
+        - {iqn: "{{ iscsi_out_iqn }}", mountpoint: "{{ iscsi_out_mountpoint }}"}
+
+    - name: 💾 Format disks if not already formatted
+      community.general.filesystem:
+        fstype: "{{ iscsi_filesystem }}"
+        dev: "{{ item.stdout }}"
+      loop: "{{ iscsi_devices.results }}"
+      loop_control:
+        label: "{{ item.item.iqn }}"
+
+    - name: 📁 Create mount point directories
+      ansible.builtin.file:
+        path: "{{ item.item.mountpoint }}"
+        state: directory
+        owner: "{{ build_user }}"
+        group: "{{ build_user }}"
+        mode: "0755"
+      loop: "{{ iscsi_devices.results }}"
+      loop_control:
+        label: "{{ item.item.mountpoint }}"
+
+    - name: 📀 Mount iSCSI disks and add to fstab
+      ansible.posix.mount:
+        path: "{{ item.item.mountpoint }}"
+        src: "{{ item.stdout }}"
+        fstype: "{{ iscsi_filesystem }}"
+        opts: "_netdev,nofail"
+        state: mounted
+      loop: "{{ iscsi_devices.results }}"
+      loop_control:
+        label: "{{ item.item.mountpoint }}"
+
+    - name: 🔧 Fix ownership of mount points after mounting
+      ansible.builtin.file:
+        path: "{{ item.item.mountpoint }}"
+        owner: "{{ build_user }}"
+        group: "{{ build_user }}"
+        mode: "0755"
+        state: directory
+      loop: "{{ iscsi_devices.results }}"
+      loop_control:
+        label: "{{ item.item.mountpoint }}"
+
+    # ── Workspace ────────────────────────────────────────────────────────
+    - name: 📁 Create LineageOS source directory
+      ansible.builtin.file:
+        path: "{{ iscsi_mountpoint }}/lineage"
+        state: directory
+        owner: "{{ build_user }}"
+        group: "{{ build_user }}"
+        mode: "0755"
+
+    - name: 📁 Create out directory on out disk
+      ansible.builtin.file:
+        path: "{{ iscsi_out_mountpoint }}/out"
+        state: directory
+        owner: "{{ build_user }}"
+        group: "{{ build_user }}"
+        mode: "0755"
+
+    - name: 📁 Create out directory in LineageOS source
+      ansible.builtin.file:
+        path: "{{ iscsi_mountpoint }}/lineage/out"
+        state: directory
+        owner: "{{ build_user }}"
+        group: "{{ build_user }}"
+        mode: "0755"
+
+    - name: 🔗 Bind mount out directory
+      ansible.posix.mount:
+        path: "{{ iscsi_mountpoint }}/lineage/out"
+        src: "{{ iscsi_out_mountpoint }}/out"
+        fstype: none
+        opts: bind
+        state: mounted
+
+    - name: 🔧 Remove OUT_DIR_COMMON_BASE from .bashrc
+      ansible.builtin.lineinfile:
+        path: "/home/{{ build_user }}/.bashrc"
+        regexp: '^export OUT_DIR_COMMON_BASE='
+        state: absent
+
+    - name: 🔧 Configure OUT_DIR in .bashrc
+      ansible.builtin.lineinfile:
+        path: "/home/{{ build_user }}/.bashrc"
+        line: 'export OUT_DIR="out"'
+        regexp: '^export OUT_DIR='
+        insertafter: EOF
+        state: present
+
+    # ── Repo Tool ────────────────────────────────────────────────────────
+    - name: 📁 Ensure ~/bin exists for repo tool
+      ansible.builtin.file:
+        path: "/home/{{ build_user }}/bin"
+        state: directory
+        owner: "{{ build_user }}"
+        group: "{{ build_user }}"
+        mode: "0755"
+
+    - name: 📥 Install Google repo tool
+      ansible.builtin.get_url:
+        url: https://storage.googleapis.com/git-repo-downloads/repo
+        dest: "/home/{{ build_user }}/bin/repo"
+        owner: "{{ build_user }}"
+        group: "{{ build_user }}"
+        mode: "0755"
+
+    - name: 🔧 Add ~/bin to PATH in .bashrc
+      ansible.builtin.lineinfile:
+        path: "/home/{{ build_user }}/.bashrc"
+        line: 'export PATH="$HOME/bin:$PATH"'
+        insertafter: EOF
+        state: present
+
+    # ── git configuration ────────────────────────────────────────────────
+    - name: ⚙️ Configure git for build user
+      community.general.git_config:
+        name: "{{ item.key }}"
+        value: "{{ item.value }}"
+        scope: global
+      become: true
+      become_user: "{{ build_user }}"
+      become_flags: "-i"
+      loop:
+        - {key: "user.name", value: "{{ git_user_name }}"}
+        - {key: "user.email", value: "{{ git_user_email }}"}
+        - {key: "trailer.changeid.key", value: "Change-Id"}
+
+    - name: 🔗 Initialize git-lfs for build user
+      ansible.builtin.command:
+        cmd: git lfs install
+      become: true
+      become_user: "{{ build_user }}"
+      become_flags: "-i"
+      register: git_lfs_init
+      changed_when: "'already initialized' not in git_lfs_init.stdout | default('')"
+
+    # ── ccache ───────────────────────────────────────────────────────────
+    - name: 🔧 Configure ccache in .bashrc
+      ansible.builtin.blockinfile:
+        path: "/home/{{ build_user }}/.bashrc"
+        marker: "# {mark} ANSIBLE MANAGED - ccache"
+        block: |
+          export USE_CCACHE=1
+          export CCACHE_EXEC=/usr/bin/ccache
+          export CCACHE_DIR={{ ccache_dir }}
+        create: false
+      when: ccache_enabled
+
+    - name: 🚫 Disable ccache in .bashrc
+      ansible.builtin.blockinfile:
+        path: "/home/{{ build_user }}/.bashrc"
+        marker: "# {mark} ANSIBLE MANAGED - ccache"
+        block: |
+          export USE_CCACHE=0
+        create: false
+      when: not ccache_enabled
+
+    - name: 📂 Create ccache directory
+      ansible.builtin.file:
+        path: "{{ ccache_dir }}"
+        state: directory
+        owner: "{{ build_user }}"
+        group: "{{ build_user }}"
+        mode: "0755"
+      when: ccache_enabled
+
+    - name: 📏 Set ccache max size
+      ansible.builtin.command:
+        cmd: "ccache -M {{ ccache_max_size }}"
+      become: true
+      become_user: "{{ build_user }}"
+      become_flags: "-i"
+      register: ccache_size
+      changed_when: "'Set cache size limit to' in ccache_size.stdout"
+      when: ccache_enabled
