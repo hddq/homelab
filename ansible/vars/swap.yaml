@@ -1,0 +1,16 @@
+# ZFS zvol swap configuration
+zvol_swap_enabled: true
+zvol_swap_dataset: "rpool/swap"
+zvol_swap_size: "16G"
+zvol_swap_blocksize: "4K"
+zvol_swap_compression: "zle"
+zvol_swap_checksum: "off"
+zvol_swap_primarycache: "metadata"
+zvol_swap_secondarycache: "none"
+zvol_swap_priority: 25
+
+# zram swap configuration
+zram_swap_enabled: true
+zram_swap_algorithm: "zstd"
+zram_swap_percent: 50
+zram_swap_priority: 100

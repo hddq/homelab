@@ -1,0 +1,132 @@
+---
+- name: Configure swap (ZFS zvol + zram)
+  hosts: proxmox
+  become: true
+  vars_files:
+    - ../../vars/swap.yaml
+
+  tasks:
+    # ── ZFS zvol swap ────────────────────────────────────────────────
+    - name: Setup ZFS zvol swap
+      when: zvol_swap_enabled
+      block:
+        - name: Check if zvol exists
+          ansible.builtin.command: zfs list -H -o volsize {{ zvol_swap_dataset }}
+          register: zvol_check
+          changed_when: false
+          failed_when: false
+
+        - name: Set zvol facts
+          ansible.builtin.set_fact:
+            zvol_exists: "{{ zvol_check.rc == 0 }}"
+            zvol_current_size: "{{ zvol_check.stdout | trim | default('') }}"
+
+        - name: Recreate zvol when size changed
+          when: zvol_exists and zvol_current_size != zvol_swap_size
+          block:
+            - name: Disable swap on existing zvol
+              ansible.builtin.command: swapoff /dev/zvol/{{ zvol_swap_dataset }}
+              changed_when: true
+              failed_when: false
+
+            - name: Destroy existing zvol
+              ansible.builtin.command: zfs destroy {{ zvol_swap_dataset }}
+              changed_when: true
+
+            - name: Mark zvol as absent for recreation
+              ansible.builtin.set_fact:
+                zvol_exists: false
+
+        - name: Create zvol for swap
+          when: not zvol_exists
+          block:
+            - name: Create ZFS zvol
+              ansible.builtin.command: >
+                zfs create -V {{ zvol_swap_size }}
+                -b {{ zvol_swap_blocksize }}
+                -o compression={{ zvol_swap_compression }}
+                -o checksum={{ zvol_swap_checksum }}
+                -o primarycache={{ zvol_swap_primarycache }}
+                -o secondarycache={{ zvol_swap_secondarycache }}
+                {{ zvol_swap_dataset }}
+              changed_when: true
+
+            - name: Format zvol as swap
+              ansible.builtin.command: mkswap /dev/zvol/{{ zvol_swap_dataset }}
+              changed_when: true
+
+        - name: Add zvol swap to fstab
+          ansible.posix.mount:
+            src: /dev/zvol/{{ zvol_swap_dataset }}
+            path: none
+            fstype: swap
+            opts: "sw,pri={{ zvol_swap_priority }}"
+            state: present
+
+        - name: Enable zvol swap
+          ansible.builtin.command: swapon -p {{ zvol_swap_priority }} /dev/zvol/{{ zvol_swap_dataset }}
+          register: swapon_result
+          changed_when: swapon_result.rc == 0
+          failed_when: swapon_result.rc != 0 and 'Device or resource busy' not in swapon_result.stderr
+
+    # ── Disable zvol swap if not wanted ──
+    - name: Remove zvol swap when disabled
+      when: not zvol_swap_enabled
+      block:
+        - name: Disable zvol swap
+          ansible.builtin.command: swapoff /dev/zvol/{{ zvol_swap_dataset }}
+          failed_when: false
+          changed_when: true
+
+        - name: Remove zvol swap from fstab
+          ansible.posix.mount:
+            src: /dev/zvol/{{ zvol_swap_dataset }}
+            path: none
+            fstype: swap
+            state: absent
+
+    # ── zram swap ────────────────────────────────────────────────────
+    - name: Setup zram swap
+      when: zram_swap_enabled
+      block:
+        - name: Install zram-tools
+          ansible.builtin.apt:
+            name: zram-tools
+            state: present
+            update_cache: true
+            cache_valid_time: 3600
+
+        - name: Configure /etc/default/zramswap
+          ansible.builtin.copy:
+            dest: /etc/default/zramswap
+            owner: root
+            group: root
+            mode: "0644"
+            content: |
+              # Managed by Ansible
+              ALGO={{ zram_swap_algorithm }}
+              PERCENT={{ zram_swap_percent }}
+              PRIORITY={{ zram_swap_priority }}
+          notify: Restart zramswap
+
+        - name: Enable zramswap service
+          ansible.builtin.systemd:
+            name: zramswap
+            enabled: true
+            state: started
+
+    - name: Disable zram swap when not wanted
+      when: not zram_swap_enabled
+      block:
+        - name: Stop and disable zramswap service
+          ansible.builtin.systemd:
+            name: zramswap
+            enabled: false
+            state: stopped
+          failed_when: false
+
+  handlers:
+    - name: Restart zramswap
+      ansible.builtin.systemd:
+        name: zramswap
+        state: restarted
