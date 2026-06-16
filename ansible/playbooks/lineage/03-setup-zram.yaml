@@ -1,0 +1,112 @@
+---
+# ─────────────────────────────────────────────────────────────────────────────
+# Set up zram swap on LineageOS build VM
+# ─────────────────────────────────────────────────────────────────────────────
+- name: 💾 Setup zram swap
+  hosts: "{{ lineage_vms[0].ip }}"
+  gather_facts: true
+  become: true
+  vars_files:
+    - "../../secrets.yaml"
+    - "../../vars/proxmox_infra.yaml"
+    - "../../vars/lineage_vm.yaml"
+
+  tasks:
+    - name: 📊 Calculate zram size from RAM
+      ansible.builtin.set_fact:
+        zram_size_mb: "{{ (ansible_memtotal_mb * zram_fraction) | int }}"
+      when: zram_enabled
+    # ── Disable existing swap ─────────────────────────────────────────────
+    - name: 🛑 Disable all existing swap
+      ansible.builtin.command:
+        cmd: swapoff -a
+      changed_when: false
+      when: zram_enabled
+
+    - name: 🧹 Remove swap entries from fstab
+      ansible.builtin.lineinfile:
+        path: /etc/fstab
+        regexp: '^\S+\s+\S+\s+swap\s+'
+        state: absent
+      when: zram_enabled
+
+    # ── Install systemd-zram-generator ────────────────────────────────────
+    - name: 📦 Install systemd-zram-generator
+      ansible.builtin.apt:
+        name: systemd-zram-generator
+        state: present
+        update_cache: yes
+      when: zram_enabled
+
+    # ── Configure zram-generator ──────────────────────────────────────────
+    - name: 📝 Deploy zram-generator config
+      ansible.builtin.copy:
+        dest: /etc/systemd/zram-generator.conf
+        owner: root
+        group: root
+        mode: "0644"
+        content: |
+          # Managed by Ansible
+          [zram0]
+          compression-algorithm = {{ zram_algorithm }}
+          zram-size = {{ zram_size_mb }}
+          swap-priority = {{ zram_swap_priority }}
+      when: zram_enabled
+      notify: Restart zram
+
+    # ── Sysctl tuning for zram ────────────────────────────────────────────
+    - name: ⚙️ Tune vm.swappiness for zram
+      ansible.posix.sysctl:
+        name: vm.swappiness
+        value: "{{ zram_swappiness }}"
+        sysctl_file: /etc/sysctl.d/99-zram.conf
+        reload: true
+        state: present
+      when: zram_enabled
+
+    - name: ⚙️ Tune vm.watermark_boost_factor for zram
+      ansible.posix.sysctl:
+        name: vm.watermark_boost_factor
+        value: "0"
+        sysctl_file: /etc/sysctl.d/99-zram.conf
+        reload: true
+        state: present
+      when: zram_enabled
+
+    - name: ⚙️ Tune vm.watermark_scale_factor for zram
+      ansible.posix.sysctl:
+        name: vm.watermark_scale_factor
+        value: "125"
+        sysctl_file: /etc/sysctl.d/99-zram.conf
+        reload: true
+        state: present
+      when: zram_enabled
+
+    - name: ⚙️ Tune vm.page-cluster for zram
+      ansible.posix.sysctl:
+        name: vm.page-cluster
+        value: "0"
+        sysctl_file: /etc/sysctl.d/99-zram.conf
+        reload: true
+        state: present
+      when: zram_enabled
+
+    # ── Verify ────────────────────────────────────────────────────────────
+    - name: ✅ Verify zram device is active
+      ansible.builtin.command:
+        cmd: swapon --show
+      register: swapon_output
+      changed_when: false
+      when: zram_enabled
+
+    - name: 📋 Show swap status
+      ansible.builtin.debug:
+        var: swapon_output.stdout_lines
+      when: zram_enabled
+
+  handlers:
+    - name: Restart zram
+      ansible.builtin.systemd:
+        name: "systemd-zram-setup@zram0.service"
+        state: restarted
+        daemon_reload: true
