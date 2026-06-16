@@ -1,4 +1,11 @@
 misconfigurations:
+  - id: KSV-0014
+    paths:
+      - "lidarr/deployment.yaml"
+    statement: >
+      linuxserver/lidarr uses s6-overlay which requires a writable /run (with exec),
+      and enabling readOnlyRootFilesystem disables PUID/PGID support (container falls
+      back to UID 911), causing permission failures on the /config PVC and /music NFS mount.
   - id: KSV-0020
     paths:
       - "postgres-playground/02-deployment.yaml"
