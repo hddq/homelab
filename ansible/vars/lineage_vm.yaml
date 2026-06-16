@@ -25,7 +25,7 @@ lineage_vms:
 # Build Environment Variables
 build_user: "hddq"
 git_user_name: "hddq"
-git_user_email: "125512521+hddq@users.noreply.github.com"
+git_user_email: "hddqgit@gmail.com"
 
 # ccache Configuration
 ccache_enabled: true
