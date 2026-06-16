@@ -43,11 +43,11 @@
             - name: Create ZFS zvol
               ansible.builtin.command: >
                 zfs create -V {{ zvol_swap_size }}
-                -b {{ zvol_swap_blocksize }}
-                -o compression={{ zvol_swap_compression }}
-                -o checksum={{ zvol_swap_checksum }}
-                -o primarycache={{ zvol_swap_primarycache }}
-                -o secondarycache={{ zvol_swap_secondarycache }}
+                -b 4K
+                -o compression=zle
+                -o checksum=off
+                -o primarycache=metadata
+                -o secondarycache=none
                 {{ zvol_swap_dataset }}
               changed_when: true
 
