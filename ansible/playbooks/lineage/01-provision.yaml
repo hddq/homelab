@@ -101,6 +101,7 @@
       delegate_to: "{{ proxmox_api_host }}"
       remote_user: root
       loop: "{{ lineage_vms }}"
+      changed_when: false
 
     - name: 🚀 Stage 5 - Start VM
       community.proxmox.proxmox_kvm:

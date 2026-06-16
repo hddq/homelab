@@ -98,7 +98,8 @@
 
     - name: 🔍 Wait for iSCSI block devices to appear
       ansible.builtin.shell:
-        cmd: "ls /dev/disk/by-path/*{{ item.iqn }}* | head -n1"
+        cmd: "set -o pipefail && ls /dev/disk/by-path/*{{ item.iqn }}* | head -n1"
+        executable: /bin/bash
       register: iscsi_devices
       changed_when: false
       until: iscsi_devices.stdout | length > 0
