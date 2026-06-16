@@ -2,9 +2,6 @@
 - name: Configure swap (ZFS zvol + zram)
   hosts: proxmox
   become: true
-  vars_files:
-    - ../../vars/swap.yaml
-
   tasks:
     # ── ZFS zvol swap ────────────────────────────────────────────────
     - name: Setup ZFS zvol swap

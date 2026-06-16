@@ -1,10 +1,9 @@
-# ZFS zvol swap configuration
+# Swap configuration for z690
 zvol_swap_enabled: true
 zvol_swap_dataset: "rpool/swap"
 zvol_swap_size: "16G"
 zvol_swap_priority: 25
 
-# zram swap configuration
 zram_swap_enabled: true
 zram_swap_algorithm: "zstd"
 zram_swap_percent: 50

@@ -1,0 +1,10 @@
+# Swap configuration for b360
+zvol_swap_enabled: false
+zvol_swap_dataset: "rpool/swap"
+zvol_swap_size: "8G"
+zvol_swap_priority: 25
+
+zram_swap_enabled: true
+zram_swap_algorithm: "lz4"
+zram_swap_percent: 50
+zram_swap_priority: 100
