@@ -1,0 +1,107 @@
+name: CI Orchestrator
+
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
+
+permissions:
+  contents: write
+  pull-requests: read
+  security-events: write
+
+jobs:
+  changes:
+    name: 🔍 Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      ansible: ${{ steps.filter.outputs.ansible }}
+      k8s: ${{ steps.filter.outputs.k8s }}
+      lint: ${{ steps.filter.outputs.lint }}
+      nix: ${{ steps.filter.outputs.nix }}
+      shellcheck: ${{ steps.filter.outputs.shellcheck }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          filters: |
+            ansible:
+              - 'ansible/**'
+              - '.github/workflows/ci-ansible.yaml'
+              - '.github/workflows/main.yaml'
+            k8s:
+              - 'apps/**'
+              - 'infrastructure/**'
+              - 'bootstrap/**'
+              - 'k3s_version.txt'
+              - '.github/workflows/ci-k8s.yaml'
+              - 'scripts/ci/**'
+              - '.github/workflows/main.yaml'
+            lint:
+              - '**/*.yaml'
+              - '**/*.yml'
+            nix:
+              - 'flake.nix'
+              - 'flake.lock'
+              - '.github/workflows/ci-nix.yaml'
+              - '.github/workflows/main.yaml'
+            shellcheck:
+              - '**/*.sh'
+              - '.github/workflows/main.yaml'
+
+  ansible:
+    name: Ansible
+    needs: changes
+    if: ${{ needs.changes.outputs.ansible == 'true' }}
+    uses: ./.github/workflows/ci-ansible.yaml
+
+  gitleaks:
+    name: Gitleaks
+    uses: ./.github/workflows/ci-gitleaks.yaml
+
+  k8s:
+    name: Kubernetes
+    needs: changes
+    if: ${{ needs.changes.outputs.k8s == 'true' }}
+    uses: ./.github/workflows/ci-k8s.yaml
+
+  lint:
+    name: Lint
+    needs: changes
+    if: ${{ needs.changes.outputs.lint == 'true' }}
+    uses: ./.github/workflows/ci-lint.yaml
+
+  nix:
+    name: Nix
+    needs: changes
+    if: ${{ needs.changes.outputs.nix == 'true' }}
+    uses: ./.github/workflows/ci-nix.yaml
+
+  shellcheck:
+    name: ShellCheck
+    needs: changes
+    if: ${{ needs.changes.outputs.shellcheck == 'true' }}
+    uses: ./.github/workflows/ci-shellcheck.yaml
+
+  promote:
+    name: 🚀 Promote to Stable
+    needs: [changes, ansible, gitleaks, k8s, lint, nix, shellcheck]
+    if: |
+      always() &&
+      github.ref == 'refs/heads/master' &&
+      github.event_name == 'push' &&
+      !contains(needs.*.result, 'failure') &&
+      !contains(needs.*.result, 'cancelled')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Push to stable
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git push origin HEAD:refs/heads/stable --force

@@ -1,24 +1,7 @@
 name: CI - Kubernetes
 
 on:
-  push:
-    branches: ["master"]
-    paths:
-      - "apps/**"
-      - "infrastructure/**"
-      - "bootstrap/**"
-      - "k3s_version.txt"
-      - ".github/workflows/ci-k8s.yaml"
-      - "scripts/ci/**"
-  pull_request:
-    branches: ["master"]
-    paths:
-      - "apps/**"
-      - "infrastructure/**"
-      - "bootstrap/**"
-      - "k3s_version.txt"
-      - ".github/workflows/ci-k8s.yaml"
-      - "scripts/ci/**"
+  workflow_call:
 
 jobs:
   helm-build:
