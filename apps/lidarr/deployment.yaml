@@ -18,6 +18,9 @@ spec:
         app.kubernetes.io/name: lidarr
     spec:
       securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
         fsGroup: 1000
       containers:
         - name: lidarr
@@ -25,6 +28,7 @@ spec:
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
             capabilities:
               drop:
                 - NET_RAW
@@ -39,6 +43,10 @@ spec:
               value: "1000"
             - name: TZ
               value: "Europe/Warsaw"
+            - name: S6_READ_ONLY_ROOT
+              value: "1"
+            - name: S6_YES_I_WANT_A_WORLD_WRITABLE_RUN_BECAUSE_KUBERNETES
+              value: "1"
           readinessProbe:
             httpGet:
               path: /ping
@@ -69,6 +77,10 @@ spec:
               subPath: music
               mountPath: /music
               readOnly: false
+            - name: run-volume
+              mountPath: /run
+            - name: tmp-volume
+              mountPath: /tmp
       volumes:
         - name: lidarr-pvc
           persistentVolumeClaim:
@@ -77,3 +89,7 @@ spec:
           nfs:
             server: 192.168.20.12
             path: /mnt/ssd1/media
+        - name: run-volume
+          emptyDir: {}
+        - name: tmp-volume
+          emptyDir: {}
