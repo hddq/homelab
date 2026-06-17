@@ -14,7 +14,7 @@ lineage_vms:
     node: "z690"
     ram: 32768
     balloon: 32768
-    cores: 8
+    cores: 9
     disk: "60G"
     storage: "local-zfs"
     ip: "192.168.20.15"

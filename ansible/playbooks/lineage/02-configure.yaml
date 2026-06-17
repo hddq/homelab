@@ -197,6 +197,22 @@
         insertafter: EOF
         state: present
 
+    - name: 🔧 Configure NINJA_ARGS in .bashrc
+      ansible.builtin.lineinfile:
+        path: "/home/{{ build_user }}/.bashrc"
+        line: 'export NINJA_ARGS="-j8"'
+        regexp: '^export NINJA_ARGS='
+        insertafter: EOF
+        state: present
+
+    - name: 🔧 Configure MAKE_JOBS in .bashrc
+      ansible.builtin.lineinfile:
+        path: "/home/{{ build_user }}/.bashrc"
+        line: 'export MAKE_JOBS=8'
+        regexp: '^export MAKE_JOBS='
+        insertafter: EOF
+        state: present
+
     # ── Repo Tool ────────────────────────────────────────────────────────
     - name: 📁 Ensure ~/bin exists for repo tool
       ansible.builtin.file:
