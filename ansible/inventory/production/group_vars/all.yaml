@@ -1,6 +1,6 @@
 deployment_environment: production
 cluster_name: production
-git_branch: master
+git_branch: stable
 target_inventory_file: inventory/production/hosts.ini
 kubeconfig_path: kubeconfig-production
 
