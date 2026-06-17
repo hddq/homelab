@@ -1,21 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: lidarr
-  namespace: lidarr
+  name: sonarr
   labels:
-    app.kubernetes.io/name: lidarr
+    app.kubernetes.io/name: sonarr
 spec:
   replicas: 1
   strategy:
     type: Recreate
   selector:
     matchLabels:
-      app.kubernetes.io/name: lidarr
+      app.kubernetes.io/name: sonarr
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: lidarr
+        app.kubernetes.io/name: sonarr
     spec:
       securityContext:
         runAsNonRoot: true
@@ -23,8 +22,8 @@ spec:
         runAsGroup: 1000
         fsGroup: 1000
       containers:
-        - name: lidarr
-          image: lscr.io/linuxserver/lidarr:3.1.0.4875-ls29@sha256:219df4d6d1375e9a2509ecce185c59baf59c2bb241ba54ec0aa39a419a0344cd
+        - name: sonarr
+          image: ghcr.io/home-operations/sonarr:4.0.17.2969
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
@@ -34,23 +33,15 @@ spec:
                 - NET_RAW
           ports:
             - name: http
-              containerPort: 8686
+              containerPort: 8989
               protocol: TCP
           env:
-            - name: PUID
-              value: "1000"
-            - name: PGID
-              value: "1000"
             - name: TZ
               value: "Europe/Warsaw"
-            - name: S6_READ_ONLY_ROOT
-              value: "1"
-            - name: S6_YES_I_WANT_A_WORLD_WRITABLE_RUN_BECAUSE_KUBERNETES
-              value: "1"
           readinessProbe:
             httpGet:
               path: /ping
-              port: 8686
+              port: 8989
             initialDelaySeconds: 10
             periodSeconds: 15
             timeoutSeconds: 2
@@ -58,7 +49,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /ping
-              port: 8686
+              port: 8989
             initialDelaySeconds: 30
             periodSeconds: 30
             timeoutSeconds: 2
@@ -71,25 +62,21 @@ spec:
               cpu: 1000m
               memory: 512Mi
           volumeMounts:
-            - name: lidarr-pvc
+            - name: sonarr-pvc
               mountPath: /config
-            - name: music-nfs
-              subPath: music
-              mountPath: /music
+            - name: tv-nfs
+              subPath: tv
+              mountPath: /tv
               readOnly: false
-            - name: run-volume
-              mountPath: /run
             - name: tmp-volume
               mountPath: /tmp
       volumes:
-        - name: lidarr-pvc
+        - name: sonarr-pvc
           persistentVolumeClaim:
-            claimName: lidarr-pvc
-        - name: music-nfs
+            claimName: sonarr-pvc
+        - name: tv-nfs
           nfs:
             server: 192.168.20.12
             path: /mnt/ssd1/media
-        - name: run-volume
-          emptyDir: {}
         - name: tmp-volume
           emptyDir: {}

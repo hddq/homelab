@@ -1,18 +1,17 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: lidarr
-  namespace: lidarr
+  name: sonarr
 spec:
   ingressClassName: infrastructure-traefik
   rules:
-    - host: lidarr.hddq-k8s.duckdns.org
+    - host: sonarr.hddq-k8s.duckdns.org
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: lidarr
+                name: sonarr
                 port:
-                  number: 8686
+                  number: 8989
