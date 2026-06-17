@@ -1,6 +1,6 @@
 dependencies:
 - name: alertmanager
   repository: https://prometheus-community.github.io/helm-charts
-  version: 1.39.0
-digest: sha256:2cb9924029357e00cbe762cee04306c6ededff6f2f3912c4057da4c4a7432d24
-generated: "2026-06-12T23:16:25.342185524Z"
+  version: 1.39.2
+digest: sha256:4fb956e584ba6859ea5295da769ba63814292483dbffde2db1971c82afef4bf0
+generated: "2026-06-17T02:37:29.938911946Z"
