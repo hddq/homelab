@@ -25,7 +25,7 @@ spec:
         fsGroup: 101
       containers:
         - name: nginx
-          image: nginxinc/nginx-unprivileged:1.31.1@sha256:1a3f97f13b245fd6307668326a9a43adfe8bab1853572e0970430285f95e5208
+          image: nginxinc/nginx-unprivileged:1.31.2@sha256:12687e757fa0cedfd6b4f15302000d62d1872def3f24bcf76c6d52f09f7f9b77
           securityContext:
             readOnlyRootFilesystem: true
             runAsNonRoot: true
