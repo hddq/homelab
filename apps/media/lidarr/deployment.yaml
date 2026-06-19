@@ -64,9 +64,8 @@ spec:
           volumeMounts:
             - name: lidarr-pvc
               mountPath: /config
-            - name: music-nfs
-              subPath: music
-              mountPath: /music
+            - name: media-nfs
+              mountPath: /mnt/media
               readOnly: false
             - name: tmp-volume
               mountPath: /tmp
@@ -74,7 +73,7 @@ spec:
         - name: lidarr-pvc
           persistentVolumeClaim:
             claimName: lidarr-pvc
-        - name: music-nfs
+        - name: media-nfs
           nfs:
             server: 192.168.20.12
             path: /mnt/ssd1/media

@@ -64,9 +64,8 @@ spec:
           volumeMounts:
             - name: sonarr-pvc
               mountPath: /config
-            - name: shows-nfs
-              subPath: shows
-              mountPath: /shows
+            - name: media-nfs
+              mountPath: /mnt/media
               readOnly: false
             - name: tmp-volume
               mountPath: /tmp
@@ -74,7 +73,7 @@ spec:
         - name: sonarr-pvc
           persistentVolumeClaim:
             claimName: sonarr-pvc
-        - name: shows-nfs
+        - name: media-nfs
           nfs:
             server: 192.168.20.12
             path: /mnt/ssd1/media

@@ -64,9 +64,8 @@ spec:
           volumeMounts:
             - name: radarr-pvc
               mountPath: /config
-            - name: movies-nfs
-              subPath: movies
-              mountPath: /movies
+            - name: media-nfs
+              mountPath: /mnt/media
               readOnly: false
             - name: tmp-volume
               mountPath: /tmp
@@ -74,7 +73,7 @@ spec:
         - name: radarr-pvc
           persistentVolumeClaim:
             claimName: radarr-pvc
-        - name: movies-nfs
+        - name: media-nfs
           nfs:
             server: 192.168.20.12
             path: /mnt/ssd1/media
