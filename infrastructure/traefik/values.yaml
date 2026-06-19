@@ -61,8 +61,7 @@ traefik:
   rbac:
     enabled: true
 
-  logs:
-    general:
-      level: INFO
-    access:
-      enabled: true
+  log:
+    level: INFO
+  accessLog:
+    enabled: true
