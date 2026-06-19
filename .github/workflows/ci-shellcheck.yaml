@@ -1,14 +1,7 @@
 name: CI - ShellCheck
 
 on:
-  push:
-    branches: ["master"]
-    paths:
-      - "**/*.sh"
-  pull_request:
-    branches: ["master"]
-    paths:
-      - "**/*.sh"
+  workflow_call:
 
 jobs:
   shellcheck:

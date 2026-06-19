@@ -1,16 +1,7 @@
 name: CI - Ansible
 
 on:
-  push:
-    branches: ["master"]
-    paths:
-      - "ansible/**"
-      - ".github/workflows/ci-ansible.yaml"
-  pull_request:
-    branches: ["master"]
-    paths:
-      - "ansible/**"
-      - ".github/workflows/ci-ansible.yaml"
+  workflow_call:
 
 jobs:
   ansible-lint:

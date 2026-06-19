@@ -39,11 +39,13 @@ The goal is to never touch a server manually — if it's not in Git, it doesn't 
 
 ### GitOps Flow
 
+Trunk-based development with an automated promotion workflow:
+
 ```
-Git push
-  └─▶ GitHub Actions (lint, validate, security scan)
-        └─▶ ArgoCD detects drift
-              └─▶ Applies changes to cluster
+Git push to master
+  └─▶ CI Orchestrator triggers all tests (lint, validate, security scan)
+        └─▶ If all pass, automatically promotes to `stable` branch
+              └─▶ ArgoCD tracks `stable`, detects drift, and applies changes
 ```
 
 ArgoCD uses the **App of Apps** pattern: Ansible installs a single root `Application` from a Jinja template, and that root app points at the `bootstrap/` Helm chart. The chart renders the child Argo applications for `apps/` and `infrastructure/`.
@@ -102,7 +104,7 @@ ansible-playbook -i inventory/staging/hosts.ini ...
 ```
 
 Each environment has its own `group_vars` under `inventory/<env>/group_vars/`.
-- Production should keep `git_branch: master`.
+- Production keeps `git_branch: stable` to only deploy CI-verified code.
 - Staging can set a default branch there, but you can also override it per run with `-e git_branch=<branch>`.
 
 > 🔑 **Before you start:** Make sure the SOPS `age` private key backup is somewhere safe and accessible. Without it, all encrypted manifests in the repo are unrecoverable.
@@ -167,7 +169,7 @@ export KUBECONFIG=$(pwd)/../kubeconfig-staging
 ansible-playbook -i inventory/staging/hosts.ini playbooks/kubernetes/03-setup-infra.yaml
 ```
 
-Set the branch Argo should watch by editing `git_branch` in `inventory/staging/group_vars/all.yaml` before running `03-setup-infra.yaml`. The bootstrap playbook injects that value into the root Argo application, which then passes it into the `bootstrap/` Helm chart as `targetRevision`.
+ArgoCD tracks the `stable` branch by default (configured via `git_branch` in `inventory/staging/group_vars/all.yaml`). The bootstrap playbook injects that value into the root Argo application, which then passes it into the `bootstrap/` Helm chart as `targetRevision`.
 
 For one-off staging tests, prefer a CLI override:
 
@@ -177,7 +179,9 @@ ansible-playbook -i inventory/staging/hosts.ini playbooks/kubernetes/03-setup-in
 
 ---
 
-## 🔒 CI / Pre-commit
+## 🔒 CI Pipeline
+
+A central `.github/workflows/main.yaml` orchestrator evaluates path changes and dynamically triggers the appropriate reusable workflows below. If all required tests pass on `master`, the commit is automatically promoted to the `stable` branch.
 
 | Check              | Tool                         | What it validates                             |
 | ------------------ | ---------------------------- | --------------------------------------------- |

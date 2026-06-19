@@ -1,16 +1,7 @@
 name: CI - Global Lint
 
 on:
-  push:
-    branches: ["master"]
-    paths:
-      - "**/*.yaml"
-      - "**/*.yml"
-  pull_request:
-    branches: ["master"]
-    paths:
-      - "**/*.yaml"
-      - "**/*.yml"
+  workflow_call:
 
 jobs:
   yaml-lint:
