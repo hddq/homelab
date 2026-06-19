@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Install Helm
         uses: azure/setup-helm@v5
@@ -46,7 +46,7 @@ jobs:
     needs: [helm-build]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Download built infrastructure charts
         uses: actions/download-artifact@v8
@@ -87,7 +87,7 @@ jobs:
     needs: [helm-build]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Download built infrastructure charts
         uses: actions/download-artifact@v8
@@ -126,7 +126,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Download Pluto
         uses: FairwindsOps/pluto/github-action@v5.24.0
@@ -143,7 +143,7 @@ jobs:
     needs: [helm-build]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Download built infrastructure charts
         uses: actions/download-artifact@v8
