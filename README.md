@@ -32,6 +32,8 @@ The goal is to never touch a server manually — if it's not in Git, it doesn't 
 | Monitoring         | VictoriaMetrics Stack          | Metrics collection, storage, alerting and dashboards   |
 | Dev environment    | Nix flake                      | Reproducible shell with all tools pinned       |
 | Dependency updates | Renovate                       | Automated PRs for image/chart/k3s updates      |
+| Source Control     | GitHub                         | Hosts GitOps manifests, single source of truth|
+| CI/CD              | GitHub Actions                 | Automated testing and promotion workflow       |
 
 ---
 
