@@ -84,6 +84,11 @@
       "matchFileNames": [".github/**"],
       "matchUpdateTypes": ["minor"],
       "groupName": "Minor ci"
+    },
+    {
+      "matchUpdateTypes": ["patch", "digest", "pinDigest"],
+      "automerge": true,
+      "schedule": ["on sunday"]
     }
   ]
 }
