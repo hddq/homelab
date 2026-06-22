@@ -44,6 +44,6 @@ iscsi_out_mountpoint: "/home/{{ build_user }}/android-out"
 # zram Swap Settings
 zram_enabled: true
 zram_fraction: 1.0
-zram_algorithm: "zstd"
+zram_algorithm: "lz4"
 zram_swap_priority: 100
 zram_swappiness: 180
