@@ -182,7 +182,7 @@
         path: "{{ iscsi_mountpoint }}/lineage/out"
         src: "{{ iscsi_out_mountpoint }}/out"
         fstype: none
-        opts: bind
+        opts: "bind,_netdev,nofail"
         state: mounted
 
     - name: 🔧 Remove OUT_DIR_COMMON_BASE from .bashrc
