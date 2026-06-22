@@ -61,6 +61,8 @@
           - libgnutls28-dev
           - qemu-guest-agent
           - tmux
+          - gh
+          - jq
         state: present
 
     - name: 🚀 Enable and start qemu-guest-agent
@@ -299,3 +301,43 @@
       register: ccache_size
       changed_when: "'Set cache size limit to' in ccache_size.stdout"
       when: ccache_enabled
+
+    # ── SSH Deployment Keys ──────────────────────────────────────────────
+    - name: 📁 Ensure ~/.ssh exists for build user
+      ansible.builtin.file:
+        path: "/home/{{ build_user }}/.ssh"
+        state: directory
+        owner: "{{ build_user }}"
+        group: "{{ build_user }}"
+        mode: "0700"
+
+    - name: 🔑 Copy lineage-ssh private key to VM
+      ansible.builtin.copy:
+        src: "~/.ssh/lineage-ssh"
+        dest: "/home/{{ build_user }}/.ssh/lineage-ssh"
+        owner: "{{ build_user }}"
+        group: "{{ build_user }}"
+        mode: "0600"
+
+    - name: 🔑 Copy lineage-ssh public key to VM
+      ansible.builtin.copy:
+        src: "~/.ssh/lineage-ssh.pub"
+        dest: "/home/{{ build_user }}/.ssh/lineage-ssh.pub"
+        owner: "{{ build_user }}"
+        group: "{{ build_user }}"
+        mode: "0644"
+
+    - name: ⚙️ Configure SSH config on VM for GitHub
+      ansible.builtin.blockinfile:
+        path: "/home/{{ build_user }}/.ssh/config"
+        create: true
+        owner: "{{ build_user }}"
+        group: "{{ build_user }}"
+        mode: "0600"
+        marker: "# {mark} ANSIBLE MANAGED - lineage-ssh key configuration"
+        block: |
+          Host github.com
+              HostName github.com
+              User git
+              IdentityFile /home/{{ build_user }}/.ssh/lineage-ssh
+              StrictHostKeyChecking no

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest>
+  <project path="device/xiaomi/marble" remote="github" name="LineageOS/android_device_xiaomi_marble" />
+  <project path="device/xiaomi/sm8450-common" remote="github" name="LineageOS/android_device_xiaomi_sm8450-common" />
+  <project path="hardware/xiaomi" remote="github" name="LineageOS/android_hardware_xiaomi" />
+  <project path="kernel/xiaomi/sm8450" remote="github" name="LineageOS/android_kernel_xiaomi_sm8450" />
+  <project path="kernel/xiaomi/sm8450-devicetrees" remote="github" name="LineageOS/android_kernel_xiaomi_sm8450-devicetrees" />
+  <project path="kernel/xiaomi/sm8450-modules" remote="github" name="LineageOS/android_kernel_xiaomi_sm8450-modules" />
+  <project name="TheMuppets/proprietary_vendor_xiaomi_marble" path="vendor/xiaomi/marble" remote="github" depth="1" />
+  <project name="TheMuppets/proprietary_vendor_xiaomi_sm8450-common" path="vendor/xiaomi/sm8450-common" remote="github" revision="lineage-23.2" clone-depth="1" />
+</manifest>
