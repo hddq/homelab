@@ -4,7 +4,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/common.sh"
 
-VARS_FILE="$SCRIPT_DIR/../../ansible/vars/lineage_vm.yaml"
+VARS_FILE="$SCRIPT_DIR/../../../ansible/vars/lineage_vm.yaml"
 MANIFESTS_DIR="$SCRIPT_DIR/../manifests"
 
 log "🖥️  Running in Host Orchestrator Mode..."

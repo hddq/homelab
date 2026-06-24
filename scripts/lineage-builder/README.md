@@ -4,12 +4,12 @@ This folder contains the scripts and local manifests to execute LineageOS builds
 
 ## File Structure
 
-- [build.sh](file:///home/hddq/git/homelab/lineage/build.sh): Main entry wrapper that delegates to either the local orchestrator or remote worker.
+- [build.sh](file:///home/hddq/git/homelab/scripts/lineage-builder/build.sh): Main entry wrapper that delegates to either the local orchestrator or remote worker.
 - **scripts/**: Modular bash and python scripts handling different stages of the build.
   - `orchestrator.sh`: Local logic for connecting to the VM and staging files.
   - `worker/`: Remote scripts executed inside the VM (`main.sh`, `sync.sh`, `build_rom.sh`, `release.sh`, `patch_updater.py`).
 - **manifests/**: Local device manifests defining vendor trees, kernels, and device trees for target builds.
-  - [marble.xml](file:///home/hddq/git/homelab/lineage/manifests/marble.xml): Xiaomi Poco F5 local manifest.
+  - [marble.xml](file:///home/hddq/git/homelab/scripts/lineage-builder/manifests/marble.xml): Example Xiaomi Poco F5 local manifest.
 
 ## Usage
 
@@ -23,13 +23,13 @@ Run the script locally on your control machine. It will automatically read confi
 
 ```bash
 # General usage info:
-./lineage/build.sh --help
+./scripts/lineage-builder/build.sh --help
 
 # Interactively select a target and trigger dirty build:
-./lineage/build.sh
+./scripts/lineage-builder/build.sh
 
 # Trigger sync and clean build for POCO F5 (marble) with cherrypicks:
-./lineage/build.sh --device marble --sync --clean --cherrypick "489879 489705 488403"
+./scripts/lineage-builder/build.sh --device marble --sync --clean --cherrypick "489879 489705 488403"
 ```
 
 ### 3. Build Process Flow
