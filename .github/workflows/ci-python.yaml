@@ -1,0 +1,17 @@
+name: CI - Python
+
+on:
+  workflow_call:
+
+jobs:
+  ruff:
+    name: 🐍 Ruff
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Setup Ruff
+        uses: astral-sh/ruff-action@v3
+        with:
+          version: "0.15.19"

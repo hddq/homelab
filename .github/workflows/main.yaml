@@ -24,6 +24,7 @@ jobs:
       k8s: ${{ steps.filter.outputs.k8s }}
       lint: ${{ steps.filter.outputs.lint }}
       nix: ${{ steps.filter.outputs.nix }}
+      python: ${{ steps.filter.outputs.python }}
       shellcheck: ${{ steps.filter.outputs.shellcheck }}
     steps:
       - uses: actions/checkout@v7
@@ -53,6 +54,10 @@ jobs:
               - 'flake.nix'
               - 'flake.lock'
               - '.github/workflows/ci-nix.yaml'
+              - '.github/workflows/main.yaml'
+            python:
+              - '**/*.py'
+              - '.github/workflows/ci-python.yaml'
               - '.github/workflows/main.yaml'
             shellcheck:
               - '**/*.sh'
@@ -86,6 +91,12 @@ jobs:
     if: ${{ needs.changes.outputs.nix == 'true' }}
     uses: ./.github/workflows/ci-nix.yaml
 
+  python:
+    name: Python
+    needs: changes
+    if: ${{ needs.changes.outputs.python == 'true' }}
+    uses: ./.github/workflows/ci-python.yaml
+
   shellcheck:
     name: ShellCheck
     needs: changes
@@ -94,7 +105,7 @@ jobs:
 
   promote:
     name: 🚀 Promote to Stable
-    needs: [changes, ansible, gitleaks, k8s, lint, nix, shellcheck]
+    needs: [changes, ansible, gitleaks, k8s, lint, nix, python, shellcheck]
     if: |
       always() &&
       github.ref == 'refs/heads/master' &&
