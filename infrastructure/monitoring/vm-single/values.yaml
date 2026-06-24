@@ -18,6 +18,8 @@ victoria-metrics-single:
       enabled: true
       storageClass: "longhorn"
       size: 10Gi
+      extraLabels:
+        recurring-job-group.longhorn.io/ignored: "enabled"
 
     service:
       type: ClusterIP
