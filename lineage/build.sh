@@ -218,7 +218,7 @@ except Exception:
     log "🚀 Launching build in tmux session 'lineage-build' on VM..."
     # Launch in a tmux session
     # shellcheck disable=SC2029
-    ssh "$BUILD_USER@$VM_IP" "tmux new-session -d -s lineage-build \"$REMOTE_CMD\""
+    ssh "$BUILD_USER@$VM_IP" "tmux new-session -d -s lineage-build \"$REMOTE_CMD; exec bash\""
 
     log "✅ Build triggered!"
     echo "------------------------------------------------------------"
