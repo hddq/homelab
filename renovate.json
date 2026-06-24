@@ -37,6 +37,14 @@
       "depNameTemplate": "J0R6IT0/navidrome-lyrics-plugin",
       "datasourceTemplate": "github-releases",
       "extractVersionTemplate": "^v(?<version>.+)$"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["\\.github/workflows/ci-python\\.yaml$"],
+      "matchStrings": ["version: \"(?<currentValue>\\d+\\.\\d+\\.\\d+)\""],
+      "depNameTemplate": "astral-sh/ruff",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v?(?<version>.+)$"
     }
   ],
   "packageRules": [
