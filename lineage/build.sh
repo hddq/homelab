@@ -469,8 +469,7 @@ with open(makefile, "w") as f:
       --argjson size "$SIZE" \
       --argjson dt "$DATETIME" \
       --arg ver "$VERSION" \
-      '{"response": [{"datetime": $dt, "filename": $fn, "id": $id,
-        "romtype": "UNOFFICIAL", "size": $size, "url": $url, "version": $ver}]}' \
+      '[{"datetime": $dt, "version": $ver, "type": "UNOFFICIAL", "files": [{"filename": $fn, "sha256": $id, "size": $size, "url": $url}]}]' \
       > "$JSON_FILE"
 
     log "📋 OTA JSON generated at $JSON_FILE"
