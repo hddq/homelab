@@ -457,7 +457,12 @@ with open(makefile, "w") as f:
 
     SHA256=$(sha256sum "$ZIP" | awk '{print $1}')
     SIZE=$(stat -c%s "$ZIP")
-    DATETIME=$(stat -c%Y "$ZIP")
+    # Extract ro.build.date.utc directly from the zip's metadata
+    DATETIME=$(unzip -p "$ZIP" META-INF/com/android/metadata 2>/dev/null | grep post-timestamp | cut -d= -f2)
+    if [[ -z "$DATETIME" ]]; then
+        error "Failed to extract post-timestamp from OTA zip metadata."
+        exit 1
+    fi
     URL="https://github.com/hddq/lineage-ota/releases/download/${TAG}/${ZIPNAME}"
 
     JSON_FILE="test/${DEVICE}.json"
