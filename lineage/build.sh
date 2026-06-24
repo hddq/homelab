@@ -292,6 +292,82 @@ if [[ "$WORKER_MODE" == "true" ]]; then
         set -u
     fi
 
+    # ── Patch OTA Updater URI ────────────────────────────
+    log "🩹 Patching lineage makefiles with OTA updater URI..."
+    UPDATER_URI="https://raw.githubusercontent.com/hddq/lineage-ota/main/test/${DEVICE}.json"
+
+    # Find the main lineage makefile for appending if needed
+    MAIN_MAKEFILE=$(find device/ -name "lineage_${DEVICE}.mk" -type f | head -n 1)
+    if [[ -z "$MAIN_MAKEFILE" ]]; then
+        MAIN_MAKEFILE=$(find device/ -path "*/${DEVICE}/lineage.mk" -type f | head -n 1)
+    fi
+
+    # Find the device tree directory
+    DEVICE_DIR=""
+    if [[ -n "$MAIN_MAKEFILE" ]]; then
+        DEVICE_DIR=$(dirname "$MAIN_MAKEFILE")
+    fi
+    if [[ -z "$DEVICE_DIR" ]]; then
+        DEVICE_DIR=$(find device/ -type d -name "$DEVICE" | head -n 1)
+    fi
+
+    if [[ -n "$DEVICE_DIR" && -d "$DEVICE_DIR" ]]; then
+        log "Device directory: $DEVICE_DIR"
+        
+        # Find all .mk files containing lineage.updater.uri
+        mapfile -t MK_FILES < <(grep -rl "lineage.updater.uri" "$DEVICE_DIR" --include="*.mk" || true)
+        
+        if [[ ${#MK_FILES[@]} -gt 0 ]]; then
+            for mk_file in "${MK_FILES[@]}"; do
+                log "Replacing existing lineage.updater.uri in $mk_file..."
+                python3 -c '
+import sys
+import re
+
+makefile = sys.argv[1]
+uri = sys.argv[2]
+
+with open(makefile, "r") as f:
+    content = f.read()
+
+pattern = r"lineage\.updater\.uri\s*=\s*\S+"
+new_content = re.sub(pattern, f"lineage.updater.uri={uri}", content)
+
+with open(makefile, "w") as f:
+    f.write(new_content)
+' "$mk_file" "$UPDATER_URI"
+            done
+        else
+            # If not found anywhere, append it to the main makefile
+            if [[ -n "$MAIN_MAKEFILE" && -f "$MAIN_MAKEFILE" ]]; then
+                log "No existing lineage.updater.uri found. Appending to main makefile: $MAIN_MAKEFILE"
+                python3 -c '
+import sys
+
+makefile = sys.argv[1]
+uri = sys.argv[2]
+
+with open(makefile, "r") as f:
+    content = f.read()
+
+new_content = content
+if not new_content.endswith("\n"):
+    new_content += "\n"
+new_content += f"\nPRODUCT_SYSTEM_DEFAULT_PROPERTIES += \\\n    lineage.updater.uri={uri}\n"
+
+with open(makefile, "w") as f:
+    f.write(new_content)
+' "$MAIN_MAKEFILE" "$UPDATER_URI"
+            else
+                error "Could not find a lineage makefile to append the updater URI!"
+                exit 1
+            fi
+        fi
+    else
+        error "Could not locate device directory for $DEVICE!"
+        exit 1
+    fi
+
     if [[ "$CLEAN" == "clean" ]]; then
         log "🧹 Clean build — running clobber..."
         mka clobber
