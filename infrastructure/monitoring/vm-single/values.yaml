@@ -14,6 +14,7 @@ victoria-metrics-single:
       enabled: true
       fsGroup: 65534
     fullnameOverride: "vm-single-server"
+    terminationGracePeriodSeconds: 120
     persistentVolume:
       enabled: true
       storageClass: "longhorn"
