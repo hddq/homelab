@@ -26,6 +26,7 @@ jobs:
       nix: ${{ steps.filter.outputs.nix }}
       python: ${{ steps.filter.outputs.python }}
       shellcheck: ${{ steps.filter.outputs.shellcheck }}
+      terraform: ${{ steps.filter.outputs.terraform }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -61,6 +62,10 @@ jobs:
               - '.github/workflows/main.yaml'
             shellcheck:
               - '**/*.sh'
+              - '.github/workflows/main.yaml'
+            terraform:
+              - 'terraform/**'
+              - '.github/workflows/ci-terraform.yaml'
               - '.github/workflows/main.yaml'
 
   ansible:
@@ -103,9 +108,15 @@ jobs:
     if: ${{ needs.changes.outputs.shellcheck == 'true' }}
     uses: ./.github/workflows/ci-shellcheck.yaml
 
+  terraform:
+    name: Terraform
+    needs: changes
+    if: ${{ needs.changes.outputs.terraform == 'true' }}
+    uses: ./.github/workflows/ci-terraform.yaml
+
   promote:
     name: 🚀 Promote to Stable
-    needs: [changes, ansible, gitleaks, k8s, lint, nix, python, shellcheck]
+    needs: [changes, ansible, gitleaks, k8s, lint, nix, python, shellcheck, terraform]
     if: |
       always() &&
       github.ref == 'refs/heads/master' &&

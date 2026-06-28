@@ -1,0 +1,45 @@
+name: CI - Terraform
+
+on:
+  workflow_call:
+
+jobs:
+  fmt:
+    name: 🖊️ Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v2
+
+      - name: Check formatting
+        run: tofu fmt -check -recursive terraform/
+
+  validate:
+    name: ✅ Validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v2
+
+      - name: Create dummy secrets file
+        # We can't decrypt the real secrets in CI without the age key.
+        # A dummy file is enough for 'tofu validate', which only checks
+        # the syntax and structure of .tf files, not actual API values.
+        run: |
+          cat <<EOF > terraform/cloudflare/secrets.yaml
+          cloudflare_api_token: "dummy"
+          EOF
+
+      - name: tofu init
+        run: tofu init -backend=false
+        working-directory: terraform/cloudflare
+
+      - name: tofu validate
+        run: tofu validate
+        working-directory: terraform/cloudflare
