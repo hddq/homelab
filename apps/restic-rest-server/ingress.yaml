@@ -8,7 +8,7 @@ metadata:
 spec:
   ingressClassName: infrastructure-traefik
   rules:
-    - host: restic.hddq-k8s.duckdns.org
+    - host: restic.lab.hddq.org
       http:
         paths:
           - path: /

@@ -30,4 +30,4 @@ longhorn:
     enabled: false
 
 homelab:
-  baseDomain: hddq-k8s.duckdns.org
+  baseDomain: lab.hddq.org

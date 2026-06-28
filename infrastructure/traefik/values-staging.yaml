@@ -1,9 +1,9 @@
 homelab:
-  baseDomain: hddq-staging.duckdns.org
+  baseDomain: stg.hddq.org
   wildcardCert:
-    name: hddq-staging-wildcard
-    secretName: hddq-staging-wildcard-tls
-    issuerName: duckdns-letsencrypt-prod
+    name: stg-hddq-wildcard
+    secretName: stg-hddq-wildcard-tls
+    issuerName: cloudflare-letsencrypt-prod
 
 traefik:
   service:

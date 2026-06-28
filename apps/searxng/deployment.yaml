@@ -49,7 +49,7 @@ spec:
               memory: 512Mi
           env:
             - name: BASE_URL
-              value: "https://searxng.hddq-k8s.duckdns.org/"
+              value: "https://searxng.lab.hddq.org/"
             - name: SEARXNG_SECRET
               valueFrom:
                 secretKeyRef:

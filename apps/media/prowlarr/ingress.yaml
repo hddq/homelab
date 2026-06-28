@@ -5,7 +5,7 @@ metadata:
 spec:
   ingressClassName: infrastructure-traefik
   rules:
-    - host: prowlarr.hddq-k8s.duckdns.org
+    - host: prowlarr.lab.hddq.org
       http:
         paths:
           - path: /

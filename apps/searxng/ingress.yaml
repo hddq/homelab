@@ -6,7 +6,7 @@ metadata:
 spec:
   ingressClassName: infrastructure-traefik
   rules:
-    - host: searxng.hddq-k8s.duckdns.org
+    - host: searxng.lab.hddq.org
       http:
         paths:
           - path: /

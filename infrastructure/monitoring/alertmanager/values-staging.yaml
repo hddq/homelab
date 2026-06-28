@@ -1,7 +1,7 @@
 alertmanager:
   ingress:
     hosts:
-      - host: alertmanager.hddq-staging.duckdns.org
+      - host: alertmanager.stg.hddq.org
         paths:
           - path: /
             pathType: ImplementationSpecific

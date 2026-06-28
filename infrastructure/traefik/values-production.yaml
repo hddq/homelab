@@ -1,9 +1,9 @@
 homelab:
-  baseDomain: hddq-k8s.duckdns.org
+  baseDomain: lab.hddq.org
   wildcardCert:
-    name: hddq-k8s-wildcard
-    secretName: hddq-k8s-wildcard-tls
-    issuerName: duckdns-letsencrypt-prod
+    name: lab-hddq-wildcard
+    secretName: lab-hddq-wildcard-tls
+    issuerName: cloudflare-letsencrypt-prod
 
 traefik:
   service:
