@@ -10,10 +10,7 @@ spec:
       name: {{ .Values.clusterIssuer.privateKeySecretName }}
     solvers:
       - dns01:
-          webhook:
-            groupName: {{ .Values.clusterIssuer.solver.groupName }}
-            solverName: {{ .Values.clusterIssuer.solver.solverName }}
-            config:
-              apiTokenSecretRef:
-                name: {{ .Values.clusterIssuer.solver.apiTokenSecretName }}
-                key: {{ .Values.clusterIssuer.solver.apiTokenSecretKey }}
+          cloudflare:
+            apiTokenSecretRef:
+              name: {{ .Values.clusterIssuer.solver.cloudflare.apiTokenSecretName }}
+              key: {{ .Values.clusterIssuer.solver.cloudflare.apiTokenSecretKey }}
