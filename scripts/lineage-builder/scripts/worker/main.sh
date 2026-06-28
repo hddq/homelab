@@ -28,6 +28,7 @@ log "Branch:      $BRANCH"
 log "Sync:        $SYNC"
 log "Clean:       $CLEAN"
 log "Cherrypicks: $CHERRYPICKS"
+log "Skip OTA:    $SKIP_OTA"
 log "========================================================="
 
 # Export necessary variables for the sub-scripts
@@ -42,5 +43,11 @@ cd "$BUILD_DIR" || exit 1
 source "$SCRIPT_DIR/worker/sync.sh"
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/worker/build_rom.sh"
-# shellcheck disable=SC1091
-source "$SCRIPT_DIR/worker/release.sh"
+
+if [[ "$SKIP_OTA" == "true" ]]; then
+    log "📵 --no-ota flag set. Skipping OTA release/upload."
+    log "🎉 Build-only run complete!"
+else
+    # shellcheck disable=SC1091
+    source "$SCRIPT_DIR/worker/release.sh"
+fi

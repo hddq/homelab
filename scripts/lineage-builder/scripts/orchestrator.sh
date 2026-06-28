@@ -84,6 +84,9 @@ log "🧹 Build Type:      $CLEAN"
 if [[ -n "$CHERRYPICKS" ]]; then
     log "🍒 Cherry-picks:    $CHERRYPICKS"
 fi
+if [[ "$SKIP_OTA" == "true" ]]; then
+    log "📵 Skip OTA:        yes"
+fi
 
 read -rp "Press Enter to start build or Ctrl+C to cancel..."
 
@@ -126,6 +129,9 @@ else
 fi
 if [[ -n "$CHERRYPICKS" ]]; then
     REMOTE_CMD="$REMOTE_CMD --cherrypick '$CHERRYPICKS'"
+fi
+if [[ "$SKIP_OTA" == "true" ]]; then
+    REMOTE_CMD="$REMOTE_CMD --no-ota"
 fi
 
 log "🚀 Launching build in tmux session 'lineage-build' on VM..."

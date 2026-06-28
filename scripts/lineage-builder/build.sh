@@ -11,6 +11,7 @@ export SYNC="false"
 export CLEAN="dirty"
 export CHERRYPICKS="489879 489705 488403"
 WORKER_MODE="false"
+export SKIP_OTA="false"
 
 # ── Parse Arguments ──────────────────────────────────────────────────────────
 while [[ $# -gt 0 ]]; do
@@ -45,6 +46,9 @@ while [[ $# -gt 0 ]]; do
         --dirty)
             export CLEAN="dirty"
             ;;
+        --no-ota)
+            export SKIP_OTA="true"
+            ;;
         -cp|--cherrypick|--cherry-pick)
             export CHERRYPICKS="$2"
             shift
@@ -58,6 +62,7 @@ while [[ $# -gt 0 ]]; do
             echo "  -s, --sync                 Sync repo before building (default: false)"
             echo "  -c, --clean                Perform clean build (clobber)"
             echo "      --dirty                Perform dirty build (default)"
+            echo "      --no-ota               Build ROM only, skip OTA release/upload"
             echo "  -cp, --cherrypick <ids>    Space-separated list of Gerrit change numbers/IDs to cherrypick"
             echo "  --worker                   Internal use: Run in worker mode on the VM"
             exit 0
