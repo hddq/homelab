@@ -20,11 +20,11 @@ provider "cloudflare" {
   api_token = data.sops_file.secrets.data["cloudflare_api_token"]
 }
 
-data "cloudflare_zone" "my_domain" {
+data "cloudflare_zones" "my_domain" {
   name = "hddq.org"
 }
 
 output "zone_id" {
-  value       = data.cloudflare_zone.my_domain.id
+  value       = data.cloudflare_zones.my_domain.result[0].id
   description = "The Cloudflare Zone ID for the domain"
 }
