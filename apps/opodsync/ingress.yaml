@@ -6,7 +6,7 @@ metadata:
 spec:
   ingressClassName: infrastructure-traefik
   rules:
-    - host: opodsync.hddq-k8s.duckdns.org
+    - host: opodsync.lab.hddq.org
       http:
         paths:
           - path: /

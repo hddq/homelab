@@ -6,7 +6,7 @@ metadata:
 spec:
   ingressClassName: infrastructure-traefik
   rules:
-    - host: feishin.hddq-k8s.duckdns.org
+    - host: feishin.lab.hddq.org
       http:
         paths:
           - path: /

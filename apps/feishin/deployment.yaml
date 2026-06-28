@@ -47,9 +47,9 @@ spec:
             - name: SERVER_TYPE
               value: "navidrome"
             - name: SERVER_URL
-              value: "https://navidrome.hddq-k8s.duckdns.org"
+              value: "https://navidrome.lab.hddq.org"
             - name: REMOTE_URL
-              value: "https://navidrome.hddq-k8s.duckdns.org"
+              value: "https://navidrome.lab.hddq.org"
           resources:
             requests:
               cpu: 50m
