@@ -1,0 +1,30 @@
+terraform {
+  required_providers {
+    cloudflare = {
+      source  = "cloudflare/cloudflare"
+      version = "4.52.8"
+    }
+    sops = {
+      source  = "carlpett/sops"
+      version = "1.4.1"
+    }
+  }
+}
+
+data "sops_file" "secrets" {
+  source_file = "secrets.yaml"
+}
+
+provider "cloudflare" {
+  # Inject the decrypted token into the Cloudflare provider
+  api_token = data.sops_file.secrets.data["cloudflare_api_token"]
+}
+
+data "cloudflare_zone" "my_domain" {
+  name = "hddq.org"
+}
+
+output "zone_id" {
+  value       = data.cloudflare_zone.my_domain.id
+  description = "The Cloudflare Zone ID for the domain"
+}

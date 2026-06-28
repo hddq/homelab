@@ -7,4 +7,6 @@ ansible/secrets.yaml
 *.tgz
 sealed-secrets-master-key.yaml
 homelab.key
-.decrypted~*secret.yaml
+.decrypted~*secret*.yaml
+.terraform
+*.tfstate
