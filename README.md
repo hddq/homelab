@@ -5,13 +5,7 @@
 Personal homelab running on Proxmox, managed fully as **Infrastructure as Code**.
 The goal is to never touch a server manually — if it's not in Git, it doesn't exist.
 
-[![CI - Kubernetes](https://github.com/hddq/homelab/actions/workflows/ci-k8s.yaml/badge.svg)](https://github.com/hddq/homelab/actions/workflows/ci-k8s.yaml)
-[![CI - Ansible](https://github.com/hddq/homelab/actions/workflows/ci-ansible.yaml/badge.svg)](https://github.com/hddq/homelab/actions/workflows/ci-ansible.yaml)
-[![CI - Nix](https://github.com/hddq/homelab/actions/workflows/ci-nix.yaml/badge.svg)](https://github.com/hddq/homelab/actions/workflows/ci-nix.yaml)
-[![CI - Lint](https://github.com/hddq/homelab/actions/workflows/ci-lint.yaml/badge.svg)](https://github.com/hddq/homelab/actions/workflows/ci-lint.yaml)
-[![CI - ShellCheck](https://github.com/hddq/homelab/actions/workflows/ci-shellcheck.yaml/badge.svg)](https://github.com/hddq/homelab/actions/workflows/ci-shellcheck.yaml)
-[![CI - Python](https://github.com/hddq/homelab/actions/workflows/ci-python.yaml/badge.svg)](https://github.com/hddq/homelab/actions/workflows/ci-python.yaml)
-[![CI - Gitleaks](https://github.com/hddq/homelab/actions/workflows/ci-gitleaks.yaml/badge.svg)](https://github.com/hddq/homelab/actions/workflows/ci-gitleaks.yaml)
+[![CI](https://github.com/hddq/homelab/actions/workflows/main.yaml/badge.svg)](https://github.com/hddq/homelab/actions/workflows/main.yaml)
 
 </div>
 
