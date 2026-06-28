@@ -25,6 +25,7 @@
         pluto
         pre-commit
         shellcheck
+        opentofu
       ];
 
       shellHook = ''
