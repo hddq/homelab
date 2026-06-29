@@ -9,7 +9,6 @@ misconfigurations:
     paths:
       - "argocd/charts/argo-cd/templates/argocd-application-controller/clusterrole.yaml"
       - "argocd/charts/argo-cd/templates/argocd-server/clusterrole.yaml"
-      - "cert-manager-webhook/charts/cert-manager-duckdns-webhook/templates/rbac.yaml"
 
   - id: KSV-0041
     statement: Infrastructure components (ArgoCD, Sealed Secrets, Traefik, Cert-Manager, Longhorn) require secret access for credentials, certificates, or unsealing operations.
@@ -29,7 +28,6 @@ misconfigurations:
       - "metallb/charts/metallb/templates/speaker.yaml"
       - "metallb/charts/metallb/charts/frr-k8s/templates/controller.yaml"
       - "metallb/charts/metallb/charts/frr-k8s/templates/status-cleaner.yaml"
-      - "cert-manager-webhook/charts/cert-manager-duckdns-webhook/templates/deployment.yaml"
       - "charts/metallb/templates/speaker.yaml"
       - "charts/metallb/charts/frr-k8s/templates/controller.yaml"
       - "charts/metallb/charts/frr-k8s/templates/status-cleaner.yaml"
@@ -41,7 +39,6 @@ misconfigurations:
       - "longhorn/charts/longhorn/templates/deployment-ui.yaml"
       - "metallb/charts/metallb/templates/speaker.yaml"
       - "metallb/charts/metallb/charts/frr-k8s/templates/controller.yaml"
-      - "cert-manager-webhook/charts/cert-manager-duckdns-webhook/templates/deployment.yaml"
       - "longhorn/charts/longhorn/templates/daemonset-sa.yaml"
       - "charts/metallb/templates/speaker.yaml"
       - "charts/metallb/charts/frr-k8s/templates/controller.yaml"
