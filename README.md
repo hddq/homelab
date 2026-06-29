@@ -16,13 +16,14 @@ The goal is to never touch a server manually — if it's not in Git, it doesn't 
 | Layer              | Tool                           | Purpose                                        |
 | ------------------ | ------------------------------ | ---------------------------------------------- |
 | Hypervisor         | Proxmox VE                     | VM management                                  |
+| Infrastructure IaC | Terraform / OpenTofu           | Declarative infrastructure management          |
 | Provisioning       | Ansible + Cloud-Init           | VM cloning, k3s install, kubeconfig            |
 | Kubernetes         | k3s                            | Lightweight k8s distribution                   |
 | GitOps             | ArgoCD                         | Syncs cluster state from this repo             |
 | Ingress            | Traefik                        | Reverse proxy + TLS termination                |
 | Load Balancer      | MetalLB (BGP)                  | Bare-metal LoadBalancer IPs via BGP to OpenWRT |
 | Storage            | Longhorn                       | Distributed block storage with replication     |
-| TLS                | cert-manager + DuckDNS webhook | Wildcard Let's Encrypt cert via DNS-01         |
+| TLS                | cert-manager                   | Wildcard Let's Encrypt cert via Cloudflare DNS-01|
 | Secrets            | SOPS + age + ksops             | Encrypted secrets safe to commit to Git        |
 | Monitoring         | VictoriaMetrics Stack          | Metrics collection, storage, alerting and dashboards   |
 | Dev environment    | Nix flake                      | Reproducible shell with all tools pinned       |
@@ -78,6 +79,7 @@ Secrets are encrypted with `sops` using an `age` key and stored as encrypted man
 ├── apps/                   # User-facing workloads
 ├── infrastructure/         # Cluster-level infrastructure (Helm wrappers)
 ├── scripts/                # One-off jobs (e.g. data migrations)
+├── terraform/              # Terraform/OpenTofu configurations
 ├── flake.nix               # Nix dev shell (all CLI tools pinned)
 ├── k3s_version.txt         # Single source of truth for k3s version (used by Ansible + Renovate)
 └── renovate.json           # Renovate bot config
@@ -208,4 +210,4 @@ direnv allow
 
 The `shellHook` sets up the Python venv, installs Ansible dependencies and collections, and configures `pre-commit`.
 
-Includes: `kubectl`, `helm`, `sops`, `age`, `argocd`, `kubeconform`, `trivy`, `pluto`, `gitleaks`, `yamllint`, `shellcheck`, `kubectx`, `pre-commit`, and the full Ansible stack in a venv.
+Includes: `kubectl`, `helm`, `sops`, `age`, `argocd`, `kubeconform`, `trivy`, `pluto`, `gitleaks`, `yamllint`, `shellcheck`, `kubectx`, `pre-commit`, `opentofu`, and the full Ansible stack in a venv.
