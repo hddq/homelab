@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-VERSION="v3.8.6"
+VERSION="v3.8.7"
 
 echo -e "Offsite Backup Script ${VERSION}"
 
@@ -80,8 +80,6 @@ determine_pools_to_process() {
 
 mount_pool_datasets() {
     local pool=$1
-    echo "Creating temporary snapshot: ${pool}@${SNAP_NAME}"
-    zfs snapshot -r "${pool}@${SNAP_NAME}"
 
     local dataset_list
     dataset_list=$(zfs list -r -H -o name -t filesystem "$pool" | grep -v "/\.")
@@ -89,6 +87,17 @@ mount_pool_datasets() {
     for item in "${BLACKLISTED_DATASETS[@]}"; do
         dataset_list=$(echo "$dataset_list" | grep -v "^${item}")
     done
+
+    local snapshot_args=()
+    while IFS= read -r dataset; do
+        [ -z "$dataset" ] && continue
+        snapshot_args+=("${dataset}@${SNAP_NAME}")
+    done <<< "$dataset_list"
+
+    if [ "${#snapshot_args[@]}" -gt 0 ]; then
+        echo "Creating temporary snapshots (excluding zvols and blacklisted datasets)..."
+        zfs snapshot "${snapshot_args[@]}"
+    fi
     
     while IFS= read -r dataset; do
         [ -z "$dataset" ] && continue
