@@ -15,6 +15,7 @@ longhorn:
   persistence:
     defaultClass: true
     defaultClassReplicaCount: 1
+    defaultDataLocality: strict-local
     reclaimPolicy: Retain
 
   preUpgradeChecker:
@@ -25,6 +26,7 @@ longhorn:
     # kubectl label node NODE_NAME node.longhorn.io/create-default-disk=true
     taintToleration: "node-role.kubernetes.io/control-plane=true:NoSchedule"
     storageMinimalAvailablePercentage: 10
+    defaultDataLocality: strict-local
 
   ingress:
     enabled: false
