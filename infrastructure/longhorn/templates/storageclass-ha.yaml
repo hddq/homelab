@@ -8,3 +8,4 @@ reclaimPolicy: Retain
 volumeBindingMode: Immediate
 parameters:
   numberOfReplicas: "2"
+  dataLocality: "disabled"
