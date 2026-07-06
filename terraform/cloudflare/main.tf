@@ -70,3 +70,13 @@ resource "cloudflare_dns_record" "stg_wildcard" {
   ttl     = 1
   proxied = false
 }
+
+# GitHub Pages: frc.hddq.org
+resource "cloudflare_dns_record" "frc_github_pages" {
+  zone_id = local.zone_id
+  name    = "frc"
+  type    = "CNAME"
+  content = "hddq.github.io"
+  ttl     = 1
+  proxied = false
+}
