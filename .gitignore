@@ -10,4 +10,4 @@ homelab.key
 .decrypted~*secret*.yaml
 .terraform
 *.tfstate
-*.tfstate.backup
+*.tfstate.*
