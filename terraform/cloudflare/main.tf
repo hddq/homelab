@@ -30,7 +30,7 @@ output "zone_id" {
 }
 
 locals {
-  zone_id = data.cloudflare_zones.my_domain.result[0].id
+  zone_id    = data.cloudflare_zones.my_domain.result[0].id
   account_id = data.sops_file.secrets.data["cloudflare_account_id"]
 }
 
