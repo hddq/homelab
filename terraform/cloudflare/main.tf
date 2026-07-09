@@ -91,7 +91,7 @@ resource "cloudflare_dns_record" "spf" {
   zone_id = local.zone_id
   name    = "hddq.org"
   type    = "TXT"
-  content = "v=spf1 include:_spf.mx.cloudflare.net ~all"
+  content = "\"v=spf1 include:_spf.mx.cloudflare.net ~all\""
   ttl     = 1
 }
 
@@ -99,7 +99,7 @@ resource "cloudflare_dns_record" "dmarc" {
   zone_id = local.zone_id
   name    = "_dmarc"
   type    = "TXT"
-  content = "v=DMARC1; p=reject; rua=mailto:hddqgit@gmail.com; adkim=s; aspf=s"
+  content = "\"v=DMARC1; p=reject; rua=mailto:hddqgit@gmail.com; adkim=s; aspf=s\""
   ttl     = 1
 }
 
