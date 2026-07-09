@@ -99,7 +99,7 @@ resource "cloudflare_dns_record" "dmarc" {
   zone_id = local.zone_id
   name    = "_dmarc"
   type    = "TXT"
-  content = "v=DMARC1; p=reject;"
+  content = "v=DMARC1; p=reject; rua=mailto:hddqgit@gmail.com; adkim=s; aspf=s"
   ttl     = 1
 }
 
