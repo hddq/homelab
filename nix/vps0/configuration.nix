@@ -33,6 +33,7 @@
   security.sudo.wheelNeedsPassword = false;
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.trusted-users = [ "hddq" ];
 
   system.stateVersion = "26.05";
 }
