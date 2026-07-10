@@ -85,7 +85,7 @@ resource "oci_core_security_list" "free_sl" {
       min = 22
     }
   }
-  
+
   ingress_security_rules {
     protocol = "1" # ICMP
     source   = "0.0.0.0/0"
@@ -94,7 +94,7 @@ resource "oci_core_security_list" "free_sl" {
       code = 4
     }
   }
-  
+
   ingress_security_rules {
     protocol = "1" # ICMP
     source   = "10.0.0.0/16"
@@ -130,9 +130,9 @@ resource "oci_core_instance" "free_instance" {
   availability_domain = data.oci_identity_availability_domains.ads.availability_domains[0].name
   compartment_id      = local.compartment_ocid
   display_name        = "vps0"
-  
+
   # Ampere A1 (ARM) Always Free shape
-  shape               = "VM.Standard.A1.Flex"
+  shape = "VM.Standard.A1.Flex"
 
   # Always Free A1 limit is a total of 2 OCPUs and 12GB of RAM across the tenancy
   shape_config {
@@ -148,7 +148,7 @@ resource "oci_core_instance" "free_instance" {
   source_details {
     source_type = "image"
     source_id   = data.oci_core_images.ubuntu_images.images[0].id
-    
+
     # 200GB is the max free tier total block volume storage
     boot_volume_size_in_gbs = 200
   }
@@ -156,7 +156,7 @@ resource "oci_core_instance" "free_instance" {
   metadata = {
     ssh_authorized_keys = local.ssh_public_key
   }
-  
+
   # Prevent Terraform from destroying and recreating on certain changes
   lifecycle {
     ignore_changes = [
