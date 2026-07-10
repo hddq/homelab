@@ -10,7 +10,6 @@
   };
 
   outputs = {
-    self,
     nixpkgs,
     disko,
     ...
