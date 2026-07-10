@@ -8,6 +8,10 @@ terraform {
       source  = "carlpett/sops"
       version = "1.4.1"
     }
+    null = {
+      source  = "hashicorp/null"
+      version = "3.3.0"
+    }
   }
 }
 
@@ -162,5 +166,26 @@ resource "oci_core_instance" "free_instance" {
     ignore_changes = [
       source_details[0].source_id
     ]
+  }
+}
+
+# Automatically deploy NixOS on the new instance
+resource "null_resource" "install_nixos" {
+  # Re-run if the instance is recreated
+  triggers = {
+    instance_id = oci_core_instance.free_instance.id
+  }
+
+  provisioner "local-exec" {
+    # We wait a bit for Ubuntu to fully boot and start sshd, 
+    # then run nixos-anywhere from the local machine.
+    # Adjust sleep time if your instance takes longer to boot.
+    command = <<EOT
+      echo "Waiting 60 seconds for Ubuntu to boot and start SSH..."
+      sleep 60
+      # Ensure you run tofu apply from within the terraform/oracle-cloud directory
+      # so the relative path to the flake resolves correctly.
+      nix run github:nix-community/nixos-anywhere -- --ssh-option StrictHostKeyChecking=no --ssh-option UserKnownHostsFile=/dev/null --flake ../../nix/vps0#vps0 ubuntu@${oci_core_instance.free_instance.public_ip}
+    EOT
   }
 }
