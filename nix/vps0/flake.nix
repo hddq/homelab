@@ -9,10 +9,15 @@
     };
   };
 
-  outputs = { self, nixpkgs, disko, ... }@inputs: {
+  outputs = {
+    self,
+    nixpkgs,
+    disko,
+    ...
+  } @ inputs: {
     nixosConfigurations."vps0" = nixpkgs.lib.nixosSystem {
       system = "aarch64-linux";
-      specialArgs = { inherit inputs; };
+      specialArgs = {inherit inputs;};
       modules = [
         disko.nixosModules.disko
         ./disk-config.nix
