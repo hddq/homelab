@@ -29,7 +29,7 @@
   users.users.hddq = {
     isNormalUser = true;
     description = "hddq";
-    extraGroups = ["networkmanager" "wheel"];
+    extraGroups = ["wheel"];
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAKFgv0ykKB0lLGjkh3fI8tUy+o8qtUcgjFPSN1AyncW hddq@main"
     ];
