@@ -16,6 +16,7 @@ The goal is to never touch a server manually — if it's not in Git, it doesn't 
 | Layer              | Tool                           | Purpose                                        |
 | ------------------ | ------------------------------ | ---------------------------------------------- |
 | Hypervisor         | Proxmox VE                     | VM management                                  |
+| Cloud              | Oracle Cloud                   | External VPS infrastructure                    |
 | Infrastructure IaC | Terraform / OpenTofu           | Declarative infrastructure management          |
 | Provisioning       | Ansible + Cloud-Init           | VM cloning, k3s install, kubeconfig            |
 | Kubernetes         | k3s                            | Lightweight k8s distribution                   |
@@ -78,6 +79,7 @@ Secrets are encrypted with `sops` using an `age` key and stored as encrypted man
 ├── bootstrap/              # ArgoCD App of Apps Helm chart
 ├── apps/                   # User-facing workloads
 ├── infrastructure/         # Cluster-level infrastructure (Helm wrappers)
+├── nix/                    # NixOS system configurations
 ├── scripts/                # One-off jobs (e.g. data migrations)
 ├── terraform/              # Terraform/OpenTofu configurations
 ├── flake.nix               # Nix dev shell (all CLI tools pinned)
