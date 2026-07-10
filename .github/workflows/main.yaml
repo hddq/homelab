@@ -52,7 +52,8 @@ jobs:
               - '**/*.yaml'
               - '**/*.yml'
             nix:
-              - 'flake.nix'
+              - '**/*.nix'
+              - 'nix/**'
               - 'flake.lock'
               - '.github/workflows/ci-nix.yaml'
               - '.github/workflows/main.yaml'
