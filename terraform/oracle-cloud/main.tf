@@ -138,10 +138,10 @@ resource "oci_core_instance" "free_instance" {
   # Ampere A1 (ARM) Always Free shape
   shape = "VM.Standard.A1.Flex"
 
-  # Always Free A1 limit is a total of 2 OCPUs and 12GB of RAM across the tenancy
+  # Always Free A1 limit is a total of 4 OCPUs and 24GB of RAM across the tenancy
   shape_config {
-    ocpus         = 2
-    memory_in_gbs = 12
+    ocpus         = 4
+    memory_in_gbs = 24
   }
 
   create_vnic_details {
