@@ -26,6 +26,7 @@
         pre-commit
         shellcheck
         opentofu
+        deploy-rs
       ];
 
       shellHook = ''
