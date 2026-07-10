@@ -1,14 +1,20 @@
 {modulesPath, ...}: {
   imports = [(modulesPath + "/profiles/qemu-guest.nix")];
 
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
-  boot.initrd.availableKernelModules = ["xhci_pci" "usbhid" "virtio_pci" "virtio_blk"];
+  boot = {
+    loader = {
+      systemd-boot.enable = true;
+      efi.canTouchEfiVariables = true;
+    };
+    initrd.availableKernelModules = ["xhci_pci" "usbhid" "virtio_pci" "virtio_blk"];
+  };
 
-  networking.hostName = "vps0";
-  networking.useDHCP = true;
-  networking.firewall.enable = true;
-  networking.firewall.allowedTCPPorts = [22];
+  networking = {
+    hostName = "vps0";
+    useDHCP = true;
+    firewall.enable = true;
+    firewall.allowedTCPPorts = [22];
+  };
 
   services.openssh = {
     enable = true;
@@ -29,9 +35,10 @@
     ];
   };
   security.sudo.wheelNeedsPassword = false;
-
-  nix.settings.experimental-features = ["nix-command" "flakes"];
-  nix.settings.trusted-users = ["hddq"];
+  nix = {
+    settings.experimental-features = ["nix-command" "flakes"];
+    settings.trusted-users = ["hddq"];
+  };
 
   system.stateVersion = "26.05";
 }
