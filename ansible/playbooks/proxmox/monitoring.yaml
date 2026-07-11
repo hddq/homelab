@@ -3,7 +3,7 @@
   hosts: proxmox
   become: true
   vars:
-    node_exporter_version: "1.11.1"
+    node_exporter_version: "1.12.0"
 
   tasks:
     - name: Check current Node Exporter version
