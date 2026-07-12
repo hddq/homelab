@@ -1,4 +1,4 @@
-{modulesPath, ...}: {
+{config, modulesPath, ...}: {
   imports = [(modulesPath + "/profiles/qemu-guest.nix")];
 
   boot = {
@@ -14,6 +14,14 @@
     useDHCP = true;
     firewall.enable = true;
     firewall.allowedTCPPorts = [2222];
+    firewall.allowedUDPPorts = [51820];
+    wireguard.interfaces = {
+      wg0 = {
+        ips = [ "192.168.70.2/24" ];
+        listenPort = 51820;
+        privateKeyFile = config.sops.secrets.wireguard_private_key.path;
+      };
+    };
   };
 
   services.openssh = {
@@ -46,6 +54,7 @@
     defaultSopsFormat = "yaml";
     age.keyFile = "/var/lib/sops-nix/key.txt";
     secrets.example = {};
+    secrets.wireguard_private_key = {};
   };
 
   system.stateVersion = "26.05";

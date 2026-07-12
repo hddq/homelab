@@ -115,6 +115,15 @@ resource "oci_core_security_list" "free_sl" {
       type = 3
     }
   }
+
+  ingress_security_rules {
+    protocol = "17" # UDP
+    source   = "0.0.0.0/0"
+    udp_options {
+      max = 51820
+      min = 51820
+    }
+  }
 }
 
 # Create a Subnet
