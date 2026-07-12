@@ -13,11 +13,12 @@
     hostName = "vps0";
     useDHCP = true;
     firewall.enable = true;
-    firewall.allowedTCPPorts = [22];
+    firewall.allowedTCPPorts = [2222];
   };
 
   services.openssh = {
     enable = true;
+    ports = [2222];
     settings = {
       PasswordAuthentication = false;
       KbdInteractiveAuthentication = false;
