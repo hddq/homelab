@@ -178,6 +178,31 @@ For one-off staging tests, prefer a CLI override:
 ansible-playbook -i inventory/staging/hosts.ini playbooks/kubernetes/03-setup-infra.yaml -e git_branch=feat-x
 ```
 
+### External VPS (vps0) Provisioning
+
+I also maintain an external VPS (`vps0`) hosted on Oracle Cloud. The infrastructure for this is managed with Terraform (`/terraform/oracle-cloud`) and the OS configuration is managed with NixOS (`/nix/vps0/`).
+
+**Step 1 — Provision Infrastructure:**
+
+Apply the Terraform configuration to provision the Oracle Cloud instance:
+
+```bash
+cd terraform/oracle-cloud
+tofu apply
+```
+
+It will also bootstrap NixOS with `nixos-anywhere`
+
+**Step 2 — Transfer SOPS Key:**
+
+For the NixOS configuration to decrypt secrets, transfer the SOPS age key to the VPS using the following commands:
+
+```bash
+ssh vps0 'sudo mkdir /var/lib/sops-nix && sudo chown $(whoami) /var/lib/sops-nix'
+scp vps0.key vps0:/var/lib/sops-nix/key.txt
+ssh vps0 'sudo chmod 600 /var/lib/sops-nix/key.txt && sudo chown root:root /var/lib/sops-nix/key.txt'
+```
+
 ---
 
 ## 🔒 CI Pipeline
