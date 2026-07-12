@@ -27,6 +27,8 @@
         shellcheck
         opentofu
         deploy-rs
+        wireguard-tools
+        qrencode
       ];
 
       shellHook = ''
