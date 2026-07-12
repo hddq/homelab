@@ -11,6 +11,10 @@
       url = "github:serokell/deploy-rs";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
@@ -18,6 +22,7 @@
     nixpkgs,
     disko,
     deploy-rs,
+    sops-nix,
     ...
   } @ inputs: {
     nixosConfigurations."vps0" = nixpkgs.lib.nixosSystem {
@@ -27,6 +32,7 @@
         disko.nixosModules.disko
         ./disk-config.nix
         ./configuration.nix
+        sops-nix.nixosModules.sops
       ];
     };
 
