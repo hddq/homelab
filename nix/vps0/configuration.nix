@@ -7,6 +7,7 @@
       efi.canTouchEfiVariables = true;
     };
     initrd.availableKernelModules = ["xhci_pci" "usbhid" "virtio_pci" "virtio_blk"];
+    kernel.sysctl."net.ipv4.ip_forward" = 1;
   };
 
   networking = {
@@ -20,6 +21,14 @@
         ips = [ "192.168.70.2/24" ];
         listenPort = 51820;
         privateKeyFile = config.sops.secrets.wireguard_private_key.path;
+
+        peers = [
+          {
+            # tundra
+            publicKey = "Ew6QN2qyHDu7JYFFz7Y+o+kfMVSFFthk+DS16xo7D1g=";
+            allowedIPs = [ "192.168.70.15/32" ];
+          }
+        ];
       };
     };
   };
