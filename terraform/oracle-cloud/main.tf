@@ -45,7 +45,7 @@ data "oci_identity_availability_domains" "ads" {
 # Create a Virtual Cloud Network (VCN)
 resource "oci_core_vcn" "free_vcn" {
   compartment_id = local.compartment_ocid
-  cidr_block     = "192.168.70.0/24"
+  cidr_block     = "10.0.0.0/24"
   display_name   = "always-free-vcn"
   dns_label      = "freevcn"
 }
@@ -112,7 +112,7 @@ resource "oci_core_security_list" "free_sl" {
 resource "oci_core_subnet" "free_subnet" {
   compartment_id    = local.compartment_ocid
   vcn_id            = oci_core_vcn.free_vcn.id
-  cidr_block        = "192.168.70.0/24"
+  cidr_block        = "10.0.0.0/24"
   display_name      = "always-free-subnet"
   route_table_id    = oci_core_route_table.free_rt.id
   security_list_ids = [oci_core_security_list.free_sl.id]
