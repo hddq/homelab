@@ -6,8 +6,4 @@ resources:
   - deployment.yaml
   - service.yaml
   - namespace.yaml
-
-configMapGenerator:
-  - name: unbound-config
-    files:
-      - config/unbound.conf
+  - ../../shared/dns
