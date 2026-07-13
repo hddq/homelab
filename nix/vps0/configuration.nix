@@ -17,7 +17,7 @@
   networking = {
     hostName = "vps0";
     useDHCP = true;
-    firewall = { 
+    firewall = {
       enable = true;
       allowedTCPPorts = [2222];
       allowedUDPPorts = [51820];
