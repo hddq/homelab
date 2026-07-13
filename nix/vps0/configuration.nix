@@ -24,8 +24,13 @@
 
         peers = [
           {
+            # openwrt
+            publicKey = "TCiRCR6qUTA/DiyCFsBFDJ+t5U2MfUf+ilJiFWrJe24=";
+            allowedIPs = [ "192.168.70.1/32" "192.168.40.0/24" "192.168.41.0/24" "192.168.10.0/24" ];
+          }
+          {
             # tundra
-            publicKey = "Ew6QN2qyHDu7JYFFz7Y+o+kfMVSFFthk+DS16xo7D1g=";
+            publicKey = "kJWA/gR6RTYrJm+XMC1DDLuTq079SvVZE5QDST/qATc=";
             allowedIPs = [ "192.168.70.15/32" ];
           }
         ];
