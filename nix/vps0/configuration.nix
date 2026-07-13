@@ -17,9 +17,11 @@
   networking = {
     hostName = "vps0";
     useDHCP = true;
-    firewall.enable = true;
-    firewall.allowedTCPPorts = [2222];
-    firewall.allowedUDPPorts = [51820];
+    firewall = { 
+      enable = true;
+      allowedTCPPorts = [2222];
+      allowedUDPPorts = [51820];
+    };
     wireguard.interfaces = {
       wg0 = {
         ips = ["192.168.70.2/24"];
@@ -71,8 +73,10 @@
     defaultSopsFile = ./secret.yaml;
     defaultSopsFormat = "yaml";
     age.keyFile = "/var/lib/sops-nix/key.txt";
-    secrets.example = {};
-    secrets.wireguard_private_key = {};
+    secrets = {
+      example = {};
+      wireguard_private_key = {};
+    };
   };
 
   system.stateVersion = "26.05";
