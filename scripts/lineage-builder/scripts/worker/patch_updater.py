@@ -19,7 +19,9 @@ else:
     new_content = content
     if not new_content.endswith("\n"):
         new_content += "\n"
-    new_content += f"\nPRODUCT_SYSTEM_DEFAULT_PROPERTIES += \\\n    lineage.updater.uri={uri}\n"
+    new_content += (
+        f"\nPRODUCT_SYSTEM_DEFAULT_PROPERTIES += \\\n    lineage.updater.uri={uri}\n"
+    )
 
 with open(makefile, "w") as f:
     f.write(new_content)

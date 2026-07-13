@@ -122,7 +122,7 @@ def put_char(lines, row, col, ch):
     ensure_line(lines, row)
     line = lines[row]
     if col < len(line):
-        line = line[:col] + ch + line[col + 1:]
+        line = line[:col] + ch + line[col + 1 :]
     else:
         line = line + (" " * (col - len(line))) + ch
     lines[row] = line
@@ -288,7 +288,9 @@ def main():
 
     print(f"Starting offsite-backup-server v{VERSION} on {HOST}:{PORT}")
     server = ThreadingHTTPServer((HOST, PORT), Handler)
-    backup_thread = threading.Thread(target=run_backup, args=(script_path, server), daemon=True)
+    backup_thread = threading.Thread(
+        target=run_backup, args=(script_path, server), daemon=True
+    )
     backup_thread.start()
 
     try:
