@@ -12,9 +12,28 @@ repos:
     rev: v0.11.0.1
     hooks:
       - id: shellcheck
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.21
+        exclude: ^\.envrc$
+  - repo: local
     hooks:
       - id: ruff
-        args: [--fix]
+        name: ruff
+        entry: nix run nixpkgs#ruff -- check --fix
+        language: system
+        types_or: [python, pyi]
+        require_serial: true
       - id: ruff-format
+        name: ruff-format
+        entry: nix run nixpkgs#ruff -- format
+        language: system
+        types_or: [python, pyi]
+        require_serial: true
+      - id: alejandra
+        name: alejandra
+        entry: nix run nixpkgs#alejandra -- .
+        language: system
+        types: [nix]
+      - id: deadnix
+        name: deadnix
+        entry: nix run nixpkgs#deadnix -- .
+        language: system
+        types: [nix]
