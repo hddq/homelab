@@ -63,8 +63,11 @@ spec:
               cpu: 100m
           volumeMounts:
             - name: config
-              mountPath: /usr/local/unbound/unbound.conf
+              mountPath: /usr/local/unbound/unbound-shared.conf
               subPath: unbound.conf
+            - name: config
+              mountPath: /usr/local/unbound/unbound.conf
+              subPath: unbound-k8s.conf
             - name: unbound-data
               mountPath: /usr/local/unbound/iana.d
               subPath: iana

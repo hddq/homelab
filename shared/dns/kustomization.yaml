@@ -4,3 +4,4 @@ configMapGenerator:
   - name: unbound-config
     files:
       - unbound.conf
+      - unbound-k8s.conf
