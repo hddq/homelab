@@ -4,127 +4,144 @@
   become: true
   tasks:
     - name: Ensure corosync-qdevice is installed on Proxmox
-      apt:
+      ansible.builtin.apt:
         name: corosync-qdevice
         state: present
-        update_cache: yes
+        update_cache: true
 
-    - name: Get Proxmox cluster name
-      command: awk '/cluster_name:/ {print $2}' /etc/pve/corosync.conf
+    - name: Get Proxmox cluster name # noqa: run-once[task]
+      ansible.builtin.command: awk '/cluster_name:/ {print $2}' /etc/pve/corosync.conf
       register: cluster_name_cmd
       changed_when: false
       run_once: true
 
-    - name: Set cluster_name fact
-      set_fact:
+    - name: Set cluster_name fact # noqa: run-once[task]
+      ansible.builtin.set_fact:
         cluster_name: "{{ cluster_name_cmd.stdout }}"
       run_once: true
 
-    - name: Ensure pmxcfs nssdb directory exists
-      file:
+    - name: Ensure pmxcfs nssdb directory exists # noqa: run-once[task]
+      ansible.builtin.file:
         path: /etc/pve/corosync/qdevice/net/nssdb
         state: directory
-        mode: '0755'
+        mode: "0755"
       run_once: true
 
     # ---- NODE 1 CERTIFICATE EXCHANGE ----
-    - block:
+    - name: Node 1 Certificate Exchange
+      when: inventory_hostname == ansible_play_hosts_all[0]
+      block:
         - name: Fetch CA cert from NixOS to controller
-          command: scp -o StrictHostKeyChecking=no -P {{ hostvars[groups['qdevice'][0]].ansible_port | default(22) }} {{ hostvars[groups['qdevice'][0]].ansible_user }}@{{ hostvars[groups['qdevice'][0]].ansible_host }}:/etc/corosync/qnetd/nssdb/qnetd-cacert.crt /tmp/qnetd-cacert.crt
+          ansible.builtin.command: scp -o StrictHostKeyChecking=no -P {{ hostvars[groups['qdevice'][0]].ansible_port | default(22) }} {{
+            hostvars[groups['qdevice'][0]].ansible_user }}@{{ hostvars[groups['qdevice'][0]].ansible_host }}:/etc/corosync/qnetd/nssdb/qnetd-cacert.crt
+            /tmp/qnetd-cacert.crt
           delegate_to: localhost
           become: false
           changed_when: false
 
         - name: Copy CA cert to Proxmox (tmp)
-          copy:
+          ansible.builtin.copy:
             src: /tmp/qnetd-cacert.crt
             dest: /tmp/qnetd-cacert.crt
+            mode: "0644"
         - name: Move CA cert to pmxcfs
-          command: cp /tmp/qnetd-cacert.crt /etc/pve/corosync/qdevice/net/nssdb/qnetd-cacert.crt
+          ansible.builtin.command: cp /tmp/qnetd-cacert.crt /etc/pve/corosync/qdevice/net/nssdb/qnetd-cacert.crt
+          changed_when: false
 
         - name: Init local NSS db (First Node)
-          command: corosync-qdevice-net-certutil -i -c /etc/pve/corosync/qdevice/net/nssdb/qnetd-cacert.crt
+          ansible.builtin.command: corosync-qdevice-net-certutil -i -c /etc/pve/corosync/qdevice/net/nssdb/qnetd-cacert.crt
           args:
             creates: /etc/corosync/qdevice/net/nssdb/cert9.db
 
         - name: Generate CSR
-          command: corosync-qdevice-net-certutil -r -n {{ cluster_name }}
+          ansible.builtin.command: corosync-qdevice-net-certutil -r -n {{ cluster_name }}
           args:
             creates: /etc/corosync/qdevice/net/nssdb/qdevice-net-node.crq
 
         - name: Fetch CSR to controller
-          fetch:
+          ansible.builtin.fetch:
             src: /etc/corosync/qdevice/net/nssdb/qdevice-net-node.crq
             dest: /tmp/qdevice-net-node.crq
-            flat: yes
+            flat: true
 
         - name: Push CSR to NixOS
-          command: scp -o StrictHostKeyChecking=no -P {{ hostvars[groups['qdevice'][0]].ansible_port | default(22) }} /tmp/qdevice-net-node.crq {{ hostvars[groups['qdevice'][0]].ansible_user }}@{{ hostvars[groups['qdevice'][0]].ansible_host }}:/tmp/qdevice-net-node.crq
+          ansible.builtin.command: scp -o StrictHostKeyChecking=no -P {{ hostvars[groups['qdevice'][0]].ansible_port | default(22) }} /tmp/qdevice-net-node.crq {{
+            hostvars[groups['qdevice'][0]].ansible_user }}@{{ hostvars[groups['qdevice'][0]].ansible_host }}:/tmp/qdevice-net-node.crq
           delegate_to: localhost
           become: false
           changed_when: false
 
         - name: Sign CSR on NixOS
-          command: ssh -o StrictHostKeyChecking=no -p {{ hostvars[groups['qdevice'][0]].ansible_port | default(22) }} {{ hostvars[groups['qdevice'][0]].ansible_user }}@{{ hostvars[groups['qdevice'][0]].ansible_host }} "corosync-qnetd-certutil -s -c /tmp/qdevice-net-node.crq -n {{ cluster_name }}"
+          ansible.builtin.command: ssh -o StrictHostKeyChecking=no -p {{ hostvars[groups['qdevice'][0]].ansible_port | default(22) }} {{
+            hostvars[groups['qdevice'][0]].ansible_user }}@{{ hostvars[groups['qdevice'][0]].ansible_host }} "corosync-qnetd-certutil -s -c
+            /tmp/qdevice-net-node.crq -n {{ cluster_name }}"
           delegate_to: localhost
           become: false
+          changed_when: true
 
         - name: Fetch signed cert from NixOS to controller
-          command: scp -o StrictHostKeyChecking=no -P {{ hostvars[groups['qdevice'][0]].ansible_port | default(22) }} {{ hostvars[groups['qdevice'][0]].ansible_user }}@{{ hostvars[groups['qdevice'][0]].ansible_host }}:/etc/corosync/qnetd/nssdb/cluster-{{ cluster_name }}.crt /tmp/cluster-{{ cluster_name }}.crt
+          ansible.builtin.command: scp -o StrictHostKeyChecking=no -P {{ hostvars[groups['qdevice'][0]].ansible_port | default(22) }} {{
+            hostvars[groups['qdevice'][0]].ansible_user }}@{{ hostvars[groups['qdevice'][0]].ansible_host }}:/etc/corosync/qnetd/nssdb/cluster-{{ cluster_name
+            }}.crt /tmp/cluster-{{ cluster_name }}.crt
           delegate_to: localhost
           become: false
           changed_when: false
 
         - name: Copy signed cert to Proxmox (tmp)
-          copy:
+          ansible.builtin.copy:
             src: /tmp/cluster-{{ cluster_name }}.crt
             dest: /tmp/cluster-{{ cluster_name }}.crt
+            mode: "0644"
         - name: Move signed cert to pmxcfs
-          command: cp /tmp/cluster-{{ cluster_name }}.crt /etc/pve/corosync/qdevice/net/nssdb/cluster-{{ cluster_name }}.crt
+          ansible.builtin.command: cp /tmp/cluster-{{ cluster_name }}.crt /etc/pve/corosync/qdevice/net/nssdb/cluster-{{ cluster_name }}.crt
+          changed_when: false
 
         - name: Import SIGNED CRT to generate p12
-          command: corosync-qdevice-net-certutil -M -c /etc/pve/corosync/qdevice/net/nssdb/cluster-{{ cluster_name }}.crt
+          ansible.builtin.command: corosync-qdevice-net-certutil -M -c /etc/pve/corosync/qdevice/net/nssdb/cluster-{{ cluster_name }}.crt
           args:
             creates: /etc/corosync/qdevice/net/nssdb/qdevice-net-node.p12
 
         - name: Propagate p12 to cluster filesystem
-          command: cp /etc/corosync/qdevice/net/nssdb/qdevice-net-node.p12 /etc/pve/corosync/qdevice/net/nssdb/qdevice-net-node.p12
-
-      when: inventory_hostname == ansible_play_hosts_all[0]
+          ansible.builtin.command: cp /etc/corosync/qdevice/net/nssdb/qdevice-net-node.p12 /etc/pve/corosync/qdevice/net/nssdb/qdevice-net-node.p12
+          changed_when: false
 
     # ---- OTHER NODES CERTIFICATE IMPORT ----
-    - block:
+    - name: Other Nodes Certificate Import
+      when: inventory_hostname != ansible_play_hosts_all[0]
+      block:
         - name: Init local NSS db (Other Nodes)
-          command: corosync-qdevice-net-certutil -i -c /etc/pve/corosync/qdevice/net/nssdb/qnetd-cacert.crt
+          ansible.builtin.command: corosync-qdevice-net-certutil -i -c /etc/pve/corosync/qdevice/net/nssdb/qnetd-cacert.crt
           args:
             creates: /etc/corosync/qdevice/net/nssdb/cert9.db
 
         - name: Check if p12 is already imported
-          command: certutil -L -d /etc/corosync/qdevice/net/nssdb
+          ansible.builtin.command: certutil -L -d /etc/corosync/qdevice/net/nssdb
           register: cert_list
           changed_when: false
           failed_when: false
 
         - name: Import p12 cert
-          command: corosync-qdevice-net-certutil -m -c /etc/pve/corosync/qdevice/net/nssdb/qdevice-net-node.p12
+          ansible.builtin.command: corosync-qdevice-net-certutil -m -c /etc/pve/corosync/qdevice/net/nssdb/qdevice-net-node.p12
           when: "'QDevice Net Node' not in cert_list.stdout"
-
-      when: inventory_hostname != ansible_play_hosts_all[0]
+          changed_when: true
 
     # ---- NODE 1: EDIT COROSYNC.CONF ----
-    - block:
+    - name: Node 1 Edit corosync.conf
+      when: inventory_hostname == ansible_play_hosts_all[0]
+      block:
         - name: Check if qdevice is already in corosync.conf
-          command: 'grep -q "model: net" /etc/pve/corosync.conf'
+          ansible.builtin.command: 'grep -q "model: net" /etc/pve/corosync.conf'
           register: qdevice_configured
           failed_when: false
           changed_when: false
 
         - name: Backup corosync.conf
-          command: cp /etc/pve/corosync.conf /etc/pve/corosync.conf.bak
+          ansible.builtin.command: cp /etc/pve/corosync.conf /etc/pve/corosync.conf.bak
           when: qdevice_configured.rc != 0
+          changed_when: true
 
         - name: Modify corosync.conf to add quorum device
-          shell: |
+          ansible.builtin.shell: |
             cat << 'EOF' > /tmp/update_corosync.py
             import re
             import sys
@@ -160,12 +177,11 @@
             python3 /tmp/update_corosync.py "{{ hostvars[groups['qdevice'][0]]['ansible_host'] }}"
             mv /etc/pve/corosync.conf.new /etc/pve/corosync.conf
           when: qdevice_configured.rc != 0
-
-      when: inventory_hostname == ansible_play_hosts_all[0]
+          changed_when: true
 
     # ---- ALL NODES: START/ENABLE ----
     - name: Enable and start corosync-qdevice
-      systemd:
+      ansible.builtin.systemd:
         name: corosync-qdevice
         state: started
-        enabled: yes
+        enabled: true
