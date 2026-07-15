@@ -3,6 +3,7 @@
     (modulesPath + "/profiles/qemu-guest.nix")
     ./wireguard.nix
     ./unbound.nix
+    ./qnetd.nix
   ];
 
   boot = {
@@ -37,7 +38,7 @@
   users.users.hddq = {
     isNormalUser = true;
     description = "hddq";
-    extraGroups = ["wheel"];
+    extraGroups = ["wheel" "coroqnetd"];
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAKFgv0ykKB0lLGjkh3fI8tUy+o8qtUcgjFPSN1AyncW hddq@main"
     ];
