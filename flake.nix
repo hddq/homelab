@@ -29,6 +29,10 @@
         deploy-rs
         wireguard-tools
         qrencode
+        statix
+        deadnix
+        alejandra
+        ruff
       ];
 
       shellHook = ''
