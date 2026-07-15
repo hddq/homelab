@@ -37,3 +37,8 @@ repos:
         entry: nix run nixpkgs#deadnix -- .
         language: system
         types: [nix]
+      - id: statix
+        name: statix
+        entry: nix run nixpkgs#statix -- fix
+        language: system
+        types: [nix]
