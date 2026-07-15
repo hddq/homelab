@@ -91,15 +91,6 @@ resource "oci_core_security_list" "free_sl" {
   }
 
   ingress_security_rules {
-    protocol = "6" # TCP
-    source   = "0.0.0.0/0"
-    tcp_options {
-      max = 2222
-      min = 2222
-    }
-  }
-
-  ingress_security_rules {
     protocol = "1" # ICMP
     source   = "0.0.0.0/0"
     icmp_options {
