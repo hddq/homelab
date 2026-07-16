@@ -5,7 +5,7 @@ metadata:
     app: blocky
   name: blocky
   annotations:
-    metallb.io/loadBalancerIPs: 192.168.41.12
+    metallb.io/loadBalancerIPs: 192.168.41.13
 spec:
   ports:
     - name: dns-udp
