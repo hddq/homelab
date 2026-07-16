@@ -33,7 +33,7 @@
       block:
         - name: Fetch CA cert from NixOS to controller
           ansible.builtin.command: scp -o StrictHostKeyChecking=no -P {{ hostvars[groups['qdevice'][0]].ansible_port | default(22) }} {{
-            hostvars[groups['qdevice'][0]].ansible_user }}@{{ hostvars[groups['qdevice'][0]].ansible_host }}:/etc/corosync/qnetd/nssdb/qnetd-cacert.crt
+            hostvars[groups['qdevice'][0]].ansible_user }}@{{ hostvars[groups['qdevice'][0]].ansible_host }}:/var/lib/corosync-qnetd/nssdb/qnetd-cacert.crt
             /tmp/qnetd-cacert.crt
           delegate_to: localhost
           become: false
@@ -81,7 +81,7 @@
 
         - name: Fetch signed cert from NixOS to controller
           ansible.builtin.command: scp -o StrictHostKeyChecking=no -P {{ hostvars[groups['qdevice'][0]].ansible_port | default(22) }} {{
-            hostvars[groups['qdevice'][0]].ansible_user }}@{{ hostvars[groups['qdevice'][0]].ansible_host }}:/etc/corosync/qnetd/nssdb/cluster-{{ cluster_name
+            hostvars[groups['qdevice'][0]].ansible_user }}@{{ hostvars[groups['qdevice'][0]].ansible_host }}:/var/lib/corosync-qnetd/nssdb/cluster-{{ cluster_name
             }}.crt /tmp/cluster-{{ cluster_name }}.crt
           delegate_to: localhost
           become: false
