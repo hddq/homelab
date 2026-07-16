@@ -4,6 +4,8 @@ metadata:
   labels:
     app: blocky
   name: blocky
+  annotations:
+    metallb.io/loadBalancerIPs: 192.168.41.12
 spec:
   ports:
     - name: dns-udp
@@ -20,4 +22,4 @@ spec:
       targetPort: http
   selector:
     app: blocky
-  type: ClusterIP
+  type: LoadBalancer
