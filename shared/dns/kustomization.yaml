@@ -5,3 +5,6 @@ configMapGenerator:
     files:
       - unbound.conf
       - unbound-k8s.conf
+  - name: blocky-config
+    files:
+      - blocky.yml

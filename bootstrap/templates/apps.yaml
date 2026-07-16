@@ -12,6 +12,7 @@
     (dict "name" "feishin" "path" "apps/feishin" "namespace" "feishin")
     (dict "name" "restic-rest-server" "path" "apps/restic-rest-server" "namespace" "restic")
     (dict "name" "media" "path" "apps/media" "namespace" "media")
+    (dict "name" "blocky" "path" "apps/blocky" "namespace" "blocky")
 }}
 ---
 apiVersion: argoproj.io/v1alpha1

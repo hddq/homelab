@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: blocky
+  name: blocky
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: blocky
+  template:
+    metadata:
+      labels:
+        app: blocky
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - image: ghcr.io/0xerr0r/blocky:v0.33.0
+          name: blocky
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          ports:
+            - containerPort: 53
+              name: dns-udp
+              protocol: UDP
+            - containerPort: 53
+              name: dns-tcp
+              protocol: TCP
+            - containerPort: 4000
+              name: http
+              protocol: TCP
+          livenessProbe:
+            tcpSocket:
+              port: 53
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: 53
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            limits:
+              memory: 256Mi
+              cpu: 200m
+            requests:
+              memory: 64Mi
+              cpu: 50m
+          volumeMounts:
+            - name: config
+              mountPath: /app/config.yml
+              subPath: blocky.yml
+      volumes:
+        - name: config
+          configMap:
+            name: blocky-config
