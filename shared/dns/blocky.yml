@@ -1,0 +1,8 @@
+upstreams:
+  groups:
+    default:
+      - 1.1.1.1
+      - 8.8.8.8
+ports:
+  dns: 53
+  http: 4000

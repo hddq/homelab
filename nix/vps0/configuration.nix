@@ -3,6 +3,7 @@
     (modulesPath + "/profiles/qemu-guest.nix")
     ./wireguard.nix
     ./unbound.nix
+    ./blocky.nix
     ./qnetd.nix
   ];
 
