@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/0xERR0R/blocky/main/docs/config.schema.json
 upstreams:
   groups:
     default:
@@ -6,7 +7,6 @@ upstreams:
 ports:
   dns: 53
   http: 4000
-
 caching:
   minTime: 0m
   maxTime: 1h
@@ -15,3 +15,6 @@ caching:
   prefetching: true
   prefetchExpires: 2h
   prefetchThreshold: 5
+customDNS:
+  mapping:
+    hddq.duckdns.org: 192.168.40.25
