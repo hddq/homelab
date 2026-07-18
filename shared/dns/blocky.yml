@@ -21,11 +21,30 @@ caching:
 customDNS:
   mapping:
     hddq.duckdns.org: 192.168.40.25
+clientLookup:
+  clients:
+    macan:
+      - 192.168.10.19
+      - 192.168.70.19
 blocking:
   blackLists:
     ads:
       - https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/ultimate.txt
       - https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/tif.txt
+  whiteLists:
+    macan-allow:
+      - |
+        # Facebook
+        b-graph-fallback.facebook.com
+        b-graph.facebook.com
+        graph-fallback.facebook.com
+        graph.facebook.com
+        graph.fbpigeon.com
+        graph.m-freeway.com
+        z-m-graph.facebook.com
   clientGroupsBlock:
     default:
       - ads
+    macan:
+      - ads
+      - macan-allow
