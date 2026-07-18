@@ -72,6 +72,12 @@ grafana:
         datasource:
           - name: DS_PROMETHEUS
             value: VictoriaMetrics
+      blocky:
+        url: https://raw.githubusercontent.com/0xERR0R/blocky/main/docs/blocky-grafana.json
+        token: ""
+        datasource:
+          - name: DS_PROMETHEUS
+            value: VictoriaMetrics
     grafana-dashboards-kubernetes:
       k8s-system-api-server:
         url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-system-api-server.json
