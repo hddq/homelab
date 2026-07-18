@@ -50,3 +50,6 @@ blocking:
       - macan-allow
 statistics:
   enable: true
+prometheus:
+  enable: true
+  path: /metrics
