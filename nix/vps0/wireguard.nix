@@ -19,6 +19,16 @@
             publicKey = "kJWA/gR6RTYrJm+XMC1DDLuTq079SvVZE5QDST/qATc=";
             allowedIPs = ["192.168.70.15/32"];
           }
+          {
+            # lavender
+            publicKey = "a5DMfPpfel9YJLdR6SouCY2DuPgCJbxWAimybuk46Sw=";
+            allowedIPs = ["192.168.70.17/32"];
+          }
+          {
+            # macan
+            publicKey = "KO7wwh27u1RWOsj9UYSWEYJLUGse8SbR9repA1OixGM=";
+            allowedIPs = ["192.168.70.19/32"];
+          }
         ];
       };
     };
