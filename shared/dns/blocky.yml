@@ -18,3 +18,11 @@ caching:
 customDNS:
   mapping:
     hddq.duckdns.org: 192.168.40.25
+blocking:
+  blackLists:
+    ads:
+      - https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/ultimate.txt
+      - https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/tif.txt
+  clientGroupsBlock:
+    default:
+      - ads
