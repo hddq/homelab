@@ -4,6 +4,9 @@ upstreams:
     default:
       - 192.168.41.11
       - 192.168.70.2:5353
+bootstrapDns:
+  - 1.1.1.1
+  - 9.9.9.9
 ports:
   dns: 53
   http: 4000
