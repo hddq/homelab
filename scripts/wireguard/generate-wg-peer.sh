@@ -15,8 +15,8 @@ PEER_IP=$2
 # ==========================================
 SERVER_PUBKEY="bRTrqKoceGLGo6i+W0ua9ubPVk6fcwaeAT3Lx/TVBiY="
 SERVER_ENDPOINT="130.61.233.3:51820"
-ALLOWED_IPS="192.168.40.0/24, 192.168.41.0/24"
-DNS_SERVERS="192.168.40.11, 192.168.40.12"
+ALLOWED_IPS="192.168.40.0/24, 192.168.41.0/24, 192.168.70.2/32"
+DNS_SERVERS="192.168.70.2, 192.168.41.13"
 # ==========================================
 
 # Ensure required tools exist
