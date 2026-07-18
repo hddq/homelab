@@ -252,6 +252,7 @@
         - {key: "user.name", value: "{{ git_user_name }}"}
         - {key: "user.email", value: "{{ git_user_email }}"}
         - {key: "trailer.changeid.key", value: "Change-Id"}
+        - {key: "review.review.lineageos.org.username", value: "{{ gerrit_username }}"}
 
     - name: 🔗 Initialize git-lfs for build user
       ansible.builtin.command:
