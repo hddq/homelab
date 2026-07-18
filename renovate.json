@@ -14,7 +14,7 @@
   "lockFileMaintenance": {
     "enabled": true,
     "automerge": true,
-    "schedule": ["on sunday"]
+    "schedule": ["on monday", "on friday"]
   },
   "customManagers": [
     {
@@ -101,7 +101,7 @@
     {
       "matchUpdateTypes": ["patch", "digest", "pinDigest"],
       "automerge": true,
-      "schedule": ["on sunday"]
+      "schedule": ["on monday", "on friday"]
     }
   ]
 }
