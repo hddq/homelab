@@ -128,3 +128,9 @@ victoria-metrics-agent:
             target_label: namespace
           - source_labels: [__meta_kubernetes_service_name]
             target_label: service
+      - job_name: "blocky"
+        static_configs:
+          - targets:
+              - "blocky.blocky.svc.cluster.local:4000"
+              - "192.168.70.2:4000"
+        metrics_path: /metrics
