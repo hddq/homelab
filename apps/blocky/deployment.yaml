@@ -52,10 +52,10 @@ spec:
             periodSeconds: 10
           resources:
             limits:
-              memory: 256Mi
+              memory: 512Mi
               cpu: 200m
             requests:
-              memory: 64Mi
+              memory: 256Mi
               cpu: 50m
           volumeMounts:
             - name: config
