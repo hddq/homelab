@@ -1,6 +1,7 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/budimanjojo/talhelper/master/pkg/config/schemas/talconfig.json
 clusterName: homelab-staging
 endpoint: https://192.168.20.120:6443
+allowSchedulingOnControlPlanes: true
 
 talosVersion: v1.13.6
 kubernetesVersion: v1.36.2
