@@ -1,0 +1,39 @@
+{{- if ne .Values.environment "staging" -}}
+{{- $targetRevision := .Values.targetRevision -}}
+{{- $repoURL := "ssh://git@ssh.github.com:443/hddq/homelab.git" -}}
+{{- $server := "https://kubernetes.default.svc" -}}
+{{- range $app := list
+    (dict "name" "nginx-playground" "path" "kubernetes/clusters/homelab/apps/nginx-playground" "namespace" "playground")
+    (dict "name" "postgres-playground" "path" "kubernetes/clusters/homelab/apps/postgres-playground" "namespace" "playground")
+    (dict "name" "searxng" "path" "kubernetes/clusters/homelab/apps/searxng" "namespace" "searxng")
+    (dict "name" "unbound" "path" "kubernetes/clusters/homelab/apps/unbound" "namespace" "unbound")
+    (dict "name" "opodsync" "path" "kubernetes/clusters/homelab/apps/opodsync" "namespace" "opodsync")
+    (dict "name" "navidrome" "path" "kubernetes/clusters/homelab/apps/navidrome" "namespace" "navidrome")
+    (dict "name" "feishin" "path" "kubernetes/clusters/homelab/apps/feishin" "namespace" "feishin")
+    (dict "name" "restic-rest-server" "path" "kubernetes/clusters/homelab/apps/restic-rest-server" "namespace" "restic")
+    (dict "name" "media" "path" "kubernetes/clusters/homelab/apps/media" "namespace" "media")
+    (dict "name" "blocky" "path" "kubernetes/clusters/homelab/apps/blocky" "namespace" "blocky")
+}}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: apps-{{ $app.name }}
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: {{ $repoURL }}
+    targetRevision: {{ $targetRevision }}
+    path: {{ $app.path }}
+  destination:
+    server: {{ $server }}
+    namespace: {{ $app.namespace }}
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+{{- end }}
+{{- end -}}

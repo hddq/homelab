@@ -14,14 +14,14 @@ jobs:
       - name: Install Helm
         uses: azure/setup-helm@v5
 
-      - name: Build Helm dependencies for infrastructure/
+      - name: Build Helm dependencies for infra/
         run: bash scripts/ci/infrastructure-charts.sh build-deps
 
       - name: Upload built infrastructure charts
         uses: actions/upload-artifact@v7
         with:
           name: helm-dependencies
-          path: infrastructure/
+          path: kubernetes/clusters/homelab/infra/
 
   kubeconform:
     name: ☸️ Validate K8s Manifests
@@ -35,7 +35,7 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           name: helm-dependencies
-          path: infrastructure/
+          path: kubernetes/clusters/homelab/infra/
 
       - name: Install Helm
         uses: azure/setup-helm@v5
@@ -43,7 +43,7 @@ jobs:
       - name: Render bootstrap chart
         run: |
           mkdir -p .ci/rendered
-          helm template homelab-bootstrap ./bootstrap > .ci/rendered/bootstrap.yaml
+          helm template homelab-bootstrap ./kubernetes/clusters/homelab/bootstrap > .ci/rendered/bootstrap.yaml
 
       - name: Render infrastructure charts
         run: |
@@ -51,7 +51,7 @@ jobs:
 
       - name: Run kubeconform
         run: |
-          mapfile -t manifest_files < <(bash scripts/ci/kubeconform-files.sh apps .ci/rendered)
+          mapfile -t manifest_files < <(bash scripts/ci/kubeconform-files.sh kubernetes/clusters/homelab/apps .ci/rendered)
 
           docker run --rm \
             -v "$PWD:/work" \
@@ -76,12 +76,12 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           name: helm-dependencies
-          path: infrastructure/
+          path: kubernetes/clusters/homelab/infra/
 
       - name: Run Trivy on apps/
         uses: aquasecurity/trivy-action@v0.36.0
         env:
-          TRIVY_IGNOREFILE: apps/.trivyignore.yaml
+          TRIVY_IGNOREFILE: kubernetes/clusters/homelab/apps/.trivyignore.yaml
         with:
           scan-type: "config"
           hide-progress: true
@@ -89,12 +89,12 @@ jobs:
           exit-code: "1"
           ignore-unfixed: true
           severity: "CRITICAL,HIGH"
-          scan-ref: "apps/"
+          scan-ref: "kubernetes/clusters/homelab/apps/"
 
-      - name: Run Trivy on infrastructure/
+      - name: Run Trivy on infra/
         uses: aquasecurity/trivy-action@v0.36.0
         env:
-          TRIVY_IGNOREFILE: infrastructure/.trivyignore.yaml
+          TRIVY_IGNOREFILE: kubernetes/clusters/homelab/infra/.trivyignore.yaml
         with:
           scan-type: "config"
           hide-progress: true
@@ -102,7 +102,7 @@ jobs:
           exit-code: "1"
           ignore-unfixed: true
           severity: "CRITICAL,HIGH"
-          scan-ref: "infrastructure/"
+          scan-ref: "kubernetes/clusters/homelab/infra/"
 
   pluto:
     name: ♇ Pluto (API Deprecations)
@@ -132,7 +132,7 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           name: helm-dependencies
-          path: infrastructure/
+          path: kubernetes/clusters/homelab/infra/
 
       - name: Install Helm
         uses: azure/setup-helm@v5

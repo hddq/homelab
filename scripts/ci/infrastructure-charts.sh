@@ -3,7 +3,7 @@
 set -euo pipefail
 
 list_charts() {
-  find infrastructure -name Chart.yaml -not -path '*/charts/*' -print \
+  find kubernetes/clusters/homelab/infra -name Chart.yaml -not -path '*/charts/*' -print \
     | sort \
     | while IFS= read -r chart_file; do
         dirname "$chart_file"
@@ -12,7 +12,7 @@ list_charts() {
 
 chart_id() {
   local chart_dir=$1
-  local id=${chart_dir#infrastructure/}
+  local id=${chart_dir#kubernetes/clusters/homelab/infra/}
   printf '%s\n' "${id//\//-}"
 }
 

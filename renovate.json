@@ -3,7 +3,7 @@
   "extends": ["config:recommended"],
   "kubernetes": {
     "enabled": true,
-    "managerFilePatterns": ["/apps/.+\\.yaml$/", "/infrastructure/.+\\.yaml$/"]
+    "managerFilePatterns": ["/kubernetes/.+\\.yaml$/"]
   },
   "nix": {
     "enabled": true
@@ -34,7 +34,7 @@
     },
     {
       "customType": "regex",
-      "managerFilePatterns": ["apps/**/deployment.yaml"],
+      "managerFilePatterns": ["kubernetes/clusters/homelab/apps/**/deployment.yaml"],
       "matchStrings": ["PLUGIN_VERSION=\"(?<currentValue>\\d+\\.\\d+\\.\\d+)\""],
       "depNameTemplate": "J0R6IT0/navidrome-lyrics-plugin",
       "datasourceTemplate": "github-releases",
@@ -52,7 +52,7 @@
   "packageRules": [
     {
       "matchDatasources": ["docker"],
-      "matchFileNames": ["apps/**", "infrastructure/**"],
+      "matchFileNames": ["kubernetes/clusters/homelab/apps/**", "kubernetes/clusters/homelab/infra/**"],
       "pinDigests": true
     },
     {
@@ -67,23 +67,23 @@
     },
 
     {
-      "matchFileNames": ["apps/**"],
+      "matchFileNames": ["kubernetes/clusters/homelab/apps/**"],
       "matchUpdateTypes": ["patch", "digest", "pinDigest"],
       "groupName": "Patch apps"
     },
     {
-      "matchFileNames": ["apps/**"],
+      "matchFileNames": ["kubernetes/clusters/homelab/apps/**"],
       "matchUpdateTypes": ["minor"],
       "groupName": "Minor apps"
     },
 
     {
-      "matchFileNames": ["infrastructure/**"],
+      "matchFileNames": ["kubernetes/clusters/homelab/infra/**"],
       "matchUpdateTypes": ["patch", "digest", "pinDigest"],
       "groupName": "Patch infrastructure"
     },
     {
-      "matchFileNames": ["infrastructure/**"],
+      "matchFileNames": ["kubernetes/clusters/homelab/infra/**"],
       "matchUpdateTypes": ["minor"],
       "groupName": "Minor infrastructure"
     },

@@ -41,9 +41,7 @@ jobs:
               - '.github/workflows/ci-ansible.yaml'
               - '.github/workflows/main.yaml'
             k8s:
-              - 'apps/**'
-              - 'infrastructure/**'
-              - 'bootstrap/**'
+              - 'kubernetes/**'
               - 'k3s_version.txt'
               - '.github/workflows/ci-k8s.yaml'
               - 'scripts/ci/**'
