@@ -31,7 +31,7 @@ resource "proxmox_virtual_environment_vm" "talos_staging" {
 
   on_boot = false
 
-  bios = "ovmf"
+  bios    = "ovmf"
   machine = "q35"
 
   efi_disk {
