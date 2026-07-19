@@ -8,6 +8,8 @@ homelab:
 
 metallb:
   speaker:
+    # Allow MetalLB to announce BGP routes on single-node / control-plane nodes
+    # despite Talos setting 'node.kubernetes.io/exclude-from-external-load-balancers'
     ignoreExcludeLB: true
   prometheus:
     serviceMonitor:
