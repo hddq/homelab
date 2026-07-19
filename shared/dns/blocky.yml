@@ -42,6 +42,8 @@ blocking:
         graph.fbpigeon.com
         graph.m-freeway.com
         z-m-graph.facebook.com
+        web.facebook.com
+        z-m-gateway.facebook.com
   clientGroupsBlock:
     default:
       - ads
