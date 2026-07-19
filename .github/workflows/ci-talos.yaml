@@ -1,0 +1,27 @@
+name: CI - Talos
+
+on:
+  workflow_call:
+
+jobs:
+  validate:
+    name: ⚙️ Validate Talos Configurations
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Install talosctl
+        run: |
+          curl -fsSL -o /tmp/talosctl https://github.com/siderolabs/talos/releases/download/v1.13.6/talosctl-linux-amd64
+          sudo mv /tmp/talosctl /usr/local/bin/talosctl
+          sudo chmod +x /usr/local/bin/talosctl
+
+      - name: Install talhelper
+        run: |
+          curl -fsSL https://github.com/budimanjojo/talhelper/releases/download/v3.1.13/talhelper_Linux_x86_64.tar.gz | tar -xz -C /tmp
+          sudo mv /tmp/talhelper /usr/local/bin/talhelper
+          sudo chmod +x /usr/local/bin/talhelper
+
+      - name: Run Talos Validation
+        run: bash scripts/ci/talos-validate.sh

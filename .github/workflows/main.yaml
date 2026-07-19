@@ -26,6 +26,7 @@ jobs:
       nix: ${{ steps.filter.outputs.nix }}
       python: ${{ steps.filter.outputs.python }}
       shellcheck: ${{ steps.filter.outputs.shellcheck }}
+      talos: ${{ steps.filter.outputs.talos }}
       terraform: ${{ steps.filter.outputs.terraform }}
     steps:
       - uses: actions/checkout@v7
@@ -61,6 +62,11 @@ jobs:
               - '.github/workflows/main.yaml'
             shellcheck:
               - '**/*.sh'
+              - '.github/workflows/main.yaml'
+            talos:
+              - 'talos/**'
+              - '.github/workflows/ci-talos.yaml'
+              - 'scripts/ci/talos-validate.sh'
               - '.github/workflows/main.yaml'
             terraform:
               - 'terraform/**'
@@ -107,6 +113,12 @@ jobs:
     if: ${{ needs.changes.outputs.shellcheck == 'true' }}
     uses: ./.github/workflows/ci-shellcheck.yaml
 
+  talos:
+    name: Talos
+    needs: changes
+    if: ${{ needs.changes.outputs.talos == 'true' }}
+    uses: ./.github/workflows/ci-talos.yaml
+
   terraform:
     name: Terraform
     needs: changes
@@ -115,7 +127,7 @@ jobs:
 
   promote:
     name: 🚀 Promote to Stable
-    needs: [changes, ansible, gitleaks, k8s, lint, nix, python, shellcheck, terraform]
+    needs: [changes, ansible, gitleaks, k8s, lint, nix, python, shellcheck, talos, terraform]
     if: |
       always() &&
       github.ref == 'refs/heads/master' &&
