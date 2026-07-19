@@ -13,14 +13,22 @@ if [ ! -d "${TALOS_DIR}" ]; then
   exit 0
 fi
 
+# Create a temporary dummy secret file for CI generation without needing SOPS key
+DUMMY_SECRET=$(mktemp)
+trap 'rm -f "${DUMMY_SECRET}"' EXIT
+
 for env_dir in "${TALOS_DIR}"/*; do
   if [ -d "${env_dir}" ] && [ -f "${env_dir}/talconfig.yaml" ]; then
     echo "🔍 Validating Talos environment: ${env_dir}..."
     (
       cd "${env_dir}"
-      talhelper genconfig
+      # Generate a dummy secret file for CI validation
+      talhelper gensecret > "${DUMMY_SECRET}"
+
+      # Generate Talos node manifests using dummy secret file
+      talhelper genconfig --secret-file "${DUMMY_SECRET}"
+
       for config_file in clusterconfig/*.yaml; do
-        # Skip talosconfig or gitignore files if matched
         if [[ "$(basename "${config_file}")" == "talosconfig" ]]; then
           continue
         fi
