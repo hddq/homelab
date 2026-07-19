@@ -33,6 +33,8 @@
         deadnix
         alejandra
         ruff
+        talosctl
+        talhelper
       ];
 
       shellHook = ''

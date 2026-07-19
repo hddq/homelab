@@ -6,6 +6,8 @@ creation_rules:
     age: age18chhggy7c5mfjfnecw2z7hc2skc52rsluktrhyx85zvl28cajdds87vrlx
   - path_regex: terraform/.*\.yaml$
     age: age1m8j9egmweu9c8cpz2yejsulpzy82227eceh9awergehk5pflwfsslu4nah
+  - path_regex: .*talsecret.yaml$
+    age: age1m8j9egmweu9c8cpz2yejsulpzy82227eceh9awergehk5pflwfsslu4nah
   - path_regex: .*(secret|secrets)\.yaml$
     encrypted_regex: ^(data|stringData)$
     age: age1m8j9egmweu9c8cpz2yejsulpzy82227eceh9awergehk5pflwfsslu4nah
