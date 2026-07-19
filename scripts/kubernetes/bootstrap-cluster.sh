@@ -13,6 +13,7 @@ AGE_KEY_PATH="homelab.key"
 REPO_SECRET_PATH="kubernetes/clusters/homelab/infra/argocd-secrets/secret.yaml"
 ARGOCD_CHART_PATH="kubernetes/clusters/homelab/infra/argocd"
 BOOTSTRAP_CHART_PATH="kubernetes/clusters/homelab/bootstrap"
+REPO_URL="ssh://git@ssh.github.com:443/hddq/homelab.git"
 
 echo "🚀 Starting cluster bootstrap..."
 echo "  - Environment: ${ENVIRONMENT}"
@@ -67,12 +68,36 @@ helm upgrade --install infrastructure-argocd "${ARGOCD_CHART_PATH}" \
   --wait \
   --timeout 10m
 
-# 6. Render and apply Root App of Apps
-echo "🌱 Applying Root App of Apps for branch '${BRANCH}'..."
-helm template homelab-bootstrap "${BOOTSTRAP_CHART_PATH}" \
-  --set targetRevision="${BRANCH}" \
-  --set environment="${ENVIRONMENT}" \
-  | kubectl --kubeconfig="${KUBECONFIG_PATH}" apply -f -
+# 6. Apply Root Application (App of Apps controller)
+echo "🌱 Applying Root Application ('root-app') tracking branch '${BRANCH}'..."
+cat <<EOF | kubectl --kubeconfig="${KUBECONFIG_PATH}" apply -f -
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root-app
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: ${REPO_URL}
+    targetRevision: ${BRANCH}
+    path: ${BOOTSTRAP_CHART_PATH}
+    helm:
+      parameters:
+        - name: targetRevision
+          value: ${BRANCH}
+        - name: environment
+          value: ${ENVIRONMENT}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+EOF
 
 # 7. Print credentials & status
 echo ""
