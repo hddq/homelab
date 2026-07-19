@@ -29,11 +29,25 @@ resource "proxmox_virtual_environment_vm" "talos_staging" {
     enabled = true
   }
 
+  on_boot = false
+
+  bios = "ovmf"
+  machine = "q35"
+
+  efi_disk {
+    datastore_id = "local-zfs"
+    file_format  = "raw"
+    type         = "4m"
+  }
+
   disk {
     datastore_id = "local-zfs"
     file_format  = "raw"
     interface    = "virtio0"
     size         = 20
+    ssd          = true
+    iothread     = true
+    discard      = "on"
   }
 
   cdrom {
