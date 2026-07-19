@@ -51,9 +51,13 @@ kubectl --kubeconfig="${KUBECONFIG_PATH}" create secret generic sops-age \
 echo "🔐 Decrypting and applying ArgoCD Git SSH secret..."
 SOPS_AGE_KEY_FILE="${AGE_KEY_PATH}" sops -d "${REPO_SECRET_PATH}" | kubectl --kubeconfig="${KUBECONFIG_PATH}" apply -f -
 
-# 5. Build Helm dependencies and install ArgoCD
+# 5. Build Helm dependencies using isolated repo config
 echo "📦 Building ArgoCD Helm dependencies..."
-helm dependency build "${ARGOCD_CHART_PATH}"
+TMP_HELM_REPO_CONF=$(mktemp)
+trap 'rm -f "${TMP_HELM_REPO_CONF}"' EXIT
+
+helm repo add argo-cd https://argoproj.github.io/argo-helm --repository-config "${TMP_HELM_REPO_CONF}" >/dev/null 2>&1
+helm dependency build "${ARGOCD_CHART_PATH}" --repository-config "${TMP_HELM_REPO_CONF}"
 
 echo "⚓ Installing/Upgrading ArgoCD..."
 helm upgrade --install infrastructure-argocd "${ARGOCD_CHART_PATH}" \
