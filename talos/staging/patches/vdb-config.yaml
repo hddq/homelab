@@ -1,0 +1,23 @@
+apiVersion: v1alpha1
+kind: UserVolumeConfig
+name: openebs
+provisioning:
+  diskSelector:
+    match: disk.dev_path == '/dev/vdb'
+  minSize: 0
+filesystem:
+  type: xfs
+  projectQuotaSupport: true
+---
+machine:
+  features:
+    diskQuotaSupport: true
+  kubelet:
+    extraMounts:
+      - destination: /var/openebs/local
+        type: bind
+        source: /var/openebs/local
+        options:
+          - rbind
+          - rshared
+          - rw

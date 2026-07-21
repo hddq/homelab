@@ -11,6 +11,8 @@ nodes:
     ipAddress: 192.168.20.120
     controlPlane: true
     installDisk: /dev/vda
+    patches:
+      - "@./patches/vdb-config.yaml"
     networkInterfaces:
       - deviceSelector:
           physical: true
