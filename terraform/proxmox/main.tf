@@ -22,7 +22,8 @@ resource "proxmox_virtual_environment_vm" "talos_staging" {
   }
 
   memory {
-    dedicated = 4096
+    dedicated = 6144
+    floating  = 4096
   }
 
   agent {
