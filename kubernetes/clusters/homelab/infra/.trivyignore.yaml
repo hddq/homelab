@@ -11,20 +11,16 @@ misconfigurations:
       - "argocd/charts/argo-cd/templates/argocd-server/clusterrole.yaml"
 
   - id: KSV-0041
-    statement: Infrastructure components (ArgoCD, Sealed Secrets, Traefik, Cert-Manager, Longhorn) require secret access for credentials, certificates, or unsealing operations.
+    statement: Infrastructure components (ArgoCD, Traefik, Cert-Manager) require secret access for credentials, certificates, or unsealing operations.
     paths:
       - "argocd/charts/argo-cd/templates/argocd-notifications/clusterrole.yaml"
-      - "sealed-secrets/charts/sealed-secrets/templates/cluster-role.yaml"
       - "traefik/charts/traefik/templates/rbac/clusterrole.yaml"
       - "cert-manager/charts/cert-manager/templates/cainjector-rbac.yaml"
       - "cert-manager/charts/cert-manager/templates/rbac.yaml"
-      - "longhorn/charts/longhorn/templates/clusterrole.yaml"
 
   - id: KSV-0118
     statement: Third-party Helm charts often use default security contexts; fixing requires specific chart support in values.yaml. frr-k8s uses default contexts for several helper containers.
     paths:
-      - "longhorn/charts/longhorn/templates/daemonset-sa.yaml"
-      - "longhorn/charts/longhorn/templates/deployment-ui.yaml"
       - "metallb/charts/metallb/templates/speaker.yaml"
       - "metallb/charts/metallb/charts/frr-k8s/templates/controller.yaml"
       - "metallb/charts/metallb/charts/frr-k8s/templates/status-cleaner.yaml"
@@ -33,40 +29,24 @@ misconfigurations:
       - "charts/metallb/charts/frr-k8s/templates/status-cleaner.yaml"
 
   - id: KSV-0014
-    statement: Components (Longhorn, MetalLB, frr-k8s) may require a writable root FS for legacy reasons or specific operations (e.g. copying scripts/binaries to shared volumes).
+    statement: Components (MetalLB, frr-k8s) may require a writable root FS for legacy reasons or specific operations (e.g. copying scripts/binaries to shared volumes).
     paths:
-      - "longhorn/charts/longhorn/templates/deployment-driver.yaml"
-      - "longhorn/charts/longhorn/templates/deployment-ui.yaml"
       - "metallb/charts/metallb/templates/speaker.yaml"
       - "metallb/charts/metallb/charts/frr-k8s/templates/controller.yaml"
-      - "longhorn/charts/longhorn/templates/daemonset-sa.yaml"
       - "charts/metallb/templates/speaker.yaml"
       - "charts/metallb/charts/frr-k8s/templates/controller.yaml"
 
-  - id: KSV-0045
-    statement: Longhorn roles require broad permissions to manage storage resources, volumes, and their lifecycle.
-    paths:
-      - "longhorn/charts/longhorn/templates/role.yaml"
-      - "longhorn/charts/longhorn/templates/clusterrole.yaml"
-
-  - id: KSV-0050
-    statement: Longhorn roles require high-level access to manage node storage, block devices, and coordinate with the host system.
-    paths:
-      - "longhorn/charts/longhorn/templates/role.yaml"
-
   - id: KSV-0056
-    statement: Longhorn and Cert-Manager may need to manage network policies for internal communication, storage synchronization, or certificate challenges.
+    statement: Cert-Manager may need to manage network policies for internal communication, storage synchronization, or certificate challenges.
     paths:
-      - "longhorn/charts/longhorn/templates/role.yaml"
       - "cert-manager/charts/cert-manager/templates/rbac.yaml"
 
   - id: KSV-0114
-    statement: MetalLB, Cert-Manager, and Longhorn manage their own mutating/validating webhooks for configuration and validation.
+    statement: MetalLB and Cert-Manager manage their own mutating/validating webhooks for configuration and validation.
     paths:
       - "metallb/charts/metallb/templates/rbac.yaml"
       - "metallb/charts/metallb/charts/frr-k8s/templates/rbac.yaml"
       - "cert-manager/charts/cert-manager/templates/cainjector-rbac.yaml"
-      - "longhorn/charts/longhorn/templates/clusterrole.yaml"
       - "charts/metallb/templates/rbac.yaml"
       - "charts/metallb/charts/frr-k8s/templates/rbac.yaml"
 
@@ -96,11 +76,6 @@ misconfigurations:
       - "metallb/charts/metallb/charts/frr-k8s/templates/controller.yaml"
       - "charts/metallb/templates/speaker.yaml"
       - "charts/metallb/charts/frr-k8s/templates/controller.yaml"
-
-  - id: KSV-0017
-    statement: Longhorn components require privileged access to manage physical disks, mount points, and block devices on the host nodes.
-    paths:
-      - "longhorn/charts/longhorn/templates/daemonset-sa.yaml"
 
   - id: KSV-0010
     statement: node-exporter uses hostPID to observe host process and kernel metrics as designed.
