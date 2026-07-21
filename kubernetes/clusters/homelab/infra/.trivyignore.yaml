@@ -5,10 +5,11 @@ misconfigurations:
       - "argocd/charts/argo-cd/templates/argocd-application-controller/clusterrole.yaml"
 
   - id: KSV-0046
-    statement: ArgoCD and Cert-Manager components require wildcard resource access for broad cluster/namespace management.
+    statement: ArgoCD, Cert-Manager and OpenEBS components require wildcard resource access for broad cluster/namespace management.
     paths:
       - "argocd/charts/argo-cd/templates/argocd-application-controller/clusterrole.yaml"
       - "argocd/charts/argo-cd/templates/argocd-server/clusterrole.yaml"
+      - "openebs/charts/openebs/charts/localpv-provisioner/templates/rbac.yaml"
 
   - id: KSV-0041
     statement: Infrastructure components (ArgoCD, Traefik, Cert-Manager) require secret access for credentials, certificates, or unsealing operations.
@@ -19,7 +20,7 @@ misconfigurations:
       - "cert-manager/charts/cert-manager/templates/rbac.yaml"
 
   - id: KSV-0118
-    statement: Third-party Helm charts often use default security contexts; fixing requires specific chart support in values.yaml. frr-k8s uses default contexts for several helper containers.
+    statement: Third-party Helm charts often use default security contexts; fixing requires specific chart support in values.yaml. frr-k8s and openebs use default contexts.
     paths:
       - "metallb/charts/metallb/templates/speaker.yaml"
       - "metallb/charts/metallb/charts/frr-k8s/templates/controller.yaml"
@@ -27,19 +28,27 @@ misconfigurations:
       - "charts/metallb/templates/speaker.yaml"
       - "charts/metallb/charts/frr-k8s/templates/controller.yaml"
       - "charts/metallb/charts/frr-k8s/templates/status-cleaner.yaml"
+      - "openebs/charts/openebs/charts/localpv-provisioner/templates/deployment.yaml"
 
   - id: KSV-0014
-    statement: Components (MetalLB, frr-k8s) may require a writable root FS for legacy reasons or specific operations (e.g. copying scripts/binaries to shared volumes).
+    statement: Components (MetalLB, frr-k8s, openebs) may require a writable root FS for legacy reasons or specific operations (e.g. copying scripts/binaries to shared volumes).
     paths:
       - "metallb/charts/metallb/templates/speaker.yaml"
       - "metallb/charts/metallb/charts/frr-k8s/templates/controller.yaml"
       - "charts/metallb/templates/speaker.yaml"
       - "charts/metallb/charts/frr-k8s/templates/controller.yaml"
+      - "openebs/charts/openebs/charts/localpv-provisioner/templates/deployment.yaml"
+
+  - id: KSV-0045
+    statement: OpenEBS roles require broad permissions to manage storage resources, volumes, namespaces, pods, and endpoints.
+    paths:
+      - "openebs/charts/openebs/charts/localpv-provisioner/templates/rbac.yaml"
 
   - id: KSV-0056
-    statement: Cert-Manager may need to manage network policies for internal communication, storage synchronization, or certificate challenges.
+    statement: Cert-Manager and OpenEBS may need to manage network policies, endpoints, or resources for internal communication.
     paths:
       - "cert-manager/charts/cert-manager/templates/rbac.yaml"
+      - "openebs/charts/openebs/charts/localpv-provisioner/templates/rbac.yaml"
 
   - id: KSV-0114
     statement: MetalLB and Cert-Manager manage their own mutating/validating webhooks for configuration and validation.
