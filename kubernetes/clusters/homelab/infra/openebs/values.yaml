@@ -1,0 +1,19 @@
+openebs:
+  engines:
+    local:
+      hostpath:
+        enabled: true
+      lvm:
+        enabled: false
+      zfs:
+        enabled: false
+    replicated:
+      mayastor:
+        enabled: false
+  loki:
+    enabled: false
+  alloy:
+    enabled: false
+  localpv-provisioner:
+    localpv:
+      basePath: "/var/openebs/local"
