@@ -41,10 +41,21 @@ resource "proxmox_virtual_environment_vm" "talos_staging" {
     type         = "4m"
   }
 
+  # Main OS disk
   disk {
     datastore_id = "local-zfs"
     file_format  = "raw"
     interface    = "virtio0"
+    size         = 20
+    ssd          = true
+    iothread     = true
+    discard      = "on"
+  }
+  # PVC Disk
+  disk {
+    datastore_id = "local-zfs"
+    file_format  = "raw"
+    interface    = "virtio1"
     size         = 20
     ssd          = true
     iothread     = true
