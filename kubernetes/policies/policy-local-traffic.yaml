@@ -1,0 +1,24 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-local-traffic-policy
+spec:
+  validationFailureAction: Enforce
+  background: false
+  rules:
+    - name: check-external-traffic-policy
+      match:
+        any:
+          - resources:
+              kinds:
+                - Service
+      preconditions:
+        all:
+          - key: "{{ request.object.spec.type || 'ClusterIP' }}"
+            operator: Equals
+            value: LoadBalancer
+      validate:
+        message: "LoadBalancer services must set externalTrafficPolicy to Local. Cluster mode is forbidden."
+        pattern:
+          spec:
+            externalTrafficPolicy: Local
