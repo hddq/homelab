@@ -12,8 +12,7 @@ traefik:
 
   deployment:
     enabled: true
-    kind: Deployment
-    replicas: 1
+    kind: DaemonSet
 
   service:
     enabled: true
