@@ -9,6 +9,7 @@ metadata:
     metallb.io/loadBalancerIPs: "{{ .Values.homelab.serviceIps.graphiteExporter }}"
 spec:
   type: LoadBalancer
+  externalTrafficPolicy: Local
   ports:
     - port: 9108
       targetPort: metrics

@@ -9,6 +9,7 @@ spec:
   selector:
     app: postgres
   type: LoadBalancer
+  externalTrafficPolicy: Local
   ports:
     - port: 5432
       targetPort: 5432
