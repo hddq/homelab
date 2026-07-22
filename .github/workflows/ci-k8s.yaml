@@ -64,6 +64,18 @@ jobs:
             -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
             "${manifest_files[@]}"
 
+      - name: Install Kyverno CLI
+        uses: kyverno/action-install-cli@v0.2.0
+
+      - name: Run Kyverno validation
+        run: |
+          mapfile -t manifest_files < <(find kubernetes/clusters/homelab/apps/ .ci/rendered/ -type f \( -name "*.yaml" -o -name "*.yml" \) -exec grep -q "apiVersion:" {} \; -print)
+          resources=()
+          for file in "${manifest_files[@]}"; do
+            resources+=("--resource" "$file")
+          done
+          kyverno apply kubernetes/policies/ "${resources[@]}"
+
   trivy:
     name: 🛡️ Security Scan (Trivy)
     runs-on: ubuntu-latest
