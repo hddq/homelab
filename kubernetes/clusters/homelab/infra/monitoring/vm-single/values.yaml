@@ -17,10 +17,10 @@ victoria-metrics-single:
     terminationGracePeriodSeconds: 120
     persistentVolume:
       enabled: true
-      storageClass: "longhorn"
+      storageClass: "openebs-hostpath"
       size: 10Gi
       extraLabels:
-        recurring-job-group.longhorn.io/ignored: "enabled"
+        # recurring-job-group.longhorn.io/ignored: "enabled"
 
     service:
       type: ClusterIP

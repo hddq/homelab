@@ -4,7 +4,7 @@ alertmanager:
     readOnlyRootFilesystem: true
   persistence:
     enabled: true
-    storageClassName: longhorn
+    storageClassName: openebs-hostpath
     size: 2Gi
   ingress:
     enabled: true
