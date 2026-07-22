@@ -35,6 +35,7 @@
         ruff
         talosctl
         talhelper
+        kyverno
       ];
 
       shellHook = ''
