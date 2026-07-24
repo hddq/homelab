@@ -19,13 +19,6 @@
   "customManagers": [
     {
       "customType": "regex",
-      "managerFilePatterns": ["k3s_version.txt"],
-      "matchStrings": ["(?<currentValue>v\\S+)"],
-      "depNameTemplate": "k3s-io/k3s",
-      "datasourceTemplate": "github-releases"
-    },
-    {
-      "customType": "regex",
       "managerFilePatterns": ["ansible/playbooks/proxmox/monitoring.yaml"],
       "matchStrings": ["node_exporter_version: \"(?<currentValue>[\\d.]+)\""],
       "depNameTemplate": "prometheus/node_exporter",
