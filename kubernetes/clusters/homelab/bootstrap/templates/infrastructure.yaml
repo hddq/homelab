@@ -12,6 +12,7 @@
     (dict "name" "cert-manager-issuers" "path" "kubernetes/clusters/homelab/infra/cert-manager-issuers" "namespace" "cert-manager" "syncWave" "0" "syncOptions" (list "CreateNamespace=true" "SkipDryRunOnMissingResource=true"))
     (dict "name" "k8up-secrets" "path" "kubernetes/clusters/homelab/infra/k8up-secrets" "namespace" "k8up" "syncWave" "-1" "syncOptions" (list "CreateNamespace=true"))
     (dict "name" "k8up" "path" "kubernetes/clusters/homelab/infra/k8up" "namespace" "k8up" "syncOptions" (list "CreateNamespace=true"))
+    (dict "name" "k8up-backups" "path" "kubernetes/clusters/homelab/infra/k8up-backups" "namespace" "k8up" "syncWave" "1" "syncOptions" (list "CreateNamespace=true"))
     (dict "name" "metallb" "path" "kubernetes/clusters/homelab/infra/metallb" "namespace" "metallb-system" "syncOptions" (list "CreateNamespace=true") "helmValueFiles" (list "values.yaml" (printf "values-%s.yaml" $environment)))
     (dict "name" "openebs" "path" "kubernetes/clusters/homelab/infra/openebs" "namespace" "openebs" "syncWave" "-2" "syncOptions" (list "CreateNamespace=true"))
     (dict "name" "argocd-secrets" "path" "kubernetes/clusters/homelab/infra/argocd-secrets" "namespace" "argocd" "syncWave" "-1" "syncOptions" (list "CreateNamespace=true"))
