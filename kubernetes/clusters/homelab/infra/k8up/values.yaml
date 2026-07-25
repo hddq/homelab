@@ -2,6 +2,24 @@ k8up:
   # Default configurations for the K8up Helm chart.
   # https://github.com/k8up-io/k8up/tree/master/charts/k8up
   replicaCount: 1
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 65532
+    runAsGroup: 65532
+    fsGroup: 65532
+    seccompProfile:
+      type: RuntimeDefault
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 65532
+    runAsGroup: 65532
+    seccompProfile:
+      type: RuntimeDefault
   k8up:
     envVars:
       # Global restic repo password — used by all Schedules that don't
