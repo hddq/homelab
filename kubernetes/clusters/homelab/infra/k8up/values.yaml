@@ -2,28 +2,29 @@ k8up:
   # Default configurations for the K8up Helm chart.
   # https://github.com/k8up-io/k8up/tree/master/charts/k8up
   replicaCount: 1
-  envVars:
-    # Global restic repo password — used by all Schedules that don't
-    # specify their own repoPasswordSecretRef. Sourced from the
-    # SOPS-encrypted k8up-secret managed in infra/k8up-secrets/.
-    - name: BACKUP_GLOBALREPOPASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: k8up-secret
-          key: password
-    # S3 credentials for Garage (TrueNAS).
-    - name: BACKUP_GLOBALACCESSKEYID
-      valueFrom:
-        secretKeyRef:
-          name: k8up-secret
-          key: s3-access-key-id
-    - name: BACKUP_GLOBALSECRETACCESSKEY
-      valueFrom:
-        secretKeyRef:
-          name: k8up-secret
-          key: s3-secret-access-key
-    # Serialize backup jobs — all Schedules trigger at the same cron
-    # time but only one restic backup runs at a time. The rest queue
-    # up, avoiding repo lock contention.
-    - name: BACKUP_GLOBAL_CONCURRENT_BACKUP_JOBS_LIMIT
-      value: "1"
+  k8up:
+    envVars:
+      # Global restic repo password — used by all Schedules that don't
+      # specify their own repoPasswordSecretRef. Sourced from the
+      # SOPS-encrypted k8up-secret managed in infra/k8up-secrets/.
+      - name: BACKUP_GLOBALREPOPASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: k8up-secret
+            key: password
+      # S3 credentials for Garage (TrueNAS).
+      - name: BACKUP_GLOBALACCESSKEYID
+        valueFrom:
+          secretKeyRef:
+            name: k8up-secret
+            key: s3-access-key-id
+      - name: BACKUP_GLOBALSECRETACCESSKEY
+        valueFrom:
+          secretKeyRef:
+            name: k8up-secret
+            key: s3-secret-access-key
+      # Serialize backup jobs — all Schedules trigger at the same cron
+      # time but only one restic backup runs at a time. The rest queue
+      # up, avoiding repo lock contention.
+      - name: BACKUP_GLOBAL_CONCURRENT_BACKUP_JOBS_LIMIT
+        value: "1"
