@@ -4,7 +4,7 @@ metadata:
   name: navidrome
   namespace: navidrome
 spec:
-  ingressClassName: infrastructure-traefik
+  ingressClassName: infra-traefik
   rules:
     - host: navidrome.lab.hddq.org
       http:

@@ -4,7 +4,7 @@ metadata:
   name: nginx-ingress
   namespace: playground
 spec:
-  ingressClassName: infrastructure-traefik
+  ingressClassName: infra-traefik
   rules:
     - host: nginx.lab.hddq.org
       http:

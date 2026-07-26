@@ -4,7 +4,7 @@ metadata:
   name: feishin
   namespace: feishin
 spec:
-  ingressClassName: infrastructure-traefik
+  ingressClassName: infra-traefik
   rules:
     - host: feishin.lab.hddq.org
       http:

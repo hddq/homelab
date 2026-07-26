@@ -4,7 +4,7 @@ metadata:
   name: argocd-server-ingress
   namespace: argocd
 spec:
-  ingressClassName: infrastructure-traefik
+  ingressClassName: infra-traefik
   rules:
     - host: {{ printf "argocd.%s" .Values.homelab.baseDomain }}
       http:
@@ -13,6 +13,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: infrastructure-argocd-server
+                name: infra-argocd-server
                 port:
                   number: 80

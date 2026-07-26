@@ -8,7 +8,7 @@ alertmanager:
     size: 2Gi
   ingress:
     enabled: true
-    className: infrastructure-traefik
+    className: infra-traefik
 
   config:
     global:

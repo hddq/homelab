@@ -6,7 +6,7 @@ metadata:
   labels:
     app.kubernetes.io/name: restic-rest-server
 spec:
-  ingressClassName: infrastructure-traefik
+  ingressClassName: infra-traefik
   rules:
     - host: restic.lab.hddq.org
       http:

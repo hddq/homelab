@@ -3,7 +3,7 @@ kind: Ingress
 metadata:
   name: lidarr
 spec:
-  ingressClassName: infrastructure-traefik
+  ingressClassName: infra-traefik
   rules:
     - host: lidarr.lab.hddq.org
       http:

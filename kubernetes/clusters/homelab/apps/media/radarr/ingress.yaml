@@ -3,7 +3,7 @@ kind: Ingress
 metadata:
   name: radarr
 spec:
-  ingressClassName: infrastructure-traefik
+  ingressClassName: infra-traefik
   rules:
     - host: radarr.lab.hddq.org
       http:

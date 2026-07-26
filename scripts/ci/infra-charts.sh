@@ -48,7 +48,7 @@ render_charts() {
     local id
     local release
     id=$(chart_id "$chart_dir")
-    release="infrastructure-$id"
+    release="infra-$id"
 
     for env in staging production; do
       args=()
@@ -76,10 +76,10 @@ lint_charts() {
 usage() {
   cat <<'EOF'
 Usage:
-  scripts/ci/infrastructure-charts.sh list
-  scripts/ci/infrastructure-charts.sh build-deps
-  scripts/ci/infrastructure-charts.sh render [output_dir]
-  scripts/ci/infrastructure-charts.sh lint
+  scripts/ci/infra-charts.sh list
+  scripts/ci/infra-charts.sh build-deps
+  scripts/ci/infra-charts.sh render [output_dir]
+  scripts/ci/infra-charts.sh lint
 EOF
 }
 

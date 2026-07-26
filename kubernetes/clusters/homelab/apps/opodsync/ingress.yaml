@@ -4,7 +4,7 @@ metadata:
   name: opodsync-ingress
   namespace: opodsync
 spec:
-  ingressClassName: infrastructure-traefik
+  ingressClassName: infra-traefik
   rules:
     - host: opodsync.lab.hddq.org
       http:

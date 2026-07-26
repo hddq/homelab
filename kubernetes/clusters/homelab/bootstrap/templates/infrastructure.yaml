@@ -4,8 +4,8 @@
 {{- $server := "https://kubernetes.default.svc" -}}
 {{- range $app := list
     (dict "name" "cert-manager" "path" "kubernetes/clusters/homelab/infra/cert-manager" "namespace" "cert-manager" "syncWave" "-2" "syncOptions" (list "CreateNamespace=true" "RespectIgnoreDifferences=true") "ignoreDifferences" (list
-      (dict "group" "admissionregistration.k8s.io" "kind" "MutatingWebhookConfiguration" "name" "infrastructure-cert-manager-webhook" "jqPathExpressions" (list ".webhooks[]?.clientConfig.caBundle"))
-      (dict "group" "admissionregistration.k8s.io" "kind" "ValidatingWebhookConfiguration" "name" "infrastructure-cert-manager-webhook" "jqPathExpressions" (list ".webhooks[]?.clientConfig.caBundle"))
+      (dict "group" "admissionregistration.k8s.io" "kind" "MutatingWebhookConfiguration" "name" "infra-cert-manager-webhook" "jqPathExpressions" (list ".webhooks[]?.clientConfig.caBundle"))
+      (dict "group" "admissionregistration.k8s.io" "kind" "ValidatingWebhookConfiguration" "name" "infra-cert-manager-webhook" "jqPathExpressions" (list ".webhooks[]?.clientConfig.caBundle"))
       (dict "group" "apiextensions.k8s.io" "kind" "CustomResourceDefinition" "jqPathExpressions" (list ".spec.conversion.webhook.clientConfig.caBundle"))
     ))
     (dict "name" "cert-manager-cloudflare-secrets" "path" "kubernetes/clusters/homelab/infra/cert-manager-cloudflare-secrets" "namespace" "cert-manager" "syncWave" "-2" "syncOptions" (list "CreateNamespace=true"))
@@ -36,7 +36,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: infrastructure-{{ $app.name }}
+  name: infra-{{ $app.name }}
   namespace: argocd
   {{- with $app.syncWave }}
   annotations:

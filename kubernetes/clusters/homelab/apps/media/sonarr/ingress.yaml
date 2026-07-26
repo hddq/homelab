@@ -3,7 +3,7 @@ kind: Ingress
 metadata:
   name: sonarr
 spec:
-  ingressClassName: infrastructure-traefik
+  ingressClassName: infra-traefik
   rules:
     - host: sonarr.lab.hddq.org
       http:

@@ -15,7 +15,7 @@ grafana:
     readOnlyRootFilesystem: true
   ingress:
     enabled: true
-    ingressClassName: infrastructure-traefik
+    ingressClassName: infra-traefik
     path: /
 
   datasources:

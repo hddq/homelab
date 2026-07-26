@@ -75,7 +75,7 @@ helm repo add argo-cd https://argoproj.github.io/argo-helm --repository-config "
 helm dependency build "${ARGOCD_CHART_PATH}" --repository-config "${TMP_HELM_REPO_CONF}"
 
 echo "⚓ Installing/Upgrading ArgoCD..."
-helm upgrade --install infrastructure-argocd "${ARGOCD_CHART_PATH}" \
+helm upgrade --install infra-argocd "${ARGOCD_CHART_PATH}" \
   --namespace argocd \
   --create-namespace \
   "${HELM_KUBECONFIG_ARGS[@]}" \
@@ -124,6 +124,6 @@ if "${KUBECTL[@]}" -n argocd get secret argocd-initial-admin-secret >/dev/null 2
 fi
 echo ""
 echo "🌐 Access ArgoCD Dashboard:"
-echo "   kubectl -n argocd port-forward service/infrastructure-argocd-server 8080:80"
+echo "   kubectl -n argocd port-forward service/infra-argocd-server 8080:80"
 echo "   Open: http://localhost:8080"
 echo "----------------------------------------------------"

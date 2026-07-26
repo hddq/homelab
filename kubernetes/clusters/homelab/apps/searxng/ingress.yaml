@@ -4,7 +4,7 @@ metadata:
   name: searxng-ingress
   namespace: searxng
 spec:
-  ingressClassName: infrastructure-traefik
+  ingressClassName: infra-traefik
   rules:
     - host: searxng.lab.hddq.org
       http:

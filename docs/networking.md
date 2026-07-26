@@ -22,7 +22,7 @@ The following table tracks the static IP addresses allocated to specific Kuberne
 
 | IP Address      | Namespace  | Service                | Description                 |
 | --------------- | ---------- | ---------------------- | --------------------------- |
-| `192.168.41.10` | `traefik`  | `infrastructure-traefik` | Main ingress controller     |
+| `192.168.41.10` | `traefik`  | `infra-traefik` | Main ingress controller     |
 | `192.168.41.11` | `unbound`  | `unbound-service`      | Unbound DNS server          |
 | `192.168.41.12` | `monitoring` | `graphite-exporter`    | Graphite metrics exporter   |
 | `192.168.41.13` | `blocky`   | `blocky`               | Blocky DNS proxy/ad-blocker |
