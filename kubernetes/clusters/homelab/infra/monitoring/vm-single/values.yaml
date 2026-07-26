@@ -19,8 +19,8 @@ victoria-metrics-single:
       enabled: true
       storageClass: "openebs-hostpath"
       size: 10Gi
-      extraLabels:
-        # recurring-job-group.longhorn.io/ignored: "enabled"
+      annotations:
+        k8up.io/backup: "false"
 
     service:
       type: ClusterIP
