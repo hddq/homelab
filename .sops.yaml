@@ -1,13 +1,28 @@
 stores:
   yaml:
     indent: 2
+
+keys:
+  - &hddq age1n0cqvlyfca7gjasrmj4668gn9e3pak8fep0e84cvnpc3srt8zffqn4fs74
+  - &k8s age10yse6kg99dwtsjaq4l7umdheecwsznpk4dnu76ff5jmjuka8uv9se4ysq2
+  - &vps0 age1yt67apuvmtl5pf2p9jpjdwqvjpryadpkh897e2dk9v5l4jagyg7s3gqkmu
+
 creation_rules:
   - path_regex: nix/vps0/.*\.yaml$
-    age: age18chhggy7c5mfjfnecw2z7hc2skc52rsluktrhyx85zvl28cajdds87vrlx
-  - path_regex: terraform/.*\.yaml$
-    age: age1m8j9egmweu9c8cpz2yejsulpzy82227eceh9awergehk5pflwfsslu4nah
-  - path_regex: .*talsecret.yaml$
-    age: age1m8j9egmweu9c8cpz2yejsulpzy82227eceh9awergehk5pflwfsslu4nah
-  - path_regex: .*(secret|secrets)\.yaml$
+    age:
+      - *hddq
+      - *vps0
+  - path_regex: k8s/.*(secret|secrets)\.yaml$
     encrypted_regex: ^(data|stringData)$
-    age: age1m8j9egmweu9c8cpz2yejsulpzy82227eceh9awergehk5pflwfsslu4nah
+    age:
+      - *hddq
+      - *k8s
+  - path_regex: talos/environments/.*/talsecret\.yaml$
+    age:
+      - *hddq
+  - path_regex: terraform/.*\.yaml$
+    age:
+      - *hddq
+  - path_regex: ansible/secrets\.yaml$
+    age:
+      - *hddq
