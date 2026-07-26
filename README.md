@@ -153,6 +153,14 @@ credential, then applies the root application.
 `nixos-anywhere` with the `nix/vps0` flake. The VPS SOPS age key must be present
 at `/var/lib/sops-nix/key.txt` for NixOS-managed secrets.
 
+After the initial VPS provision, install its dedicated age identity:
+
+```bash
+ssh vps0 'sudo mkdir /var/lib/sops-nix && sudo chown $(whoami) /var/lib/sops-nix'
+scp vps0.key vps0:/var/lib/sops-nix/key.txt
+ssh vps0 'sudo chmod 600 /var/lib/sops-nix/key.txt && sudo chown root:root /var/lib/sops-nix/key.txt'
+```
+
 ## Secrets
 
 SOPS-encrypted files remain in Git; age private keys do not. The local SOPS key
