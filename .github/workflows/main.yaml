@@ -67,9 +67,11 @@ jobs:
               - 'talos/**'
               - '.github/workflows/ci-talos.yaml'
               - 'scripts/ci/talos-validate.sh'
+              - 'scripts/talos/**'
               - '.github/workflows/main.yaml'
             terraform:
               - 'terraform/**'
+              - 'talos/versions.yaml'
               - '.github/workflows/ci-terraform.yaml'
               - '.github/workflows/main.yaml'
 
