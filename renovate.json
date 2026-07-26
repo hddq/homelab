@@ -19,6 +19,30 @@
   "customManagers": [
     {
       "customType": "regex",
+      "managerFilePatterns": ["talos/versions.yaml"],
+      "matchStrings": ["TALOS_VERSION: (?<currentValue>v?\\d+\\.\\d+\\.\\d+)"],
+      "depNameTemplate": "siderolabs/talos",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v?(?<version>.+)$"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["\\.github/workflows/ci-talos\\.yaml$"],
+      "matchStrings": ["mikefarah/yq/releases/download/v(?<currentValue>\\d+\\.\\d+\\.\\d+)/yq_linux_amd64"],
+      "depNameTemplate": "mikefarah/yq",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v?(?<version>.+)$"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["talos/versions.yaml"],
+      "matchStrings": ["KUBERNETES_VERSION: (?<currentValue>v?\\d+\\.\\d+\\.\\d+)"],
+      "depNameTemplate": "kubernetes/kubernetes",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v?(?<version>.+)$"
+    },
+    {
+      "customType": "regex",
       "managerFilePatterns": ["ansible/playbooks/proxmox/monitoring.yaml"],
       "matchStrings": ["node_exporter_version: \"(?<currentValue>[\\d.]+)\""],
       "depNameTemplate": "prometheus/node_exporter",
