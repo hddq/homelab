@@ -128,9 +128,9 @@ jobs:
 
       - name: Use pluto
         run: |
-          K3S_VER=$(cat k3s_version.txt)
-          echo "k3s version: $K3S_VER"
-          pluto detect-files -d . --target-versions k8s=${K3S_VER%+*}
+          KUBERNETES_VERSION=$(awk '/^KUBERNETES_VERSION:/ { print $2 }' talos/versions.yaml)
+          echo "Kubernetes version: $KUBERNETES_VERSION"
+          pluto detect-files -d kubernetes --target-versions k8s=${KUBERNETES_VERSION}
 
   helm-lint:
     name: ⎈ Helm Lint
