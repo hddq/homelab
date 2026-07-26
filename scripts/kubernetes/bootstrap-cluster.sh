@@ -3,27 +3,41 @@
 set -euo pipefail
 
 # Homelab Cluster Bootstrapper for ArgoCD & Root App
-# Usage: ./scripts/kubernetes/bootstrap-cluster.sh [environment] [branch] [kubeconfig]
-# Example: ./scripts/kubernetes/bootstrap-cluster.sh production stable kubeconfig-production
+# Usage: ./scripts/kubernetes/bootstrap-cluster.sh [environment] [branch] <age-key-path> [kubeconfig]
+# Example: ./scripts/kubernetes/bootstrap-cluster.sh production stable ./k8s.key
 
 ENVIRONMENT="${1:-production}"
 BRANCH="${2:-stable}"
-KUBECONFIG_PATH="${3:-kubeconfig-${ENVIRONMENT}}"
-AGE_KEY_PATH="homelab.key"
+AGE_KEY_PATH="${3:-}"
+KUBECONFIG_PATH="${4:-}"
 REPO_SECRET_PATH="kubernetes/clusters/homelab/infra/argocd-secrets/secret.yaml"
 ARGOCD_CHART_PATH="kubernetes/clusters/homelab/infra/argocd"
 BOOTSTRAP_CHART_PATH="kubernetes/clusters/homelab/bootstrap"
 REPO_URL="ssh://git@ssh.github.com:443/hddq/homelab.git"
 
+KUBECTL=(kubectl)
+HELM_KUBECONFIG_ARGS=()
+if [ -n "${KUBECONFIG_PATH}" ]; then
+  KUBECTL+=("--kubeconfig=${KUBECONFIG_PATH}")
+  HELM_KUBECONFIG_ARGS+=("--kubeconfig=${KUBECONFIG_PATH}")
+fi
+
 echo "🚀 Starting cluster bootstrap..."
 echo "  - Environment: ${ENVIRONMENT}"
 echo "  - Git Branch:  ${BRANCH}"
-echo "  - Kubeconfig:  ${KUBECONFIG_PATH}"
+echo "  - Kubeconfig:  ${KUBECONFIG_PATH:-active context}"
+echo "  - SOPS key:    ${AGE_KEY_PATH}"
 echo ""
 
 # 1. Prerequisite checks
-if [ ! -f "${KUBECONFIG_PATH}" ]; then
+if [ -n "${KUBECONFIG_PATH}" ] && [ ! -f "${KUBECONFIG_PATH}" ]; then
   echo "❌ Error: Kubeconfig file not found at '${KUBECONFIG_PATH}'."
+  exit 1
+fi
+
+if [ -z "${AGE_KEY_PATH}" ]; then
+  echo "❌ Error: provide the SOPS Age key path as the third argument."
+  echo "Usage: $0 [environment] [branch] <age-key-path> [kubeconfig]"
   exit 1
 fi
 
@@ -39,18 +53,18 @@ fi
 
 # 2. Ensure argocd namespace exists
 echo "📁 Ensuring 'argocd' namespace exists..."
-kubectl --kubeconfig="${KUBECONFIG_PATH}" create namespace argocd --dry-run=client -o yaml | kubectl --kubeconfig="${KUBECONFIG_PATH}" apply -f -
+"${KUBECTL[@]}" create namespace argocd --dry-run=client -o yaml | "${KUBECTL[@]}" apply -f -
 
 # 3. Apply SOPS Age key to cluster
 echo "🔑 Injecting SOPS Age key secret ('sops-age')..."
-kubectl --kubeconfig="${KUBECONFIG_PATH}" create secret generic sops-age \
+"${KUBECTL[@]}" create secret generic sops-age \
   --namespace argocd \
   --from-file=keys.txt="${AGE_KEY_PATH}" \
-  --dry-run=client -o yaml | kubectl --kubeconfig="${KUBECONFIG_PATH}" apply -f -
+  --dry-run=client -o yaml | "${KUBECTL[@]}" apply -f -
 
 # 4. Decrypt and apply ArgoCD SSH Git repository secret
 echo "🔐 Decrypting and applying ArgoCD Git SSH secret..."
-SOPS_AGE_KEY_FILE="${AGE_KEY_PATH}" sops -d "${REPO_SECRET_PATH}" | kubectl --kubeconfig="${KUBECONFIG_PATH}" apply -f -
+SOPS_AGE_KEY_FILE="${AGE_KEY_PATH}" sops -d "${REPO_SECRET_PATH}" | "${KUBECTL[@]}" apply -f -
 
 # 5. Build Helm dependencies using isolated repo config
 echo "📦 Building ArgoCD Helm dependencies..."
@@ -64,13 +78,13 @@ echo "⚓ Installing/Upgrading ArgoCD..."
 helm upgrade --install infrastructure-argocd "${ARGOCD_CHART_PATH}" \
   --namespace argocd \
   --create-namespace \
-  --kubeconfig="${KUBECONFIG_PATH}" \
+  "${HELM_KUBECONFIG_ARGS[@]}" \
   --wait \
   --timeout 10m
 
 # 6. Apply Root Application (App of Apps controller)
 echo "🌱 Applying Root Application ('root-app') tracking branch '${BRANCH}'..."
-cat <<EOF | kubectl --kubeconfig="${KUBECONFIG_PATH}" apply -f -
+cat <<EOF | "${KUBECTL[@]}" apply -f -
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -103,13 +117,13 @@ EOF
 echo ""
 echo "🎉 Cluster bootstrap complete!"
 echo "----------------------------------------------------"
-if kubectl --kubeconfig="${KUBECONFIG_PATH}" -n argocd get secret argocd-initial-admin-secret >/dev/null 2>&1; then
-  ARGOCD_PASS=$(kubectl --kubeconfig="${KUBECONFIG_PATH}" -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)
+if "${KUBECTL[@]}" -n argocd get secret argocd-initial-admin-secret >/dev/null 2>&1; then
+  ARGOCD_PASS=$("${KUBECTL[@]}" -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)
   echo "🔑 ArgoCD Admin User:     admin"
   echo "🔑 ArgoCD Admin Password: ${ARGOCD_PASS}"
 fi
 echo ""
 echo "🌐 Access ArgoCD Dashboard:"
-echo "   kubectl --kubeconfig=${KUBECONFIG_PATH} -n argocd port-forward service/infrastructure-argocd-server 8080:80"
+echo "   kubectl -n argocd port-forward service/infrastructure-argocd-server 8080:80"
 echo "   Open: http://localhost:8080"
 echo "----------------------------------------------------"

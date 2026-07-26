@@ -140,12 +140,13 @@ SOPS-encrypted `talsecret.yaml`.
 3. Obtain the cluster kubeconfig, then run the Argo CD bootstrap script:
 
 ```bash
-bash scripts/kubernetes/bootstrap-cluster.sh production stable kubeconfig-production
+bash scripts/kubernetes/bootstrap-cluster.sh production stable ./k8s.key
 ```
 
-Pass `staging` and the appropriate kubeconfig for the staging cluster. The
-bootstrap script installs Argo CD, adds the SOPS age key and repository
-credential, then applies the root application.
+Pass `staging` and the Kubernetes age key for the staging cluster. The script
+uses the active `KUBECONFIG` context; alternatively, provide a kubeconfig path
+as its fourth argument. The bootstrap script installs Argo CD, adds the SOPS
+age key and repository credential, then applies the root application.
 
 ### External VPS
 
