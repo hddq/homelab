@@ -15,7 +15,7 @@ jobs:
         uses: azure/setup-helm@v5
 
       - name: Build Helm dependencies for infra/
-        run: bash scripts/ci/infrastructure-charts.sh build-deps
+        run: bash scripts/ci/infra-charts.sh build-deps
 
       - name: Upload built infrastructure charts
         uses: actions/upload-artifact@v7
@@ -47,7 +47,7 @@ jobs:
 
       - name: Render infrastructure charts
         run: |
-          bash scripts/ci/infrastructure-charts.sh render .ci/rendered/infrastructure
+          bash scripts/ci/infra-charts.sh render .ci/rendered/infra
 
       - name: Run kubeconform
         run: |
@@ -150,4 +150,4 @@ jobs:
         uses: azure/setup-helm@v5
 
       - name: Run Helm Lint
-        run: bash scripts/ci/infrastructure-charts.sh lint
+        run: bash scripts/ci/infra-charts.sh lint
