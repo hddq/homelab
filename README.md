@@ -1,240 +1,171 @@
 <div align="center">
 
-# 🏠 Homelab
+# Homelab
 
-Personal homelab running on Proxmox, managed fully as **Infrastructure as Code**.
-The goal is to never touch a server manually — if it's not in Git, it doesn't exist.
+Personal homelab managed through Infrastructure as Code — built to minimize manual server changes and keep Git as the source of truth.
 
 [![CI](https://github.com/hddq/homelab/actions/workflows/main.yaml/badge.svg)](https://github.com/hddq/homelab/actions/workflows/main.yaml)
 
 </div>
 
----
+## Stack
 
-## ⚙️ Stack
+| Area | Technology | Role |
+| --- | --- | --- |
+| Hypervisor | Proxmox VE | Hosts local virtual machines, including Talos nodes. |
+| Network | OpenWrt + FRR | Routing, VLAN segmentation, firewalling, and BGP peers for MetalLB. |
+| Storage | TrueNAS | Network-attached storage for shared data, storage services, and backups. |
+| Public DNS | Cloudflare | DNS records, wildcard ingress records, and DNS-01 certificate support. |
+| External compute | Oracle Cloud + NixOS | `vps0`, including WireGuard, DNS, and corosync qdevice services. |
+| Infrastructure IaC | OpenTofu/Terraform | Provisions Proxmox, Cloudflare, and Oracle Cloud resources. |
+| Host automation | Ansible | Automates infrastructure configuration and operational services. |
+| Secrets | SOPS + age | Encrypts repository secrets at rest. |
+| Developer environment | Nix flake | Provides the reproducible local toolchain. |
+| Automation | GitHub Actions + Renovate | Validates changes, promotes releases, and opens dependency updates. |
 
-| Layer              | Tool                           | Purpose                                        |
-| ------------------ | ------------------------------ | ---------------------------------------------- |
-| Hypervisor         | Proxmox VE                     | VM management                                  |
-| Cloud              | Oracle Cloud                   | External VPS infrastructure                    |
-| Infrastructure IaC | Terraform / OpenTofu           | Declarative infrastructure management          |
-| Provisioning       | Ansible + Cloud-Init           | VM cloning, k3s install, kubeconfig            |
-| Kubernetes         | k3s                            | Lightweight k8s distribution                   |
-| GitOps             | ArgoCD                         | Syncs cluster state from this repo             |
-| Ingress            | Traefik                        | Reverse proxy + TLS termination                |
-| Load Balancer      | MetalLB (BGP)                  | Bare-metal LoadBalancer IPs via BGP to OpenWRT |
-| Storage            | Longhorn                       | Distributed block storage with replication     |
-| TLS                | cert-manager                   | Wildcard Let's Encrypt cert via Cloudflare DNS-01|
-| Secrets            | SOPS + age + ksops             | Encrypted secrets safe to commit to Git        |
-| Monitoring         | VictoriaMetrics Stack          | Metrics collection, storage, alerting and dashboards   |
-| Dev environment    | Nix flake                      | Reproducible shell with all tools pinned       |
-| Dependency updates | Renovate                       | Automated PRs for image/chart/k3s updates      |
-| Source Control     | GitHub                         | Hosts GitOps manifests, single source of truth|
-| CI/CD              | GitHub Actions                 | Automated testing and promotion workflow       |
+## Kubernetes Stack
 
----
+Two independent clusters, `homelab-production` and `homelab-staging`, run
+vanilla Kubernetes on Talos Linux. Talos contains only the host configuration
+needed to start Kubernetes; cluster services are installed through Helm charts
+and regular manifests under `kubernetes/clusters/homelab/`.
 
-## 🏗️ Architecture
+| Area | Technology | Role |
+| --- | --- | --- |
+| Node OS | Talos Linux | Immutable Kubernetes host OS, rendered with Talhelper. |
+| Provisioning | OpenTofu/Terraform | Creates the Proxmox VMs and their disks. |
+| GitOps | Argo CD | Reconciles the cluster from this repository using App of Apps. |
+| Packaging | Helm | Wraps infrastructure charts and the bootstrap chart. |
+| Load balancing | MetalLB | Announces service addresses through BGP. |
+| Ingress | Traefik | Handles ingress traffic and TLS termination. |
+| Certificates | cert-manager + Cloudflare | Issues certificates through DNS-01. |
+| Storage | OpenEBS LocalPV Hostpath | Provides node-local persistent volumes at `/var/openebs/local`. |
+| Backups | K8up | Backs up persistent volumes to TrueNAS storage. |
+| Observability | VictoriaMetrics, Grafana, Alertmanager, vmagent, vmalert | Collects, stores, visualizes, and alerts on metrics. |
 
-### GitOps Flow
-
-Trunk-based development with an automated promotion workflow:
-
-```
-Git push to master
-  └─▶ CI Orchestrator triggers all tests (lint, validate, security scan)
-        └─▶ If all pass, automatically promotes to `stable` branch
-              └─▶ ArgoCD tracks `stable`, detects drift, and applies changes
-```
-
-ArgoCD uses the **App of Apps** pattern: Ansible installs a single root `Application` from a Jinja template, and that root app points at the `bootstrap/` Helm chart. The chart renders the child Argo applications for `apps/` and `infrastructure/`.
 
 ### Cluster Topology
 
+| Environment | Nodes | Kubernetes endpoint |
+| --- | --- | --- |
+| Production | `k8s-prod-cp-1` (control plane + workloads), `k8s-prod-worker-1` (worker) | `192.168.20.100:6443` |
+| Staging | `k8s-staging-1` (control plane + workloads) | `192.168.20.120:6443` |
+
+## Architecture
+
+```text
+Oracle Cloud (vps0: DNS / qdevice)
+       |
+   WireGuard
+       |
+OpenWrt + FRR ---- BGP ---- MetalLB ---- Kubernetes Services
+       |                             |
+       |                             +---- Traefik ---- Cloudflare DNS
+       |
+       +---- Proxmox VE
+              ├---- Talos production and staging VMs
+              └---- TrueNAS
 ```
-Production
-  ├── k8s-cp-1  (192.168.20.111) — control plane only, tainted NoSchedule
-  ├── k8s-worker-1 (192.168.20.112) — worker
-  └── k8s-worker-2 (192.168.20.113) — worker
 
-MetalLB IP pool: 192.168.41.10 - 192.168.41.250
+GitOps promotion follows a trunk-based model:
 
-Staging
-  └── k8s-staging-1 (192.168.20.120) — single-node control plane + workloads
-
-MetalLB IP pool: 192.168.42.10 - 192.168.42.250
+```text
+master -> GitHub Actions validation -> stable -> Argo CD reconciliation
 ```
 
-### Secret Management
+The root Argo CD application renders the bootstrap chart, which creates the
+infrastructure and application `Application` resources for the selected
+environment.
 
-Secrets are encrypted with `sops` using an `age` key and stored as encrypted manifests in Git. ArgoCD uses the `ksops` plugin to decrypt them at runtime — no plaintext secrets ever touch the repo.
+## Repository Layout
 
----
-
-## 📁 Repository Structure
-
-```
+```text
 .
-├── ansible/                # VM provisioning + k3s install playbooks
-├── bootstrap/              # ArgoCD App of Apps Helm chart
-├── apps/                   # User-facing workloads
-├── infrastructure/         # Cluster-level infrastructure (Helm wrappers)
-├── nix/                    # NixOS system configurations
-├── scripts/                # One-off jobs (e.g. data migrations)
-├── terraform/              # Terraform/OpenTofu configurations
-├── flake.nix               # Nix dev shell (all CLI tools pinned)
-├── k3s_version.txt         # Single source of truth for k3s version (used by Ansible + Renovate)
-└── renovate.json           # Renovate bot config
+├── ansible/                         # Infrastructure configuration and operational playbooks
+├── docs/                            # Network and operational documentation
+├── kubernetes/
+│   ├── clusters/homelab/
+│   │   ├── apps/                    # Workloads managed by Argo CD
+│   │   ├── bootstrap/               # Root App of Apps chart
+│   │   └── infra/                   # Cluster services and Helm wrappers
+│   └── policies/                    # Kyverno policies
+├── nix/vps0/                        # NixOS configuration for the Oracle Cloud VPS
+├── scripts/                         # Bootstrap, validation, migration, and administration tools
+├── shared/dns/                      # Shared Blocky and Unbound configuration
+├── talos/
+│   ├── common.yaml                  # Shared Talhelper configuration
+│   ├── environments/                # Per-cluster topology, environment values, and SOPS secrets
+│   └── versions.yaml                # Talos and Kubernetes version source of truth
+├── terraform/
+│   ├── cloudflare/                  # DNS and email-routing resources
+│   ├── oracle-cloud/                # VPS infrastructure
+│   └── proxmox/                     # Proxmox infrastructure
+├── flake.nix                        # Development shell
+└── renovate.json                    # Dependency update configuration
 ```
 
----
+## Operating the Platform
 
-## 🔁 Reprovisioning from Scratch
-
-Full cluster rebuild order using the Ansible playbooks. Assumes Proxmox is up with a VM template at ID `299`.
-
-Select the target environment by inventory:
-
-```bash
-cd ansible
-# production
-ansible-playbook -i inventory/production/hosts.ini ...
-
-# staging
-ansible-playbook -i inventory/staging/hosts.ini ...
-```
-
-Each environment has its own `group_vars` under `inventory/<env>/group_vars/`.
-- Production keeps `git_branch: stable` to only deploy CI-verified code.
-- Staging can set a default branch there, but you can also override it per run with `-e git_branch=<branch>`.
-
-> 🔑 **Before you start:** Make sure the SOPS `age` private key backup is somewhere safe and accessible. Without it, all encrypted manifests in the repo are unrecoverable.
-
-**Step 1 — Enter dev shell:**
-
-```bash
-nix develop  # or: direnv allow
-```
-
-**Step 2 — Create secrets file:**
-
-```bash
-cp ansible/secrets.example.yaml ansible/secrets.yaml
-# Fill in proxmox_api_token_secret
-```
-
-**Step 3 — Provision VMs:**
-
-```bash
-cd ansible
-ansible-playbook -i inventory/production/hosts.ini playbooks/kubernetes/01-provision.yaml
-```
-
-**Step 4 — Install k3s:**
-
-```bash
-ansible-playbook -i inventory/production/hosts.ini playbooks/kubernetes/02-k3s-install.yaml
-# kubeconfig is saved to ./kubeconfig-production
-export KUBECONFIG=$(pwd)/../kubeconfig-production
-```
-
-**Step 5 — Setup Infrastructure (SOPS/age + ArgoCD):**
-
-```bash
-ansible-playbook -i inventory/production/hosts.ini playbooks/kubernetes/03-setup-infra.yaml
-```
-
-> ⚠️ This installs ArgoCD and the `age` key for `ksops`. This must happen **before** ArgoCD starts syncing from private repos.
-
-**Step 6 — Label Longhorn nodes:**
-
-After ArgoCD syncs Longhorn, label each node intended to serve as a Longhorn storage node.
-
-```bash
-kubectl label node NODE_NAME node.longhorn.io/create-default-disk=true
-```
-
-**Step 7 — Confirm ArgoCD sync:**
-
-ArgoCD will now sync everything else automatically from this repo. Done. ✅
-
-### Staging Cluster
-
-The staging cluster uses the same playbooks with the staging inventory.
-
-```bash
-cd ansible
-ansible-playbook -i inventory/staging/hosts.ini playbooks/kubernetes/01-provision.yaml
-ansible-playbook -i inventory/staging/hosts.ini playbooks/kubernetes/02-k3s-install.yaml
-export KUBECONFIG=$(pwd)/../kubeconfig-staging
-ansible-playbook -i inventory/staging/hosts.ini playbooks/kubernetes/03-setup-infra.yaml
-```
-
-ArgoCD tracks the `stable` branch by default (configured via `git_branch` in `inventory/staging/group_vars/all.yaml`). The bootstrap playbook injects that value into the root Argo application, which then passes it into the `bootstrap/` Helm chart as `targetRevision`.
-
-For one-off staging tests, prefer a CLI override:
-
-```bash
-ansible-playbook -i inventory/staging/hosts.ini playbooks/kubernetes/03-setup-infra.yaml -e git_branch=feat-x
-```
-
-### External VPS (vps0) Provisioning
-
-I also maintain an external VPS (`vps0`) hosted on Oracle Cloud. The infrastructure for this is managed with Terraform (`/terraform/oracle-cloud`) and the OS configuration is managed with NixOS (`/nix/vps0/`).
-
-**Step 1 — Provision Infrastructure:**
-
-Apply the Terraform configuration to provision the Oracle Cloud instance:
-
-```bash
-cd terraform/oracle-cloud
-tofu apply
-```
-
-It will also bootstrap NixOS with `nixos-anywhere`
-
-**Step 2 — Transfer SOPS Key:**
-
-For the NixOS configuration to decrypt secrets, transfer the SOPS age key to the VPS using the following commands:
-
-```bash
-ssh vps0 'sudo mkdir /var/lib/sops-nix && sudo chown $(whoami) /var/lib/sops-nix'
-scp vps0.key vps0:/var/lib/sops-nix/key.txt
-ssh vps0 'sudo chmod 600 /var/lib/sops-nix/key.txt && sudo chown root:root /var/lib/sops-nix/key.txt'
-```
-
----
-
-## 🔒 CI Pipeline
-
-A central `.github/workflows/main.yaml` orchestrator evaluates path changes and dynamically triggers the appropriate reusable workflows below. If all required tests pass on `master`, the commit is automatically promoted to the `stable` branch.
-
-| Check              | Tool                         | What it validates                             |
-| ------------------ | ---------------------------- | --------------------------------------------- |
-| K8s manifests      | kubeconform                  | Schema validation against k3s version         |
-| API deprecations   | Pluto                        | Catches deprecated/removed k8s APIs           |
-| Security misconfig | Trivy                        | IaC misconfiguration scan (CRITICAL/HIGH)     |
-| Ansible            | ansible-lint                 | Ansible best practices                        |
-| YAML               | yamllint                     | YAML formatting                               |
-| Shell scripts      | ShellCheck                   | POSIX/bash linting                            |
-| Python             | Ruff                         | Python linting and formatting                 |
-| Nix                | alejandra + statix + deadnix | Nix formatting, linting, dead code            |
-| Secrets            | Gitleaks                     | Prevents secret leaks (pre-commit + daily CI) |
-
-Pre-commit hooks run `gitleaks`, `yamllint`, `shellcheck`, and `ruff` on every commit locally.
-
----
-
-## 🛠️ Dev Environment
-
-Uses a [Nix flake](./flake.nix) for a fully reproducible dev shell with all tools pinned:
+### Development Environment
 
 ```bash
 nix develop
-# or with direnv:
-direnv allow
 ```
 
-The `shellHook` sets up the Python venv, installs Ansible dependencies and collections, and configures `pre-commit`.
+The development shell provides Talos, Kubernetes, OpenTofu, Helm, SOPS,
+Ansible, and validation tooling. Its shell hook also prepares the Ansible
+environment and installs pre-commit hooks.
 
-Includes: `kubectl`, `helm`, `sops`, `age`, `argocd`, `kubeconform`, `trivy`, `pluto`, `gitleaks`, `yamllint`, `shellcheck`, `kubectx`, `pre-commit`, `opentofu`, and the full Ansible stack in a venv.
+### Talos Configuration
+
+Talhelper renders each environment by merging `talos/common.yaml` with its
+environment definition. `talos/versions.yaml` is the shared source for Talos
+and Kubernetes versions and is consumed by both Talos and Terraform.
+
+```bash
+bash scripts/talos/render.sh staging
+bash scripts/talos/render.sh production
+```
+
+Rendered machine configurations are written to `talos/generated/<environment>/`
+and are intentionally not committed. Each environment has a separate
+SOPS-encrypted `talsecret.yaml`.
+
+### Provisioning and Bootstrap
+
+1. Apply the relevant OpenTofu configuration in `terraform/proxmox/` to create
+   or update Talos VMs.
+2. Render Talos configuration, apply it to the nodes, and bootstrap the control
+   plane with `talosctl`.
+3. Obtain the cluster kubeconfig, then run the Argo CD bootstrap script:
+
+```bash
+bash scripts/kubernetes/bootstrap-cluster.sh production stable kubeconfig-production
+```
+
+Pass `staging` and the appropriate kubeconfig for the staging cluster. The
+bootstrap script installs Argo CD, adds the SOPS age key and repository
+credential, then applies the root application.
+
+### External VPS
+
+`terraform/oracle-cloud/` creates the Oracle Cloud instance and runs
+`nixos-anywhere` with the `nix/vps0` flake. The VPS SOPS age key must be present
+at `/var/lib/sops-nix/key.txt` for NixOS-managed secrets.
+
+## Secrets
+
+SOPS-encrypted files remain in Git; age private keys do not. The local SOPS key
+is required to render Talos configs, apply Terraform configurations that use
+encrypted provider credentials, and bootstrap Argo CD. Keep recovery copies of
+the age key outside the homelab.
+
+## CI and Dependency Updates
+
+GitHub Actions runs focused workflows based on changed paths. These cover
+Talos rendering and validation, OpenTofu formatting and validation, Kubernetes
+rendering and schema validation, Helm linting, Pluto API deprecation checks,
+Trivy, Ansible, Nix, shell, Python, YAML, and secret scanning.
+
+Renovate tracks chart, image, action, Talos, Kubernetes, and other dependency
+versions. Talos and Kubernetes updates start in `talos/versions.yaml`.
