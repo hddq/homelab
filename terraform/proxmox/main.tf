@@ -4,6 +4,7 @@ locals {
   talos_nodes = {
     staging-cp-1 = {
       name        = "k8s-staging-1"
+      pve_node    = "z690"
       description = "Talos staging control plane"
       environment = "staging"
       role        = "control-plane"
@@ -15,6 +16,7 @@ locals {
     }
     production-cp-1 = {
       name        = "k8s-prod-cp-1"
+      pve_node    = "z690"
       description = "Talos production control plane"
       environment = "production"
       role        = "control-plane"
@@ -26,6 +28,7 @@ locals {
     }
     production-worker-1 = {
       name        = "k8s-prod-worker-1"
+      pve_node    = "b360"
       description = "Talos production worker"
       environment = "production"
       role        = "worker"
