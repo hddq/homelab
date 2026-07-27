@@ -41,10 +41,15 @@ locals {
   }
 }
 
+locals {
+  unique_nodes = toset([for k, v in local.talos_nodes : v.pve_node])
+}
+
 resource "proxmox_virtual_environment_file" "talos_iso" {
+  for_each     = local.unique_nodes
   content_type = "iso"
   datastore_id = "local"
-  node_name    = var.proxmox_node
+  node_name    = each.key
 
   source_file {
     path      = "https://factory.talos.dev/image/ce4c980550dd2ab1b17bbf2b08801c7eb59418eafe8f279833297925d67c7515/${local.talos_versions.TALOS_VERSION}/nocloud-amd64.iso"
@@ -114,7 +119,7 @@ resource "proxmox_virtual_environment_vm" "talos" {
   }
 
   cdrom {
-    file_id   = proxmox_virtual_environment_file.talos_iso.id
+    file_id   = proxmox_virtual_environment_file.talos_iso[each.value.pve_node].id
     interface = "ide2"
   }
 
