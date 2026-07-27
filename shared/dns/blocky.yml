@@ -31,8 +31,11 @@ blocking:
     ads:
       - https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/ultimate.txt
       - https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/tif.txt
+    macan:
+      - https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/ultimate.txt
+      - https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/tif.txt
   whiteLists:
-    macan-allow:
+    macan:
       - |
         # Facebook
         b-graph-fallback.facebook.com
@@ -48,8 +51,7 @@ blocking:
     default:
       - ads
     macan:
-      - ads
-      - macan-allow
+      - macan
 statistics:
   enable: true
 prometheus:
