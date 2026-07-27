@@ -67,7 +67,7 @@
     },
     {
       "customType": "regex",
-      "managerFilePatterns": ["\\.nix$"],
+      "managerFilePatterns": ["/^nix/vps0/.*\\.nix$/"],
       "matchStrings": ["image\\s*=\\s*\"(?<depName>[^\"]+):(?<currentValue>[^\"]+)\";"],
       "datasourceTemplate": "docker"
     }
