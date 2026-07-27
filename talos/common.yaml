@@ -25,16 +25,6 @@ controlPlane:
       machine:
         features:
           diskQuotaSupport: true
-        kubelet:
-          extraMounts:
-            - destination: /var/openebs/local
-              type: bind
-              source: /var/openebs/local
-              options:
-                - rbind
-                - rshared
-                - rw
-
 worker:
   schematic:
     customization:
@@ -57,12 +47,3 @@ worker:
       machine:
         features:
           diskQuotaSupport: true
-        kubelet:
-          extraMounts:
-            - destination: /var/openebs/local
-              type: bind
-              source: /var/openebs/local
-              options:
-                - rbind
-                - rshared
-                - rw
