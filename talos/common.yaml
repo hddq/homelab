@@ -18,6 +18,7 @@ controlPlane:
         diskSelector:
           match: disk.dev_path == '/dev/vdb'
         minSize: 0
+        grow: true
       filesystem:
         type: xfs
         projectQuotaSupport: true
@@ -40,6 +41,7 @@ worker:
         diskSelector:
           match: disk.dev_path == '/dev/vdb'
         minSize: 0
+        grow: true
       filesystem:
         type: xfs
         projectQuotaSupport: true
