@@ -64,6 +64,12 @@
       "depNameTemplate": "astral-sh/ruff",
       "datasourceTemplate": "github-releases",
       "extractVersionTemplate": "^v?(?<version>.+)$"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["\\.nix$"],
+      "matchStrings": ["image\\s*=\\s*\"(?<depName>[^\"]+):(?<currentValue>[^\"]+)\";"],
+      "datasourceTemplate": "docker"
     }
   ],
   "packageRules": [
