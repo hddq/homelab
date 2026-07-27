@@ -3,7 +3,7 @@
   "extends": ["config:recommended"],
   "kubernetes": {
     "enabled": true,
-    "managerFilePatterns": ["/apps/.+\\.yaml$/", "/infrastructure/.+\\.yaml$/"]
+    "managerFilePatterns": ["/kubernetes/.+\\.yaml$/"]
   },
   "nix": {
     "enabled": true
@@ -19,10 +19,27 @@
   "customManagers": [
     {
       "customType": "regex",
-      "managerFilePatterns": ["k3s_version.txt"],
-      "matchStrings": ["(?<currentValue>v\\S+)"],
-      "depNameTemplate": "k3s-io/k3s",
-      "datasourceTemplate": "github-releases"
+      "managerFilePatterns": ["talos/versions.yaml"],
+      "matchStrings": ["TALOS_VERSION: (?<currentValue>v?\\d+\\.\\d+\\.\\d+)"],
+      "depNameTemplate": "siderolabs/talos",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v?(?<version>.+)$"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["\\.github/workflows/ci-talos\\.yaml$"],
+      "matchStrings": ["mikefarah/yq/releases/download/v(?<currentValue>\\d+\\.\\d+\\.\\d+)/yq_linux_amd64"],
+      "depNameTemplate": "mikefarah/yq",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v?(?<version>.+)$"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["talos/versions.yaml"],
+      "matchStrings": ["KUBERNETES_VERSION: (?<currentValue>v?\\d+\\.\\d+\\.\\d+)"],
+      "depNameTemplate": "kubernetes/kubernetes",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v?(?<version>.+)$"
     },
     {
       "customType": "regex",
@@ -34,7 +51,7 @@
     },
     {
       "customType": "regex",
-      "managerFilePatterns": ["apps/**/deployment.yaml"],
+      "managerFilePatterns": ["kubernetes/clusters/homelab/apps/**/deployment.yaml"],
       "matchStrings": ["PLUGIN_VERSION=\"(?<currentValue>\\d+\\.\\d+\\.\\d+)\""],
       "depNameTemplate": "J0R6IT0/navidrome-lyrics-plugin",
       "datasourceTemplate": "github-releases",
@@ -52,7 +69,7 @@
   "packageRules": [
     {
       "matchDatasources": ["docker"],
-      "matchFileNames": ["apps/**", "infrastructure/**"],
+      "matchFileNames": ["kubernetes/clusters/homelab/apps/**", "kubernetes/clusters/homelab/infra/**"],
       "pinDigests": true
     },
     {
@@ -67,23 +84,23 @@
     },
 
     {
-      "matchFileNames": ["apps/**"],
+      "matchFileNames": ["kubernetes/clusters/homelab/apps/**"],
       "matchUpdateTypes": ["patch", "digest", "pinDigest"],
       "groupName": "Patch apps"
     },
     {
-      "matchFileNames": ["apps/**"],
+      "matchFileNames": ["kubernetes/clusters/homelab/apps/**"],
       "matchUpdateTypes": ["minor"],
       "groupName": "Minor apps"
     },
 
     {
-      "matchFileNames": ["infrastructure/**"],
+      "matchFileNames": ["kubernetes/clusters/homelab/infra/**"],
       "matchUpdateTypes": ["patch", "digest", "pinDigest"],
       "groupName": "Patch infrastructure"
     },
     {
-      "matchFileNames": ["infrastructure/**"],
+      "matchFileNames": ["kubernetes/clusters/homelab/infra/**"],
       "matchUpdateTypes": ["minor"],
       "groupName": "Minor infrastructure"
     },

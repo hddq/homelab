@@ -1,0 +1,122 @@
+grafana:
+  enabled: true
+  admin:
+    existingSecret: grafana-admin
+    userKey: admin-user
+    passwordKey: admin-password
+  persistence:
+    enabled: true
+    storageClassName: openebs-hostpath
+    size: 2Gi
+  service:
+    port: 80
+    targetPort: 3000
+  containerSecurityContext:
+    readOnlyRootFilesystem: true
+  ingress:
+    enabled: true
+    ingressClassName: infra-traefik
+    path: /
+
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+        - name: VictoriaMetrics
+          type: prometheus
+          access: proxy
+          url: http://vm-single-server.monitoring.svc.cluster.local:8428/
+          isDefault: true
+          jsonData:
+            prometheusType: VictoriaMetrics
+            timeInterval: 15s
+            queryTimeout: 30s
+            oauthPassThru: false
+
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+        - name: "default"
+          orgId: 1
+          folder: ""
+          type: file
+          disableDeletion: true
+          editable: true
+          options:
+            path: /var/lib/grafana/dashboards/default
+        - name: "grafana-dashboards-kubernetes"
+          orgId: 1
+          folder: "Kubernetes"
+          type: file
+          disableDeletion: true
+          editable: true
+          options:
+            path: /var/lib/grafana/dashboards/grafana-dashboards-kubernetes
+
+  dashboards:
+    default:
+      node-exporter-full:
+        gnetId: 1860
+        revision: 42
+        datasource: VictoriaMetrics
+      proxmox-pve:
+        gnetId: 10347
+        revision: 5
+        datasource:
+          - name: DS_PROMETHEUS
+            value: VictoriaMetrics
+      openwrt-node-exporter:
+        gnetId: 18153
+        revision: 4
+        datasource:
+          - name: DS_PROMETHEUS
+            value: VictoriaMetrics
+      blocky:
+        url: https://raw.githubusercontent.com/0xERR0R/blocky/main/docs/blocky-grafana.json
+        token: ""
+        datasource:
+          - name: DS_PROMETHEUS
+            value: VictoriaMetrics
+    grafana-dashboards-kubernetes:
+      k8s-system-api-server:
+        url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-system-api-server.json
+        token: ""
+      k8s-system-coredns:
+        url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-system-coredns.json
+        token: ""
+      k8s-views-global:
+        url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-global.json
+        token: ""
+      k8s-views-namespaces:
+        url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-namespaces.json
+        token: ""
+      k8s-views-nodes:
+        url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-nodes.json
+        token: ""
+      k8s-views-pods:
+        url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-pods.json
+        token: ""
+
+  downloadDashboards:
+    securityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop:
+          - ALL
+      seccompProfile:
+        type: RuntimeDefault
+
+  initChownData:
+    securityContext:
+      readOnlyRootFilesystem: true
+      runAsNonRoot: false
+      runAsUser: 0
+      seccompProfile:
+        type: RuntimeDefault
+      capabilities:
+        add:
+          - CHOWN
+        drop:
+          - ALL

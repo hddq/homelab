@@ -1,0 +1,10 @@
+apiVersion: v2
+name: openebs-wrapper
+description: Wrapper for OpenEBS LocalPV Storage
+type: application
+version: 1.0.0
+appVersion: "4.5.1"
+dependencies:
+  - name: openebs
+    version: 4.5.1
+    repository: https://openebs.github.io/openebs

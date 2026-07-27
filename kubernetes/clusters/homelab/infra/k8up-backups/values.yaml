@@ -1,0 +1,31 @@
+# Namespaces to EXCLUDE from backups (infrastructure, system, etc.).
+# Everything else gets a K8up Schedule automatically.
+# Namespaces can also be excluded by labeling them: k8up.io/backup: "false"
+# Individual PVCs can be excluded by annotating them: k8up.io/backup: "false"
+excludeNamespaces:
+  - kube-system
+  - kube-public
+  - kube-node-lease
+  - k8up
+
+# S3-compatible backend (Garage on TrueNAS).
+s3:
+  endpoint: http://192.168.20.12:30188
+  bucket: kubernetes-backups
+
+backup:
+  # Daily at 23:55
+  schedule: "55 23 * * *"
+
+prune:
+  # Weekly on Sunday at 04:00
+  schedule: "0 4 * * 0"
+  retention:
+    keepLast: 7
+    keepDaily: 7
+    keepWeekly: 4
+    keepMonthly: 3
+
+check:
+  # Weekly on Sunday at 05:00
+  schedule: "0 5 * * 0"

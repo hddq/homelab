@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: feishin
+  namespace: feishin
+spec:
+  ingressClassName: infra-traefik
+  rules:
+    - host: feishin.lab.hddq.org
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: feishin
+                port:
+                  number: 9180

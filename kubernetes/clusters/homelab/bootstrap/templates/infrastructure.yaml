@@ -1,0 +1,89 @@
+{{- $targetRevision := .Values.targetRevision -}}
+{{- $environment := .Values.environment | default "production" -}}
+{{- $repoURL := "ssh://git@ssh.github.com:443/hddq/homelab.git" -}}
+{{- $server := "https://kubernetes.default.svc" -}}
+{{- range $app := list
+    (dict "name" "cert-manager" "path" "kubernetes/clusters/homelab/infra/cert-manager" "namespace" "cert-manager" "syncWave" "-2" "syncOptions" (list "CreateNamespace=true" "RespectIgnoreDifferences=true") "ignoreDifferences" (list
+      (dict "group" "admissionregistration.k8s.io" "kind" "MutatingWebhookConfiguration" "name" "infra-cert-manager-webhook" "jqPathExpressions" (list ".webhooks[]?.clientConfig.caBundle"))
+      (dict "group" "admissionregistration.k8s.io" "kind" "ValidatingWebhookConfiguration" "name" "infra-cert-manager-webhook" "jqPathExpressions" (list ".webhooks[]?.clientConfig.caBundle"))
+      (dict "group" "apiextensions.k8s.io" "kind" "CustomResourceDefinition" "jqPathExpressions" (list ".spec.conversion.webhook.clientConfig.caBundle"))
+    ))
+    (dict "name" "cert-manager-cloudflare-secrets" "path" "kubernetes/clusters/homelab/infra/cert-manager-cloudflare-secrets" "namespace" "cert-manager" "syncWave" "-2" "syncOptions" (list "CreateNamespace=true"))
+    (dict "name" "cert-manager-issuers" "path" "kubernetes/clusters/homelab/infra/cert-manager-issuers" "namespace" "cert-manager" "syncWave" "0" "syncOptions" (list "CreateNamespace=true" "SkipDryRunOnMissingResource=true"))
+    (dict "name" "k8up-secrets" "path" "kubernetes/clusters/homelab/infra/k8up-secrets" "namespace" "k8up" "syncWave" "-1" "syncOptions" (list "CreateNamespace=true"))
+    (dict "name" "k8up" "path" "kubernetes/clusters/homelab/infra/k8up" "namespace" "k8up" "syncOptions" (list "CreateNamespace=true" "ServerSideApply=true"))
+    (dict "name" "k8up-backups" "path" "kubernetes/clusters/homelab/infra/k8up-backups" "namespace" "k8up" "syncWave" "1" "syncOptions" (list "CreateNamespace=true"))
+    (dict "name" "metallb" "path" "kubernetes/clusters/homelab/infra/metallb" "namespace" "metallb-system" "syncOptions" (list "CreateNamespace=true") "helmValueFiles" (list "values.yaml" (printf "values-%s.yaml" $environment)))
+    (dict "name" "openebs" "path" "kubernetes/clusters/homelab/infra/openebs" "namespace" "openebs" "syncWave" "-2" "syncOptions" (list "CreateNamespace=true"))
+    (dict "name" "argocd-secrets" "path" "kubernetes/clusters/homelab/infra/argocd-secrets" "namespace" "argocd" "syncWave" "-1" "syncOptions" (list "CreateNamespace=true"))
+    (dict "name" "argocd" "path" "kubernetes/clusters/homelab/infra/argocd" "namespace" "argocd" "syncOptions" (list "ServerSideApply=true") "helmValueFiles" (list "values.yaml" (printf "values-%s.yaml" $environment)))
+    (dict "name" "metrics-server" "path" "kubernetes/clusters/homelab/infra/metrics-server" "namespace" "kube-system")
+    (dict "name" "traefik" "path" "kubernetes/clusters/homelab/infra/traefik" "namespace" "traefik" "syncOptions" (list "CreateNamespace=true") "helmValueFiles" (list "values.yaml" (printf "values-%s.yaml" $environment)))
+    (dict "name" "monitoring-vm-single" "path" "kubernetes/clusters/homelab/infra/monitoring/vm-single" "namespace" "monitoring" "syncWave" "0" "syncOptions" (list "CreateNamespace=true"))
+    (dict "name" "monitoring-alertmanager-secrets" "path" "kubernetes/clusters/homelab/infra/monitoring/alertmanager-secrets" "namespace" "monitoring" "syncWave" "-1" "syncOptions" (list "CreateNamespace=true"))
+    (dict "name" "monitoring-alertmanager" "path" "kubernetes/clusters/homelab/infra/monitoring/alertmanager" "namespace" "monitoring" "syncWave" "0" "syncOptions" (list "CreateNamespace=true") "helmValueFiles" (list "values.yaml" (printf "values-%s.yaml" $environment)))
+    (dict "name" "monitoring-kube-state-metrics" "path" "kubernetes/clusters/homelab/infra/monitoring/kube-state-metrics" "namespace" "monitoring" "syncWave" "0" "syncOptions" (list "CreateNamespace=true"))
+    (dict "name" "monitoring-node-exporter" "path" "kubernetes/clusters/homelab/infra/monitoring/node-exporter" "namespace" "node-exporter" "syncWave" "0" "syncOptions" (list "CreateNamespace=true"))
+    (dict "name" "monitoring-graphite-exporter" "path" "kubernetes/clusters/homelab/infra/monitoring/graphite-exporter" "namespace" "monitoring" "syncWave" "0" "syncOptions" (list "CreateNamespace=true") "helmValueFiles" (list "values.yaml" (printf "values-%s.yaml" $environment)))
+    (dict "name" "monitoring-pve-exporter-secrets" "path" "kubernetes/clusters/homelab/infra/monitoring/pve-exporter-secrets" "namespace" "monitoring" "syncWave" "-1" "syncOptions" (list "CreateNamespace=true"))
+    (dict "name" "monitoring-pve-exporter" "path" "kubernetes/clusters/homelab/infra/monitoring/pve-exporter" "namespace" "monitoring" "syncWave" "0" "syncOptions" (list "CreateNamespace=true") "helmValueFiles" (list "values.yaml" (printf "values-%s.yaml" $environment)))
+    (dict "name" "monitoring-vm-agent" "path" "kubernetes/clusters/homelab/infra/monitoring/vm-agent" "namespace" "monitoring" "syncWave" "1" "syncOptions" (list "CreateNamespace=true") "helmValueFiles" (list "values.yaml" (printf "values-%s.yaml" $environment)))
+    (dict "name" "monitoring-vmalert" "path" "kubernetes/clusters/homelab/infra/monitoring/vmalert" "namespace" "monitoring" "syncWave" "2" "syncOptions" (list "CreateNamespace=true") "helmValueFiles" (list "values.yaml" (printf "values-%s.yaml" $environment)))
+    (dict "name" "monitoring-grafana-secrets" "path" "kubernetes/clusters/homelab/infra/monitoring/grafana-secrets" "namespace" "monitoring" "syncWave" "1" "syncOptions" (list "CreateNamespace=true"))
+    (dict "name" "monitoring-grafana" "path" "kubernetes/clusters/homelab/infra/monitoring/grafana" "namespace" "monitoring" "syncWave" "2" "syncOptions" (list "CreateNamespace=true") "helmValueFiles" (list "values.yaml" (printf "values-%s.yaml" $environment)))
+}}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: infra-{{ $app.name }}
+  namespace: argocd
+  {{- with $app.syncWave }}
+  annotations:
+    argocd.argoproj.io/sync-wave: {{ . | quote }}
+  {{- end }}
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: {{ $repoURL }}
+    targetRevision: {{ $targetRevision }}
+    path: {{ $app.path }}
+    {{- with $app.helmValueFiles }}
+    helm:
+      valueFiles:
+        {{- range . }}
+        - {{ . }}
+        {{- end }}
+    {{- end }}
+  destination:
+    server: {{ $server }}
+    namespace: {{ $app.namespace }}
+  {{- with $app.ignoreDifferences }}
+  ignoreDifferences:
+    {{- range . }}
+    - group: {{ .group }}
+      kind: {{ .kind }}
+      {{- with .name }}
+      name: {{ . }}
+      {{- end }}
+      {{- with .jqPathExpressions }}
+      jqPathExpressions:
+        {{- range . }}
+        - {{ . | quote }}
+        {{- end }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    {{- with $app.syncOptions }}
+    syncOptions:
+      {{- range . }}
+      - {{ . }}
+      {{- end }}
+    {{- end }}
+{{- end }}

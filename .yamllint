@@ -19,9 +19,9 @@ rules:
 ignore: |
   .git/
   .venv/
-  bootstrap/templates/
-  infrastructure/*/templates/
-  infrastructure/*/*/templates/
-  infrastructure/*/charts/
-  infrastructure/*/*/charts/
+  kubernetes/clusters/homelab/bootstrap/templates/
+  kubernetes/clusters/homelab/infra/*/templates/
+  kubernetes/clusters/homelab/infra/*/*/templates/
+  kubernetes/clusters/homelab/infra/*/charts/
+  kubernetes/clusters/homelab/infra/*/*/charts/
   .ansible

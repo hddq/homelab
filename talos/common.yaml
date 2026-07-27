@@ -1,0 +1,51 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/budimanjojo/talhelper/master/pkg/config/schemas/talconfig.json
+talosVersion: ${TALOS_VERSION}
+kubernetesVersion: ${KUBERNETES_VERSION}
+allowSchedulingOnControlPlanes: true
+
+controlPlane:
+  schematic:
+    customization:
+      systemExtensions:
+        officialExtensions:
+          - siderolabs/qemu-guest-agent
+  patches:
+    - |-
+      apiVersion: v1alpha1
+      kind: UserVolumeConfig
+      name: openebs
+      provisioning:
+        diskSelector:
+          match: disk.dev_path == '/dev/vdb'
+        minSize: 0
+        grow: true
+      filesystem:
+        type: xfs
+        projectQuotaSupport: true
+      ---
+      machine:
+        features:
+          diskQuotaSupport: true
+worker:
+  schematic:
+    customization:
+      systemExtensions:
+        officialExtensions:
+          - siderolabs/qemu-guest-agent
+  patches:
+    - |-
+      apiVersion: v1alpha1
+      kind: UserVolumeConfig
+      name: openebs
+      provisioning:
+        diskSelector:
+          match: disk.dev_path == '/dev/vdb'
+        minSize: 0
+        grow: true
+      filesystem:
+        type: xfs
+        projectQuotaSupport: true
+      ---
+      machine:
+        features:
+          diskQuotaSupport: true

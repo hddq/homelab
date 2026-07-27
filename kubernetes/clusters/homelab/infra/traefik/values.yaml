@@ -1,0 +1,68 @@
+homelab:
+  baseDomain: lab.hddq.org
+  wildcardCert:
+    name: lab-hddq-wildcard
+    secretName: lab-hddq-wildcard-tls
+    issuerName: cloudflare-letsencrypt-prod
+
+traefik:
+  additionalArguments:
+    - "--global.checknewversion=false"
+    - "--global.sendanonymoususage=false"
+
+  deployment:
+    enabled: true
+    kind: DaemonSet
+
+  service:
+    enabled: true
+    spec:
+      type: LoadBalancer
+      externalTrafficPolicy: Local
+    annotations:
+      metallb.io/loadBalancerIPs: "192.168.41.10"
+
+  ports:
+    web:
+      port: 80
+      expose:
+        default: true
+      exposedPort: 80
+      protocol: TCP
+      http:
+        redirections:
+          entryPoint:
+            to: websecure
+            scheme: https
+            permanent: true
+
+    websecure:
+      port: 443
+      expose:
+        default: true
+      exposedPort: 443
+      protocol: TCP
+      http:
+        tls:
+          enabled: true
+
+  ingressRoute:
+    dashboard:
+      enabled: false
+
+  providers:
+    kubernetesCRD:
+      enabled: true
+      allowCrossNamespace: true
+    kubernetesIngress:
+      enabled: true
+      publishedService:
+        enabled: true
+
+  rbac:
+    enabled: true
+
+  log:
+    level: INFO
+  accessLog:
+    enabled: true

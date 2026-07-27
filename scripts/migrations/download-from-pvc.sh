@@ -19,7 +19,7 @@ NAMESPACE=$2
 PVC_NAME=$3
 LOCAL_PATH=$4
 REMOTE_PATH=$5
-ARGOCD_APP="apps-${APP_NAME}"
+ARGOCD_APP="app-${APP_NAME}"
 
 if [[ -z "$APP_NAME" || -z "$NAMESPACE" || -z "$PVC_NAME" || -z "$LOCAL_PATH" || -z "$REMOTE_PATH" ]]; then
     echo -e "${YELLOW}Usage:${NC} $0 <app-name> <namespace> <pvc-name> <local-path> <remote-path>"

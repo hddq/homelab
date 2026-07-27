@@ -33,6 +33,10 @@
         deadnix
         alejandra
         ruff
+        talosctl
+        talhelper
+        yq-go
+        kyverno
       ];
 
       shellHook = ''

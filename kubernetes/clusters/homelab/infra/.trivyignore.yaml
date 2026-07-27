@@ -1,0 +1,103 @@
+misconfigurations:
+  - id: KSV-0044
+    statement: ArgoCD Application Controller needs wildcard permissions to manage all resources in the cluster (GitOps).
+    paths:
+      - "argocd/charts/argo-cd/templates/argocd-application-controller/clusterrole.yaml"
+
+  - id: KSV-0046
+    statement: ArgoCD, Cert-Manager, OpenEBS and K8up components require wildcard resource access for broad cluster/namespace management.
+    paths:
+      - "argocd/charts/argo-cd/templates/argocd-application-controller/clusterrole.yaml"
+      - "argocd/charts/argo-cd/templates/argocd-server/clusterrole.yaml"
+      - "openebs/charts/openebs/charts/localpv-provisioner/templates/rbac.yaml"
+      - "k8up/charts/k8up/templates/user-clusterrole.yaml"
+
+  - id: KSV-0053
+    statement: K8up executor requires pods/exec permission to run application pre/post backup commands inside target containers.
+    paths:
+      - "k8up/charts/k8up/templates/executor-clusterrole.yaml"
+
+  - id: KSV-0041
+    statement: Infrastructure components (ArgoCD, Traefik, Cert-Manager) require secret access for credentials, certificates, or unsealing operations.
+    paths:
+      - "argocd/charts/argo-cd/templates/argocd-notifications/clusterrole.yaml"
+      - "traefik/charts/traefik/templates/rbac/clusterrole.yaml"
+      - "cert-manager/charts/cert-manager/templates/cainjector-rbac.yaml"
+      - "cert-manager/charts/cert-manager/templates/rbac.yaml"
+
+  - id: KSV-0118
+    statement: Third-party Helm charts often use default security contexts; fixing requires specific chart support in values.yaml. frr-k8s and openebs use default contexts.
+    paths:
+      - "metallb/charts/metallb/templates/speaker.yaml"
+      - "metallb/charts/metallb/charts/frr-k8s/templates/controller.yaml"
+      - "metallb/charts/metallb/charts/frr-k8s/templates/status-cleaner.yaml"
+      - "charts/metallb/templates/speaker.yaml"
+      - "charts/metallb/charts/frr-k8s/templates/controller.yaml"
+      - "charts/metallb/charts/frr-k8s/templates/status-cleaner.yaml"
+      - "openebs/charts/openebs/charts/localpv-provisioner/templates/deployment.yaml"
+
+  - id: KSV-0014
+    statement: Components (MetalLB, frr-k8s, openebs) may require a writable root FS for legacy reasons or specific operations (e.g. copying scripts/binaries to shared volumes).
+    paths:
+      - "metallb/charts/metallb/templates/speaker.yaml"
+      - "metallb/charts/metallb/charts/frr-k8s/templates/controller.yaml"
+      - "charts/metallb/templates/speaker.yaml"
+      - "charts/metallb/charts/frr-k8s/templates/controller.yaml"
+      - "openebs/charts/openebs/charts/localpv-provisioner/templates/deployment.yaml"
+
+  - id: KSV-0045
+    statement: OpenEBS roles require broad permissions to manage storage resources, volumes, namespaces, pods, and endpoints.
+    paths:
+      - "openebs/charts/openebs/charts/localpv-provisioner/templates/rbac.yaml"
+
+  - id: KSV-0056
+    statement: Cert-Manager and OpenEBS may need to manage network policies, endpoints, or resources for internal communication.
+    paths:
+      - "cert-manager/charts/cert-manager/templates/rbac.yaml"
+      - "openebs/charts/openebs/charts/localpv-provisioner/templates/rbac.yaml"
+
+  - id: KSV-0114
+    statement: MetalLB and Cert-Manager manage their own mutating/validating webhooks for configuration and validation.
+    paths:
+      - "metallb/charts/metallb/templates/rbac.yaml"
+      - "metallb/charts/metallb/charts/frr-k8s/templates/rbac.yaml"
+      - "cert-manager/charts/cert-manager/templates/cainjector-rbac.yaml"
+      - "charts/metallb/templates/rbac.yaml"
+      - "charts/metallb/charts/frr-k8s/templates/rbac.yaml"
+
+  - id: KSV-0005
+    statement: MetalLB speaker and frr-k8s controller require low-level host access (SYS_ADMIN) for network stack operations and inter-process communication on the node.
+    paths:
+      - "metallb/charts/metallb/templates/speaker.yaml"
+      - "metallb/charts/metallb/charts/frr-k8s/templates/controller.yaml"
+      - "charts/metallb/templates/speaker.yaml"
+      - "charts/metallb/charts/frr-k8s/templates/controller.yaml"
+
+  - id: KSV-0009
+    statement: MetalLB speaker and frr-k8s components MUST use hostNetwork to respond to ARP/NDP requests on node interfaces and manage BGP sessions.
+    paths:
+      - "metallb/charts/metallb/templates/speaker.yaml"
+      - "metallb/charts/metallb/charts/frr-k8s/templates/controller.yaml"
+      - "metallb/charts/metallb/charts/frr-k8s/templates/status-cleaner.yaml"
+      - "monitoring/node-exporter/charts/prometheus-node-exporter/templates/daemonset.yaml"
+      - "charts/metallb/templates/speaker.yaml"
+      - "charts/metallb/charts/frr-k8s/templates/controller.yaml"
+      - "charts/metallb/charts/frr-k8s/templates/status-cleaner.yaml"
+
+  - id: KSV-0119
+    statement: MetalLB speaker and frr-k8s controller require NET_RAW to send/receive raw BGP/ARP packets. AppArmor profiles are not standard across all k8s distributions.
+    paths:
+      - "metallb/charts/metallb/templates/speaker.yaml"
+      - "metallb/charts/metallb/charts/frr-k8s/templates/controller.yaml"
+      - "charts/metallb/templates/speaker.yaml"
+      - "charts/metallb/charts/frr-k8s/templates/controller.yaml"
+
+  - id: KSV-0010
+    statement: node-exporter uses hostPID to observe host process and kernel metrics as designed.
+    paths:
+      - "monitoring/node-exporter/charts/prometheus-node-exporter/templates/daemonset.yaml"
+
+  - id: KSV-0121
+    statement: node-exporter intentionally mounts host root, proc, and sys filesystems to export host metrics.
+    paths:
+      - "monitoring/node-exporter/charts/prometheus-node-exporter/templates/daemonset.yaml"

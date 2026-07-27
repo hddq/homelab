@@ -6,9 +6,8 @@
   vars:
     # Production K8s
     bgp_prod_neighbors:
-      - 192.168.20.111
-      - 192.168.20.112
-      - 192.168.20.113
+      - 192.168.20.100
+      - 192.168.20.101
 
     # Staging K8s
     bgp_staging_neighbors:

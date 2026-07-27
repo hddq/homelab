@@ -1,0 +1,6 @@
+dependencies:
+- name: k8up
+  repository: https://k8up-io.github.io/k8up
+  version: 4.10.0
+digest: sha256:8ed4439fbb22a22b453ecd57cb35c1f78a96e6f5926f07ff1c58e1b186404dce
+generated: "2026-07-24T22:08:54.294879362+02:00"

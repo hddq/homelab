@@ -11,3 +11,5 @@ sealed-secrets-master-key.yaml
 .terraform
 *.tfstate
 *.tfstate.*
+.ci/
+talos/generated/

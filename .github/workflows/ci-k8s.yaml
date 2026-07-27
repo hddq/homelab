@@ -14,14 +14,14 @@ jobs:
       - name: Install Helm
         uses: azure/setup-helm@v5
 
-      - name: Build Helm dependencies for infrastructure/
-        run: bash scripts/ci/infrastructure-charts.sh build-deps
+      - name: Build Helm dependencies for infra/
+        run: bash scripts/ci/infra-charts.sh build-deps
 
       - name: Upload built infrastructure charts
         uses: actions/upload-artifact@v7
         with:
           name: helm-dependencies
-          path: infrastructure/
+          path: kubernetes/clusters/homelab/infra/
 
   kubeconform:
     name: ☸️ Validate K8s Manifests
@@ -35,7 +35,7 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           name: helm-dependencies
-          path: infrastructure/
+          path: kubernetes/clusters/homelab/infra/
 
       - name: Install Helm
         uses: azure/setup-helm@v5
@@ -43,15 +43,15 @@ jobs:
       - name: Render bootstrap chart
         run: |
           mkdir -p .ci/rendered
-          helm template homelab-bootstrap ./bootstrap > .ci/rendered/bootstrap.yaml
+          helm template homelab-bootstrap ./kubernetes/clusters/homelab/bootstrap > .ci/rendered/bootstrap.yaml
 
       - name: Render infrastructure charts
         run: |
-          bash scripts/ci/infrastructure-charts.sh render .ci/rendered/infrastructure
+          bash scripts/ci/infra-charts.sh render .ci/rendered/infra
 
       - name: Run kubeconform
         run: |
-          mapfile -t manifest_files < <(bash scripts/ci/kubeconform-files.sh apps .ci/rendered)
+          mapfile -t manifest_files < <(bash scripts/ci/kubeconform-files.sh kubernetes/clusters/homelab/apps .ci/rendered)
 
           docker run --rm \
             -v "$PWD:/work" \
@@ -63,6 +63,18 @@ jobs:
             -schema-location default \
             -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
             "${manifest_files[@]}"
+
+      - name: Install Kyverno CLI
+        uses: kyverno/action-install-cli@v0.2.0
+
+      - name: Run Kyverno validation
+        run: |
+          mapfile -t manifest_files < <(find kubernetes/clusters/homelab/apps/ .ci/rendered/ -type f \( -name "*.yaml" -o -name "*.yml" \) -exec grep -q "apiVersion:" {} \; -print)
+          resources=()
+          for file in "${manifest_files[@]}"; do
+            resources+=("--resource" "$file")
+          done
+          kyverno apply kubernetes/policies/ "${resources[@]}"
 
   trivy:
     name: 🛡️ Security Scan (Trivy)
@@ -76,12 +88,12 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           name: helm-dependencies
-          path: infrastructure/
+          path: kubernetes/clusters/homelab/infra/
 
       - name: Run Trivy on apps/
         uses: aquasecurity/trivy-action@v0.36.0
         env:
-          TRIVY_IGNOREFILE: apps/.trivyignore.yaml
+          TRIVY_IGNOREFILE: kubernetes/clusters/homelab/apps/.trivyignore.yaml
         with:
           scan-type: "config"
           hide-progress: true
@@ -89,12 +101,12 @@ jobs:
           exit-code: "1"
           ignore-unfixed: true
           severity: "CRITICAL,HIGH"
-          scan-ref: "apps/"
+          scan-ref: "kubernetes/clusters/homelab/apps/"
 
-      - name: Run Trivy on infrastructure/
+      - name: Run Trivy on infra/
         uses: aquasecurity/trivy-action@v0.36.0
         env:
-          TRIVY_IGNOREFILE: infrastructure/.trivyignore.yaml
+          TRIVY_IGNOREFILE: kubernetes/clusters/homelab/infra/.trivyignore.yaml
         with:
           scan-type: "config"
           hide-progress: true
@@ -102,7 +114,7 @@ jobs:
           exit-code: "1"
           ignore-unfixed: true
           severity: "CRITICAL,HIGH"
-          scan-ref: "infrastructure/"
+          scan-ref: "kubernetes/clusters/homelab/infra/"
 
   pluto:
     name: ♇ Pluto (API Deprecations)
@@ -116,9 +128,9 @@ jobs:
 
       - name: Use pluto
         run: |
-          K3S_VER=$(cat k3s_version.txt)
-          echo "k3s version: $K3S_VER"
-          pluto detect-files -d . --target-versions k8s=${K3S_VER%+*}
+          KUBERNETES_VERSION=$(awk '/^KUBERNETES_VERSION:/ { print $2 }' talos/versions.yaml)
+          echo "Kubernetes version: $KUBERNETES_VERSION"
+          pluto detect-files -d kubernetes --target-versions k8s=${KUBERNETES_VERSION}
 
   helm-lint:
     name: ⎈ Helm Lint
@@ -132,10 +144,10 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           name: helm-dependencies
-          path: infrastructure/
+          path: kubernetes/clusters/homelab/infra/
 
       - name: Install Helm
         uses: azure/setup-helm@v5
 
       - name: Run Helm Lint
-        run: bash scripts/ci/infrastructure-charts.sh lint
+        run: bash scripts/ci/infra-charts.sh lint
