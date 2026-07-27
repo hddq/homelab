@@ -16,6 +16,8 @@ spec:
       labels:
         app.kubernetes.io/name: prowlarr
     spec:
+      nodeSelector:
+        kubernetes.io/hostname: k8s-prod-cp-1
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
