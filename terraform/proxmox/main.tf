@@ -58,8 +58,14 @@ resource "proxmox_virtual_environment_vm" "talos" {
   name        = each.value.name
   description = each.value.description
   tags        = ["talos", "k8s", each.value.environment, each.value.role]
-  node_name   = var.proxmox_node
+  node_name   = each.value.pve_node
   vm_id       = each.value.vm_id
+
+  lifecycle {
+    ignore_changes = [
+      started
+    ]
+  }
 
   cpu {
     cores = each.value.cpu_cores
