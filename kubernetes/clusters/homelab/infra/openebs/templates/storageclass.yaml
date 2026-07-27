@@ -9,7 +9,7 @@ metadata:
       - name: StorageType
         value: "hostpath"
       - name: BasePath
-        value: "/var/openebs/local"
+        value: "/var/mnt/openebs"
       - name: XFSQuota
         enabled: "true"
 provisioner: openebs.io/local

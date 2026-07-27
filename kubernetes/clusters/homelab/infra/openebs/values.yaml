@@ -16,4 +16,4 @@ openebs:
     enabled: false
   localpv-provisioner:
     localpv:
-      basePath: "/var/openebs/local"
+      basePath: "/var/mnt/openebs"
