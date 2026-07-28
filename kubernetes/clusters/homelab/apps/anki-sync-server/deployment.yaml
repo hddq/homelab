@@ -26,7 +26,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: anki-sync-server
-          image: jeankhawand/anki-sync-server:26.05-distroless
+          image: jeankhawand/anki-sync-server:26.05-distroless@sha256:306af2f5e3349fa30a619300e3203feddfc0622fab102118cb9183e438f10a11
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
