@@ -1,12 +1,12 @@
-# Namespaces to EXCLUDE from backups (infrastructure, system, etc.).
-# Everything else gets a K8up Schedule automatically.
-# Namespaces can also be excluded by labeling them: k8up.io/backup: "false"
-# Individual PVCs can be excluded by annotating them: k8up.io/backup: "false"
-excludeNamespaces:
-  - kube-system
-  - kube-public
-  - kube-node-lease
-  - k8up
+# Namespaces to INCLUDE for backups.
+# Only these namespaces will get a K8up Schedule automatically.
+# Individual PVCs can still be excluded by annotating them: k8up.io/backup: "false"
+includeNamespaces:
+  - anki-sync-server
+  - media
+  - monitoring
+  - navidrome
+  - opodsync
 
 # S3-compatible backend (Garage on TrueNAS).
 s3:

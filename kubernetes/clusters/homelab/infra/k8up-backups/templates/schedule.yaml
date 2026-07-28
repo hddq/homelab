@@ -1,7 +1,5 @@
 {{- /*
-  Auto-discovers all namespaces via Helm lookup and generates a K8up
-  Schedule in each one (minus excludeNamespaces and namespaces labeled
-  k8up.io/backup: "false").
+  Generates a K8up Schedule in each namespace specified in includeNamespaces.
 
   All Schedules point to the same S3 bucket → single restic repo.
 
@@ -9,16 +7,8 @@
   - Repo password:    BACKUP_GLOBALREPOPASSWORD on the operator
   - S3 access key:    BACKUP_GLOBALACCESSKEYID on the operator
   - S3 secret key:    BACKUP_GLOBALSECRETACCESSKEY on the operator
-
-  Note: `helm template` dry-run won't render anything (lookup returns
-  empty). Use `helm template --validate` or just let ArgoCD sync.
 */ -}}
-{{- $excludeNamespaces := .Values.excludeNamespaces }}
-{{- range $ns := (lookup "v1" "Namespace" "" "").items }}
-{{- $name := $ns.metadata.name }}
-{{- if not (has $name $excludeNamespaces) }}
-{{- $labels := $ns.metadata.labels | default dict }}
-{{- if ne (get $labels "k8up.io/backup") "false" }}
+{{- range $name := .Values.includeNamespaces }}
 ---
 apiVersion: k8up.io/v1
 kind: Schedule
@@ -43,6 +33,4 @@ spec:
       keepMonthly: {{ $.Values.prune.retention.keepMonthly }}
   check:
     schedule: {{ $.Values.check.schedule | quote }}
-{{- end }}
-{{- end }}
 {{- end }}
