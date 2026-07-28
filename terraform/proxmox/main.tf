@@ -86,7 +86,7 @@ resource "proxmox_virtual_environment_vm" "talos" {
     enabled = true
   }
 
-  on_boot = false
+  on_boot = each.value.environment == "production"
 
   bios    = "ovmf"
   machine = "q35"
