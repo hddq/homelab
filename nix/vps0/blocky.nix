@@ -1,6 +1,6 @@
 _: {
   virtualisation.oci-containers.containers.blocky = {
-    image = "ghcr.io/0xerr0r/blocky:v0.33.0";
+    image = "ghcr.io/0xerr0r/blocky:v0.34.0";
     extraOptions = ["--network=host"];
     volumes = [
       "${../../shared/dns/blocky.yml}:/app/config.yml:ro"
