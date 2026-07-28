@@ -27,14 +27,14 @@ clientLookup:
       - 192.168.10.19
       - 192.168.70.19
 blocking:
-  blackLists:
+  denylists:
     ads:
       - https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/ultimate.txt
       - https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/tif.txt
     macan:
       - https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/ultimate.txt
       - https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/tif.txt
-  whiteLists:
+  allowlists:
     macan:
       - |
         # Facebook
