@@ -35,6 +35,9 @@ blocking:
       - https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/ultimate.txt
       - https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/tif.txt
   allowlists:
+    ads:
+      - |
+        stats.lineageos.org
     macan:
       - |
         # Facebook
