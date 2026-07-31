@@ -11,7 +11,7 @@ locals {
       vm_id       = 499
       ip_address  = "192.168.20.120"
       cpu_cores   = 4
-      memory      = 6144
+      memory      = 8192
       balloon     = 4096
     }
     production-cp-1 = {
@@ -23,7 +23,7 @@ locals {
       vm_id       = 400
       ip_address  = "192.168.20.100"
       cpu_cores   = 6
-      memory      = 8192
+      memory      = 12288
       balloon     = 6144
     }
     production-worker-1 = {
@@ -35,7 +35,7 @@ locals {
       vm_id       = 401
       ip_address  = "192.168.20.101"
       cpu_cores   = 4
-      memory      = 8192
+      memory      = 12288
       balloon     = 6144
     }
   }
