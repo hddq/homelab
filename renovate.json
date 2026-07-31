@@ -14,7 +14,7 @@
   "lockFileMaintenance": {
     "enabled": true,
     "automerge": true,
-    "schedule": ["on monday", "on friday"]
+    "schedule": ["before 4am on monday", "before 4am on friday"]
   },
   "customManagers": [
     {
