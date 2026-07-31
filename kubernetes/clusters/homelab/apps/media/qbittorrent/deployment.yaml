@@ -43,15 +43,6 @@ spec:
             - name: torrent-udp
               containerPort: 6881
               protocol: UDP
-          env:
-            - name: PUID
-              value: "1000"
-            - name: PGID
-              value: "1000"
-            - name: UMASK
-              value: "002"
-            - name: TZ
-              value: "Europe/Warsaw"
           resources:
             requests:
               cpu: 100m
