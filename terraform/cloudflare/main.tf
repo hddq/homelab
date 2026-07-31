@@ -108,15 +108,13 @@ resource "cloudflare_email_routing_address" "my_gmail" {
   email      = "hddqgit@gmail.com"
 }
 
-resource "cloudflare_email_routing_rule" "git_forward" {
+resource "cloudflare_email_routing_catch_all" "catch_all" {
   zone_id = local.zone_id
-  name    = "Redirect Git"
+  name    = "Catch All"
   enabled = true
 
   matchers = [{
-    type  = "literal"
-    field = "to"
-    value = "git@hddq.org"
+    type = "all"
   }]
 
   actions = [{
