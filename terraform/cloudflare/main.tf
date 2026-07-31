@@ -103,9 +103,9 @@ resource "cloudflare_dns_record" "dmarc" {
   ttl     = 1
 }
 
-resource "cloudflare_email_routing_address" "my_gmail" {
+resource "cloudflare_email_routing_address" "main_mail" {
   account_id = local.account_id
-  email      = "hddqgit@gmail.com"
+  email      = data.sops_file.secrets.data["main_mail"]
 }
 
 resource "cloudflare_email_routing_catch_all" "catch_all" {
@@ -119,6 +119,6 @@ resource "cloudflare_email_routing_catch_all" "catch_all" {
 
   actions = [{
     type  = "forward"
-    value = [cloudflare_email_routing_address.my_gmail.email]
+    value = [cloudflare_email_routing_address.main_mail.email]
   }]
 }
