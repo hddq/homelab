@@ -44,5 +44,10 @@ immich:
     persistence:
       library:
         existingClaim: "immich-nfs-pvc"
+  persistence:
+    tmp:
+      type: emptyDir
+      globalMounts:
+        - path: /tmp
   env:
     TZ: "UTC"
