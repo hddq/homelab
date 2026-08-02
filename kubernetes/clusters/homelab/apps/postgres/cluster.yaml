@@ -1,12 +1,19 @@
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
-  name: immich-database
+  name: postgres
 spec:
   instances: 1
 
   storage:
     size: 1Gi
+
+  bootstrap:
+    initdb:
+      database: immich
+      owner: immich
+      secret:
+        name: immich-postgres
 
   imageName: ghcr.io/cloudnative-pg/postgresql:18-standard-trixie
 
@@ -14,7 +21,6 @@ spec:
     shared_preload_libraries:
       - "vchord.so"
 
-    # This extension is loaded via the Database CRD at cloudnative-pg-database.yaml
     extensions:
       - name: vchord
         image:
