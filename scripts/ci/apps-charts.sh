@@ -3,7 +3,7 @@
 set -euo pipefail
 
 list_charts() {
-  find kubernetes/clusters/homelab/infra -name Chart.yaml -not -path '*/charts/*' -print \
+  find kubernetes/clusters/homelab/apps -name Chart.yaml -not -path '*/charts/*' -print \
     | sort \
     | while IFS= read -r chart_file; do
         dirname "$chart_file"
@@ -12,7 +12,7 @@ list_charts() {
 
 chart_id() {
   local chart_dir=$1
-  local id=${chart_dir#kubernetes/clusters/homelab/infra/}
+  local id=${chart_dir#kubernetes/clusters/homelab/apps/}
   printf '%s\n' "${id//\//-}"
 }
 
@@ -26,7 +26,7 @@ build_deps() {
   mapfile -t repos < <(list_repos)
 
   for i in "${!repos[@]}"; do
-    helm repo add "infra-repo-$i" "${repos[$i]}"
+    helm repo add "apps-repo-$i" "${repos[$i]}"
   done
 
   if [ "${#repos[@]}" -gt 0 ]; then
@@ -48,7 +48,7 @@ render_charts() {
     local id
     local release
     id=$(chart_id "$chart_dir")
-    release="infra-$id"
+    release="apps-$id"
 
     for env in staging production; do
       args=()
@@ -76,10 +76,10 @@ lint_charts() {
 usage() {
   cat <<'EOF'
 Usage:
-  scripts/ci/infra-charts.sh list
-  scripts/ci/infra-charts.sh build-deps
-  scripts/ci/infra-charts.sh render [output_dir]
-  scripts/ci/infra-charts.sh lint
+  scripts/ci/apps-charts.sh list
+  scripts/ci/apps-charts.sh build-deps
+  scripts/ci/apps-charts.sh render [output_dir]
+  scripts/ci/apps-charts.sh lint
 EOF
 }
 
