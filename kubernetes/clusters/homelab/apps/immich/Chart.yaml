@@ -1,0 +1,9 @@
+apiVersion: v2
+name: immich-wrapper
+description: Wrapper chart for Immich
+type: application
+version: 1.0.0
+dependencies:
+  - name: immich
+    version: 0.13.1
+    repository: oci://ghcr.io/immich-app/immich-charts

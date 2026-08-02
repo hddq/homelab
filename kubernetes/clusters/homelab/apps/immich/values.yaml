@@ -1,0 +1,35 @@
+immich:
+  server:
+    ingress:
+      main:
+        enabled: true
+        className: infra-traefik
+        hosts:
+          - host: immich.stg.hddq.org
+            paths:
+              - path: /
+                service:
+                  identifier: main
+  valkey:
+    enabled: true
+  controllers:
+    main:
+      containers:
+        main:
+          image:
+            tag: v3.1.0
+          env:
+            DB_HOSTNAME: immich-database-rw
+            DB_USERNAME: app
+            DB_DATABASE_NAME: app
+            DB_PASSWORD:
+              valueFrom:
+                secretKeyRef:
+                  name: immich-database-app
+                  key: password
+  immich:
+    persistence:
+      library:
+        existingClaim: "immich-nfs-pvc"
+  env:
+    TZ: "UTC"
