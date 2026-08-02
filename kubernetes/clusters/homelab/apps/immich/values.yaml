@@ -1,4 +1,11 @@
 immich:
+  defaultPodOptions:
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+      runAsGroup: 1000
+      seccompProfile:
+        type: RuntimeDefault
   server:
     ingress:
       main:
@@ -16,6 +23,12 @@ immich:
     main:
       containers:
         main:
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
           image:
             tag: v3.1.0
           env:
