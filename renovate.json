@@ -123,8 +123,7 @@
     },
     {
       "matchUpdateTypes": ["patch", "digest", "pinDigest"],
-      "automerge": true,
-      "schedule": ["every day"]
+      "automerge": true
     }
   ]
 }
