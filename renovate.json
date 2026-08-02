@@ -124,7 +124,7 @@
     {
       "matchUpdateTypes": ["patch", "digest", "pinDigest"],
       "automerge": true,
-      "schedule": ["on monday", "on friday"]
+      "schedule": ["every day"]
     }
   ]
 }
