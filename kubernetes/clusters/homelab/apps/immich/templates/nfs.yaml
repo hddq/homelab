@@ -10,7 +10,7 @@ spec:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
   nfs:
-    path: /mnt/ssd1/encrypted/app/immich-test
+    path: /mnt/ssd1/encrypted/app/immich
     server: 192.168.20.12
 ---
 apiVersion: v1

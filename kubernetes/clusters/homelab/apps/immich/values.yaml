@@ -12,7 +12,7 @@ immich:
         enabled: true
         className: infra-traefik
         hosts:
-          - host: immich.stg.hddq.org
+          - host: immich.lab.hddq.org
             paths:
               - path: /
                 service:
