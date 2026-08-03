@@ -70,6 +70,11 @@
       "managerFilePatterns": ["/^nix/vps0/.*\\.nix$/"],
       "matchStrings": ["image\\s*=\\s*\"(?<depName>[^\"]+):(?<currentValue>[^\"]+)\";"],
       "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["(^|/)values\\.yaml$"],
+      "matchStrings": ["# renovate: datasource=(?<datasource>[a-z-]+) depName=(?<depName>[^\\s]+)\\n\\s+tag:\\s+(?<currentValue>[^\\s]+)"]
     }
   ],
   "packageRules": [
