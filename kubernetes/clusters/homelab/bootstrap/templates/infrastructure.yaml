@@ -17,6 +17,7 @@
     (dict "name" "openebs" "path" "kubernetes/clusters/homelab/infra/openebs" "namespace" "openebs" "syncWave" "-2" "syncOptions" (list "CreateNamespace=true"))
     (dict "name" "argocd-secrets" "path" "kubernetes/clusters/homelab/infra/argocd-secrets" "namespace" "argocd" "syncWave" "-1" "syncOptions" (list "CreateNamespace=true"))
     (dict "name" "argocd" "path" "kubernetes/clusters/homelab/infra/argocd" "namespace" "argocd" "syncOptions" (list "ServerSideApply=true") "helmValueFiles" (list "values.yaml" (printf "values-%s.yaml" $environment)))
+    (dict "name" "cloudnative-pg" "path" "kubernetes/clusters/homelab/infra/cloudnative-pg" "namespace" "cnpg-system" "syncWave" "-2" "syncOptions" (list "CreateNamespace=true" "ServerSideApply=true") "helmValueFiles" (list "values.yaml" (printf "values-%s.yaml" $environment)))
     (dict "name" "metrics-server" "path" "kubernetes/clusters/homelab/infra/metrics-server" "namespace" "kube-system")
     (dict "name" "traefik" "path" "kubernetes/clusters/homelab/infra/traefik" "namespace" "traefik" "syncOptions" (list "CreateNamespace=true") "helmValueFiles" (list "values.yaml" (printf "values-%s.yaml" $environment)))
     (dict "name" "monitoring-vm-single" "path" "kubernetes/clusters/homelab/infra/monitoring/vm-single" "namespace" "monitoring" "syncWave" "0" "syncOptions" (list "CreateNamespace=true"))
