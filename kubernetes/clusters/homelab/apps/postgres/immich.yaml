@@ -4,6 +4,7 @@ metadata:
   name: immich
 spec:
   name: immich
+  login: true
   cluster:
     name: postgres
   passwordSecret:
