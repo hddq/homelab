@@ -15,10 +15,10 @@ jobs:
         uses: azure/setup-helm@v5
 
       - name: Build Helm dependencies for infra/
-        run: bash scripts/ci/infra-charts.sh build-deps
+        run: bash scripts/ci/helm-charts.sh kubernetes/clusters/homelab/infra build-deps
 
       - name: Build Helm dependencies for apps/
-        run: bash scripts/ci/apps-charts.sh build-deps
+        run: bash scripts/ci/helm-charts.sh kubernetes/clusters/homelab/apps build-deps
 
       - name: Upload built infrastructure charts
         uses: actions/upload-artifact@v7
@@ -62,11 +62,11 @@ jobs:
 
       - name: Render infrastructure charts
         run: |
-          bash scripts/ci/infra-charts.sh render .ci/rendered/infra
+          bash scripts/ci/helm-charts.sh kubernetes/clusters/homelab/infra render .ci/rendered/infra
 
       - name: Render apps charts
         run: |
-          bash scripts/ci/apps-charts.sh render .ci/rendered/apps
+          bash scripts/ci/helm-charts.sh kubernetes/clusters/homelab/apps render .ci/rendered/apps
 
       - name: Run kubeconform
         run: |
@@ -182,5 +182,5 @@ jobs:
 
       - name: Run Helm Lint
         run: |
-          bash scripts/ci/infra-charts.sh lint
-          bash scripts/ci/apps-charts.sh lint
+          bash scripts/ci/helm-charts.sh kubernetes/clusters/homelab/infra lint
+          bash scripts/ci/helm-charts.sh kubernetes/clusters/homelab/apps lint
