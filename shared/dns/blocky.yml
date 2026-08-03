@@ -32,8 +32,9 @@ blocking:
       - https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/ultimate.txt
       - https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/tif.txt
     macan:
-      - https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/ultimate.txt
-      - https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/tif.txt
+      - |
+        # dummy entry so this group isn't treated as allow-only exclusive mode
+        this-domain-should-never-resolve.invalid
   allowlists:
     ads:
       - |
@@ -54,6 +55,7 @@ blocking:
     default:
       - ads
     macan:
+      - ads
       - macan
 statistics:
   enable: true
