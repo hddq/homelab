@@ -6,7 +6,7 @@ spec:
   instances: 1
 
   storage:
-    size: 1Gi
+    size: 8Gi
 
   imageName: ghcr.io/cloudnative-pg/postgresql:18-standard-trixie
 
