@@ -1,4 +1,15 @@
 apiVersion: postgresql.cnpg.io/v1
+kind: Role
+metadata:
+  name: immich
+spec:
+  name: immich
+  cluster:
+    name: postgres
+  passwordSecret:
+    name: immich-postgres
+---
+apiVersion: postgresql.cnpg.io/v1
 kind: Database
 metadata:
   name: immich

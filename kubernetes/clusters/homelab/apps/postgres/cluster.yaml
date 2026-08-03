@@ -8,13 +8,6 @@ spec:
   storage:
     size: 1Gi
 
-  bootstrap:
-    initdb:
-      database: immich
-      owner: immich
-      secret:
-        name: immich-postgres
-
   imageName: ghcr.io/cloudnative-pg/postgresql:18-standard-trixie
 
   postgresql:
