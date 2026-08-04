@@ -14,7 +14,7 @@ jobs:
       - name: Install talosctl
         run: |
           talos_version="$(awk '/^TALOS_VERSION:/ { print $2 }' talos/versions.yaml)"
-          curl -fsSL -o /tmp/talosctl "https://github.com/siderolabs/talos/releases/download/${talos_version}/talosctl-linux-amd64"
+          curl -fsSL -o /tmp/talosctl "https://github.com/siderolabs/talos/releases/download/v${talos_version}/talosctl-linux-amd64"
           sudo mv /tmp/talosctl /usr/local/bin/talosctl
           sudo chmod +x /usr/local/bin/talosctl
 
