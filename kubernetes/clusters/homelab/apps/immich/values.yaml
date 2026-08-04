@@ -27,6 +27,29 @@ immich:
               - path: /
                 service:
                   identifier: main
+    controllers:
+      main:
+        containers:
+          main:
+            securityContext:
+              readOnlyRootFilesystem: true
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop:
+                  - ALL
+            image:
+              # renovate: datasource=docker depName=ghcr.io/immich-app/immich-server
+              tag: v3.1.0
+              digest: sha256:b434cb9287eea1471c9974845914d4dd328c9c2d652e446ed4930f99944f0ceb
+            env:
+              DB_HOSTNAME: postgres-rw.postgres.svc.cluster.local
+              DB_USERNAME: immich
+              DB_DATABASE_NAME: immich
+              DB_PASSWORD:
+                valueFrom:
+                  secretKeyRef:
+                    name: immich-postgres
+                    key: password
   machine-learning:
     persistence:
       cache:
@@ -35,31 +58,17 @@ immich:
         size: 10Gi
         accessMode: ReadWriteOnce
         storageClass: openebs-hostpath
+    controllers:
+      main:
+        containers:
+          main:
+            image:
+              # renovate: datasource=docker depName=ghcr.io/immich-app/immich-machine-learning
+              tag: v3.1.0
+              digest: sha256:abcd
   valkey:
     enabled: true
-  controllers:
-    main:
-      containers:
-        main:
-          securityContext:
-            readOnlyRootFilesystem: true
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-                - ALL
-          image:
-            # renovate: datasource=docker depName=ghcr.io/immich-app/immich-server
-            tag: v3.1.0
-            digest: sha256:b434cb9287eea1471c9974845914d4dd328c9c2d652e446ed4930f99944f0ceb
-          env:
-            DB_HOSTNAME: postgres-rw.postgres.svc.cluster.local
-            DB_USERNAME: immich
-            DB_DATABASE_NAME: immich
-            DB_PASSWORD:
-              valueFrom:
-                secretKeyRef:
-                  name: immich-postgres
-                  key: password
+
   immich:
     persistence:
       library:
