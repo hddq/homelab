@@ -73,8 +73,8 @@
     },
     {
       "customType": "regex",
-      "managerFilePatterns": ["(^|/)values\\.yaml$"],
-      "matchStrings": ["# renovate: datasource=(?<datasource>[a-z-]+) depName=(?<depName>[^\\s]+)\\n\\s+tag:\\s+(?<currentValue>[^\\s]+)"]
+      "managerFilePatterns": ["**/values.yaml"],
+      "matchStrings": ["# renovate: datasource=(?<datasource>[a-z-]+) depName=(?<depName>[^\\s]+)\\n\\s+tag:\\s+(?<currentValue>[^\\s]+)(?:\\n\\s+digest:\\s+(?<currentDigest>[^\\s]+))?"]
     }
   ],
   "packageRules": [
