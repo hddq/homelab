@@ -31,12 +31,6 @@ immich:
       main:
         containers:
           main:
-            securityContext:
-              readOnlyRootFilesystem: true
-              allowPrivilegeEscalation: false
-              capabilities:
-                drop:
-                  - ALL
             image:
               # renovate: datasource=docker depName=ghcr.io/immich-app/immich-server
               tag: v3.1.0
@@ -68,6 +62,16 @@ immich:
               digest: sha256:abcd
   valkey:
     enabled: true
+  controllers:
+    main:
+      containers:
+        main:
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
 
   immich:
     persistence:
