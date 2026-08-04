@@ -1,0 +1,30 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: DatabaseRole
+metadata:
+  name: immich
+spec:
+  name: immich
+  login: true
+  cluster:
+    name: postgres
+  passwordSecret:
+    name: immich-postgres
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: immich
+spec:
+  name: immich
+  owner: immich
+  cluster:
+    name: postgres
+  extensions:
+    - name: vector
+      ensure: present
+    - name: vchord
+      ensure: present
+    - name: earthdistance
+      ensure: present
+    - name: cube
+      ensure: present

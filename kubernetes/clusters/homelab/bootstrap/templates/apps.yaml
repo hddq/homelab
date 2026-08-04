@@ -12,6 +12,9 @@
     (dict "name" "media" "path" "kubernetes/clusters/homelab/apps/media" "namespace" "media")
     (dict "name" "blocky" "path" "kubernetes/clusters/homelab/apps/blocky" "namespace" "blocky")
     (dict "name" "anki-sync-server" "path" "kubernetes/clusters/homelab/apps/anki-sync-server" "namespace" "anki-sync-server")
+    (dict "name" "postgres" "path" "kubernetes/clusters/homelab/apps/postgres" "namespace" "postgres")
+    (dict "name" "immich" "path" "kubernetes/clusters/homelab/apps/immich" "namespace" "immich")
+    (dict "name" "immich-secrets" "path" "kubernetes/clusters/homelab/apps/immich-secrets" "namespace" "immich")
 }}
 ---
 apiVersion: argoproj.io/v1alpha1

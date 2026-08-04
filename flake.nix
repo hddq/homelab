@@ -13,6 +13,7 @@
       packages = with pkgs; [
         python3
         kubectl
+        kubectl-cnpg
         kubernetes-helm
         age
         sops

@@ -15,13 +15,22 @@ jobs:
         uses: azure/setup-helm@v5
 
       - name: Build Helm dependencies for infra/
-        run: bash scripts/ci/infra-charts.sh build-deps
+        run: bash scripts/ci/helm-charts.sh kubernetes/clusters/homelab/infra build-deps
+
+      - name: Build Helm dependencies for apps/
+        run: bash scripts/ci/helm-charts.sh kubernetes/clusters/homelab/apps build-deps
 
       - name: Upload built infrastructure charts
         uses: actions/upload-artifact@v7
         with:
-          name: helm-dependencies
+          name: helm-dependencies-infra
           path: kubernetes/clusters/homelab/infra/
+
+      - name: Upload built apps charts
+        uses: actions/upload-artifact@v7
+        with:
+          name: helm-dependencies-apps
+          path: kubernetes/clusters/homelab/apps/
 
   kubeconform:
     name: ☸️ Validate K8s Manifests
@@ -34,8 +43,14 @@ jobs:
       - name: Download built infrastructure charts
         uses: actions/download-artifact@v8
         with:
-          name: helm-dependencies
+          name: helm-dependencies-infra
           path: kubernetes/clusters/homelab/infra/
+
+      - name: Download built apps charts
+        uses: actions/download-artifact@v8
+        with:
+          name: helm-dependencies-apps
+          path: kubernetes/clusters/homelab/apps/
 
       - name: Install Helm
         uses: azure/setup-helm@v5
@@ -47,7 +62,11 @@ jobs:
 
       - name: Render infrastructure charts
         run: |
-          bash scripts/ci/infra-charts.sh render .ci/rendered/infra
+          bash scripts/ci/helm-charts.sh kubernetes/clusters/homelab/infra render .ci/rendered/infra
+
+      - name: Render apps charts
+        run: |
+          bash scripts/ci/helm-charts.sh kubernetes/clusters/homelab/apps render .ci/rendered/apps
 
       - name: Run kubeconform
         run: |
@@ -87,8 +106,14 @@ jobs:
       - name: Download built infrastructure charts
         uses: actions/download-artifact@v8
         with:
-          name: helm-dependencies
+          name: helm-dependencies-infra
           path: kubernetes/clusters/homelab/infra/
+
+      - name: Download built apps charts
+        uses: actions/download-artifact@v8
+        with:
+          name: helm-dependencies-apps
+          path: kubernetes/clusters/homelab/apps/
 
       - name: Run Trivy on apps/
         uses: aquasecurity/trivy-action@v0.36.0
@@ -143,11 +168,19 @@ jobs:
       - name: Download built infrastructure charts
         uses: actions/download-artifact@v8
         with:
-          name: helm-dependencies
+          name: helm-dependencies-infra
           path: kubernetes/clusters/homelab/infra/
+
+      - name: Download built apps charts
+        uses: actions/download-artifact@v8
+        with:
+          name: helm-dependencies-apps
+          path: kubernetes/clusters/homelab/apps/
 
       - name: Install Helm
         uses: azure/setup-helm@v5
 
       - name: Run Helm Lint
-        run: bash scripts/ci/infra-charts.sh lint
+        run: |
+          bash scripts/ci/helm-charts.sh kubernetes/clusters/homelab/infra lint
+          bash scripts/ci/helm-charts.sh kubernetes/clusters/homelab/apps lint

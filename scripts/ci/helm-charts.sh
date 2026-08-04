@@ -2,8 +2,28 @@
 
 set -euo pipefail
 
+usage() {
+  cat <<'EOF'
+Usage:
+  scripts/ci/helm-charts.sh <directory> list
+  scripts/ci/helm-charts.sh <directory> build-deps
+  scripts/ci/helm-charts.sh <directory> render [output_dir]
+  scripts/ci/helm-charts.sh <directory> lint
+EOF
+}
+
+if [ $# -lt 2 ]; then
+  usage >&2
+  exit 1
+fi
+
+BASE_DIR=${1%/}
+COMMAND=$2
+TYPE=$(basename "$BASE_DIR")
+OUTDIR=${3:-.ci/rendered/${TYPE}}
+
 list_charts() {
-  find kubernetes/clusters/homelab/infra -name Chart.yaml -not -path '*/charts/*' -print \
+  find "$BASE_DIR" -name Chart.yaml -not -path '*/charts/*' -print \
     | sort \
     | while IFS= read -r chart_file; do
         dirname "$chart_file"
@@ -12,21 +32,21 @@ list_charts() {
 
 chart_id() {
   local chart_dir=$1
-  local id=${chart_dir#kubernetes/clusters/homelab/infra/}
+  local id=${chart_dir#"${BASE_DIR}"/}
   printf '%s\n' "${id//\//-}"
 }
 
 list_repos() {
   while IFS= read -r chart_dir; do
     awk '/repository:/ { print $2 }' "$chart_dir/Chart.yaml"
-  done < <(list_charts) | sort -u
+  done < <(list_charts) | sort -u | grep -v '^oci://' || true
 }
 
 build_deps() {
   mapfile -t repos < <(list_repos)
 
   for i in "${!repos[@]}"; do
-    helm repo add "repo-$i" "${repos[$i]}"
+    helm repo add "${TYPE}-repo-$i" "${repos[$i]}"
   done
 
   if [ "${#repos[@]}" -gt 0 ]; then
@@ -40,7 +60,7 @@ build_deps() {
 }
 
 render_charts() {
-  local outdir=${1:-.ci/rendered/infrastructure}
+  local outdir=${1:-$OUTDIR}
 
   mkdir -p "$outdir"
 
@@ -48,7 +68,7 @@ render_charts() {
     local id
     local release
     id=$(chart_id "$chart_dir")
-    release="infra-$id"
+    release="${TYPE}-$id"
 
     for env in staging production; do
       args=()
@@ -73,37 +93,25 @@ lint_charts() {
   done < <(list_charts)
 }
 
-usage() {
-  cat <<'EOF'
-Usage:
-  scripts/ci/infra-charts.sh list
-  scripts/ci/infra-charts.sh build-deps
-  scripts/ci/infra-charts.sh render [output_dir]
-  scripts/ci/infra-charts.sh lint
-EOF
-}
-
-main() {
-  local command=${1:-}
-
-  case "$command" in
-    list)
-      list_charts
-      ;;
-    build-deps)
-      build_deps
-      ;;
-    render)
-      render_charts "${2:-.ci/rendered/infrastructure}"
-      ;;
-    lint)
-      lint_charts
-      ;;
-    *)
-      usage >&2
-      exit 1
-      ;;
-  esac
-}
-
-main "$@"
+case "$COMMAND" in
+  list)
+    list_charts
+    ;;
+  build-deps)
+    build_deps
+    ;;
+  render)
+    if [ -n "${3:-}" ]; then
+      render_charts "$3"
+    else
+      render_charts "$OUTDIR"
+    fi
+    ;;
+  lint)
+    lint_charts
+    ;;
+  *)
+    usage >&2
+    exit 1
+    ;;
+esac
