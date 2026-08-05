@@ -23,11 +23,30 @@ TYPE=$(basename "$BASE_DIR")
 OUTDIR=${3:-.ci/rendered/${TYPE}}
 
 list_charts() {
-  find "$BASE_DIR" -name Chart.yaml -not -path '*/charts/*' -print \
+  local all_charts
+  all_charts=$(find "$BASE_DIR" -name Chart.yaml -not -path '*/charts/*' -print \
     | sort \
     | while IFS= read -r chart_file; do
         dirname "$chart_file"
-      done
+      done)
+
+  if [ "${CHECK_CHANGED_ONLY:-false}" = "true" ]; then
+    local base_ref="stable"
+    if [ "$GITHUB_EVENT_NAME" = "pull_request" ] && [ -n "${GITHUB_BASE_REF:-}" ]; then
+      base_ref="$GITHUB_BASE_REF"
+    fi
+
+    # Fetch only the specific branch to avoid full clone (fetch-depth: 0)
+    git fetch --depth=1 origin "$base_ref" 2>/dev/null || true
+
+    for chart in $all_charts; do
+      if git diff --name-only "origin/$base_ref" HEAD -- "$chart" 2>/dev/null | grep -q .; then
+        echo "$chart"
+      fi
+    done
+  else
+    echo "$all_charts"
+  fi
 }
 
 chart_id() {

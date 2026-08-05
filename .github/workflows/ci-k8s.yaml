@@ -3,6 +3,9 @@ name: CI - Kubernetes
 on:
   workflow_call:
 
+env:
+  CHECK_CHANGED_ONLY: "true"
+
 jobs:
   helm-build:
     name: ⎈ Build Helm Dependencies
