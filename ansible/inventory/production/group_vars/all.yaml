@@ -3,24 +3,3 @@ cluster_name: production
 git_branch: stable
 target_inventory_file: inventory/production/hosts.ini
 kubeconfig_path: kubeconfig-production
-
-vms_to_provision:
-  - name: "k8s-cp-1"
-    vmid: 211
-    node: "z690"
-    ip: "192.168.20.111"
-    k3s_role: "master"
-    run_workloads: false
-
-  - name: "k8s-worker-1"
-    vmid: 212
-    node: "z690"
-    ip: "192.168.20.112"
-    k3s_role: "worker"
-
-  - name: "k8s-worker-2"
-    vmid: 213
-    node: "b360"
-    disk: "50G"
-    ip: "192.168.20.113"
-    k3s_role: "worker"

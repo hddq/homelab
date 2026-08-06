@@ -43,7 +43,6 @@ jobs:
               - '.github/workflows/main.yaml'
             k8s:
               - 'kubernetes/**'
-              - 'k3s_version.txt'
               - '.github/workflows/ci-k8s.yaml'
               - 'scripts/ci/**'
               - '.github/workflows/main.yaml'

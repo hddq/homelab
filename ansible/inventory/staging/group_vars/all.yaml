@@ -3,11 +3,3 @@ cluster_name: staging
 git_branch: stable
 target_inventory_file: inventory/staging/hosts.ini
 kubeconfig_path: kubeconfig-staging
-
-vms_to_provision:
-  - name: "k8s-staging-1"
-    vmid: 220
-    node: "z690"
-    ip: "192.168.20.120"
-    k3s_role: "master"
-    run_workloads: true
