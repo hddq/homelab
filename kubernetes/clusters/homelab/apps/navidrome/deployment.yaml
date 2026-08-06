@@ -63,12 +63,8 @@ spec:
               containerPort: 4533
               protocol: TCP
           env:
-            - name: ND_LOGLEVEL
-              value: "info"
-            - name: ND_MUSICFOLDER
-              value: "/music"
-            - name: ND_DATAFOLDER
-              value: "/data"
+            - name: ND_CONFIGFILE
+              value: "/config/navidrome.toml"
             - name: ND_LASTFM_APIKEY
               valueFrom:
                 secretKeyRef:
@@ -79,10 +75,6 @@ spec:
                 secretKeyRef:
                   name: navidrome-secret
                   key: ND_LASTFM_SECRET
-            - name: ND_PLUGINS_ENABLED
-              value: "true"
-            - name: ND_LYRICSPRIORITY
-              value: "embedded,.lrc,nd-lyrics"
           resources:
             requests:
               cpu: 100m
@@ -91,6 +83,8 @@ spec:
               cpu: 500m
               memory: 512Mi
           volumeMounts:
+            - name: config-volume
+              mountPath: /config
             - name: music-nfs
               subPath: music
               mountPath: /music
@@ -103,6 +97,9 @@ spec:
             - name: tmp-dir
               mountPath: /tmp
       volumes:
+        - name: config-volume
+          configMap:
+            name: navidrome-config
         - name: music-nfs
           nfs:
             server: 192.168.20.12

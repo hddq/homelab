@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: navidrome-config
+  namespace: navidrome
+data:
+  navidrome.toml: |
+    LogLevel = "info"
+    MusicFolder = "/music"
+    DataFolder = "/data"
+    PluginsEnabled = true
+    LyricsPriority = "embedded,.lrc,nd-lyrics"
+
+    [Plugins]
+    Enabled = true
+    Folder = "/data/plugins"
+
+    [PluginConfig.nd-lyrics]
+    enabled = true
