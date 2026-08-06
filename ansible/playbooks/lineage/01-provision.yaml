@@ -126,7 +126,7 @@
 
     - name: 📝 Stage 7 - Update inventory file
       ansible.builtin.lineinfile:
-        path: "{{ playbook_dir }}/../../inventory/production/hosts.ini"
+        path: "{{ playbook_dir }}/../../inventory/hosts.ini"
         insertafter: '\[lineage\]'
         line: "{{ item.ip }} ansible_user={{ vm_user }}"
         state: present

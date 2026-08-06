@@ -1,5 +1,0 @@
-deployment_environment: staging
-cluster_name: staging
-git_branch: stable
-target_inventory_file: inventory/staging/hosts.ini
-kubeconfig_path: kubeconfig-staging
