@@ -15,6 +15,8 @@
         kubectl
         kubectl-cnpg
         kubernetes-helm
+        kustomize
+        kustomize-sops
         age
         sops
         argocd
