@@ -35,7 +35,7 @@ spec:
             - sh
             - -c
             - |
-              PLUGIN_VERSION="7.1.0"
+              PLUGIN_VERSION="7.2.0"
               PLUGIN_PATH="/data/plugins/nd-lyrics.ndp"
               EXPECTED_VERSION_FILE="/data/plugins/.nd-lyrics-version"
 
