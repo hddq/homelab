@@ -10,7 +10,8 @@ ENVIRONMENT="${1:-production}"
 BRANCH="${2:-stable}"
 AGE_KEY_PATH="${3:-}"
 KUBECONFIG_PATH="${4:-}"
-REPO_SECRET_PATH="kubernetes/clusters/homelab/infra/argocd-secrets/secret.yaml"
+REPO_SECRET_PATH="kubernetes/clusters/homelab/infra/argocd-secrets/repo-secret.yaml"
+ADMIN_SECRET_PATH="kubernetes/clusters/homelab/infra/argocd-secrets/admin-secret.yaml"
 ARGOCD_CHART_PATH="kubernetes/clusters/homelab/infra/argocd"
 BOOTSTRAP_CHART_PATH="kubernetes/clusters/homelab/bootstrap"
 REPO_URL="ssh://git@ssh.github.com:443/hddq/homelab.git"
@@ -51,6 +52,11 @@ if [ ! -f "${REPO_SECRET_PATH}" ]; then
   exit 1
 fi
 
+if [ ! -f "${ADMIN_SECRET_PATH}" ]; then
+  echo "❌ Error: ArgoCD admin secret file not found at '${ADMIN_SECRET_PATH}'."
+  exit 1
+fi
+
 # 2. Ensure argocd namespace exists
 echo "📁 Ensuring 'argocd' namespace exists..."
 "${KUBECTL[@]}" create namespace argocd --dry-run=client -o yaml | "${KUBECTL[@]}" apply -f -
@@ -62,9 +68,10 @@ echo "🔑 Injecting SOPS Age key secret ('sops-age')..."
   --from-file=keys.txt="${AGE_KEY_PATH}" \
   --dry-run=client -o yaml | "${KUBECTL[@]}" apply -f -
 
-# 4. Decrypt and apply ArgoCD SSH Git repository secret
-echo "🔐 Decrypting and applying ArgoCD Git SSH secret..."
+# 4. Decrypt and apply ArgoCD SSH Git repository secret & admin secret
+echo "🔐 Decrypting and applying ArgoCD secrets..."
 SOPS_AGE_KEY_FILE="${AGE_KEY_PATH}" sops -d "${REPO_SECRET_PATH}" | "${KUBECTL[@]}" apply -f -
+SOPS_AGE_KEY_FILE="${AGE_KEY_PATH}" sops -d "${ADMIN_SECRET_PATH}" | "${KUBECTL[@]}" apply -f -
 
 # 5. Build Helm dependencies using isolated repo config
 echo "📦 Building ArgoCD Helm dependencies..."
@@ -117,11 +124,8 @@ EOF
 echo ""
 echo "🎉 Cluster bootstrap complete!"
 echo "----------------------------------------------------"
-if "${KUBECTL[@]}" -n argocd get secret argocd-initial-admin-secret >/dev/null 2>&1; then
-  ARGOCD_PASS=$("${KUBECTL[@]}" -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)
-  echo "🔑 ArgoCD Admin User:     admin"
-  echo "🔑 ArgoCD Admin Password: ${ARGOCD_PASS}"
-fi
+echo "🔑 ArgoCD Admin User:     admin"
+echo "🔑 ArgoCD Admin Password: (predefined in 'argocd-secret')"
 echo ""
 echo "🌐 Access ArgoCD Dashboard:"
 echo "   kubectl -n argocd port-forward service/infra-argocd-server 8080:80"
