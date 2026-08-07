@@ -1,0 +1,107 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flaresolverr
+  labels:
+    app.kubernetes.io/name: flaresolverr
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: flaresolverr
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: flaresolverr
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      initContainers:
+        - name: copy-chromedriver
+          image: ghcr.io/flaresolverr/flaresolverr:v3.5.0
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - cp /app/chromedriver /tmp/driver/chromedriver && chmod 755 /tmp/driver/chromedriver
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: chromedriver-volume
+              mountPath: /tmp/driver
+            - name: tmp-volume
+              mountPath: /tmp
+      containers:
+        - name: flaresolverr
+          image: ghcr.io/flaresolverr/flaresolverr:v3.5.0
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          ports:
+            - name: http
+              containerPort: 8191
+              protocol: TCP
+          env:
+            - name: TZ
+              value: "Europe/Warsaw"
+            - name: LOG_LEVEL
+              value: "info"
+            - name: HOME
+              value: "/tmp"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8191
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            timeoutSeconds: 2
+            failureThreshold: 5
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8191
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 2
+            failureThreshold: 5
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+          volumeMounts:
+            - name: tmp-volume
+              mountPath: /tmp
+            - name: dshm
+              mountPath: /dev/shm
+            - name: userdata-volume
+              mountPath: /app/userData
+            - name: chromedriver-volume
+              mountPath: /app/chromedriver
+              subPath: chromedriver
+      volumes:
+        - name: tmp-volume
+          emptyDir: {}
+        - name: dshm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 256Mi
+        - name: userdata-volume
+          emptyDir: {}
+        - name: chromedriver-volume
+          emptyDir: {}
