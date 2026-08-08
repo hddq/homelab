@@ -9,6 +9,8 @@ argo-cd:
   configs:
     cm:
       kustomize.buildOptions: --enable-alpha-plugins --enable-exec
+    secret:
+      createSecret: false
   server:
     ingress:
       enabled: false

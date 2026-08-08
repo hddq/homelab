@@ -15,7 +15,7 @@
     (dict "name" "k8up-backups" "path" "kubernetes/clusters/homelab/infra/k8up-backups" "namespace" "k8up" "syncWave" "1" "syncOptions" (list "CreateNamespace=true"))
     (dict "name" "metallb" "path" "kubernetes/clusters/homelab/infra/metallb" "namespace" "metallb-system" "syncOptions" (list "CreateNamespace=true") "helmValueFiles" (list "values.yaml" (printf "values-%s.yaml" $environment)))
     (dict "name" "openebs" "path" "kubernetes/clusters/homelab/infra/openebs" "namespace" "openebs" "syncWave" "-2" "syncOptions" (list "CreateNamespace=true"))
-    (dict "name" "argocd-secrets" "path" "kubernetes/clusters/homelab/infra/argocd-secrets" "namespace" "argocd" "syncWave" "-1" "syncOptions" (list "CreateNamespace=true"))
+    (dict "name" "argocd-secrets" "path" "kubernetes/clusters/homelab/infra/argocd-secrets" "namespace" "argocd" "syncWave" "-1" "syncOptions" (list "CreateNamespace=true" "RespectIgnoreDifferences=true") "ignoreDifferences" (list (dict "group" "" "kind" "Secret" "name" "argocd-secret" "jsonPointers" (list "/data/server.secretkey" "/data/tls.crt" "/data/tls.key" "/data/oidc.key" "/data/session.token"))))
     (dict "name" "argocd" "path" "kubernetes/clusters/homelab/infra/argocd" "namespace" "argocd" "syncOptions" (list "ServerSideApply=true") "helmValueFiles" (list "values.yaml" (printf "values-%s.yaml" $environment)))
     (dict "name" "cloudnative-pg" "path" "kubernetes/clusters/homelab/infra/cloudnative-pg" "namespace" "cnpg-system" "syncWave" "-2" "syncOptions" (list "CreateNamespace=true" "ServerSideApply=true") "helmValueFiles" (list "values.yaml"))
     (dict "name" "metrics-server" "path" "kubernetes/clusters/homelab/infra/metrics-server" "namespace" "kube-system")
@@ -71,6 +71,12 @@ spec:
       {{- end }}
       {{- with .jqPathExpressions }}
       jqPathExpressions:
+        {{- range . }}
+        - {{ . | quote }}
+        {{- end }}
+      {{- end }}
+      {{- with .jsonPointers }}
+      jsonPointers:
         {{- range . }}
         - {{ . | quote }}
         {{- end }}
