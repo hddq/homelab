@@ -64,10 +64,10 @@ spec:
   {{- with $app.ignoreDifferences }}
   ignoreDifferences:
     {{- range . }}
-    - group: {{ .group }}
-      kind: {{ .kind }}
+    - group: {{ .group | quote }}
+      kind: {{ .kind | quote }}
       {{- with .name }}
-      name: {{ . }}
+      name: {{ . | quote }}
       {{- end }}
       {{- with .jqPathExpressions }}
       jqPathExpressions:
