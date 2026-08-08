@@ -104,7 +104,6 @@ resource "proxmox_virtual_environment_vm" "talos" {
     file_format  = "raw"
     interface    = "virtio0"
     size         = 20
-    ssd          = true
     iothread     = true
     discard      = "on"
   }
@@ -114,7 +113,6 @@ resource "proxmox_virtual_environment_vm" "talos" {
     file_format  = "raw"
     interface    = "virtio1"
     size         = 20
-    ssd          = true
     iothread     = true
     discard      = "on"
   }
