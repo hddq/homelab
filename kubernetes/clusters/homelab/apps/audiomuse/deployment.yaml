@@ -54,7 +54,7 @@ spec:
             - "until nc -z audiomuse-redis 6379; do echo waiting for redis; sleep 2; done"
       containers:
         - name: audiomuse-flask
-          image: ghcr.io/neptunehub/audiomuse-ai:3.1.1@sha256:15c50b3e7ec34f9c1e99340f54bf0a61135226d9b838bf75284e1ef55dfbc2ab
+          image: ghcr.io/neptunehub/audiomuse-ai:3.2.0@sha256:c24895c630214fcdf55ca3d5a0561d76056973beac45ed2a50022e949dcc94d9
           imagePullPolicy: IfNotPresent
           securityContext:
             readOnlyRootFilesystem: true
@@ -178,7 +178,7 @@ spec:
             - "until nc -z audiomuse-redis 6379; do echo waiting for redis; sleep 2; done"
       containers:
         - name: audiomuse-worker
-          image: ghcr.io/neptunehub/audiomuse-ai:3.1.1@sha256:15c50b3e7ec34f9c1e99340f54bf0a61135226d9b838bf75284e1ef55dfbc2ab
+          image: ghcr.io/neptunehub/audiomuse-ai:3.2.0@sha256:c24895c630214fcdf55ca3d5a0561d76056973beac45ed2a50022e949dcc94d9
           imagePullPolicy: IfNotPresent
           securityContext:
             readOnlyRootFilesystem: true
