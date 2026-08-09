@@ -25,7 +25,7 @@ spec:
         runAsGroup: 1000
         fsGroup: 1000
       initContainers:
-        - name: install-lyrics-plugin
+        - name: install-plugins
           image: curlimages/curl:8.21.0@sha256:7c12af72ceb38b7432ab85e1a265cff6ae58e06f95539d539b654f2cfa64bb13
           securityContext:
             runAsUser: 1000
@@ -35,20 +35,33 @@ spec:
             - sh
             - -c
             - |
-              PLUGIN_VERSION="7.2.0"
-              PLUGIN_PATH="/data/plugins/nd-lyrics.ndp"
-              EXPECTED_VERSION_FILE="/data/plugins/.nd-lyrics-version"
+              mkdir -p /data/plugins
 
-              if [ -f "$EXPECTED_VERSION_FILE" ] && [ "$(cat $EXPECTED_VERSION_FILE)" = "$PLUGIN_VERSION" ]; then
-                echo "Plugin already at version $PLUGIN_VERSION, skipping download"
-                exit 0
+              # Install Lyrics Plugin
+              LYRICS_VERSION="7.2.0"
+              LYRICS_PATH="/data/plugins/nd-lyrics.ndp"
+              LYRICS_VERSION_FILE="/data/plugins/.nd-lyrics-version"
+
+              if [ ! -f "$LYRICS_VERSION_FILE" ] || [ "$(cat $LYRICS_VERSION_FILE 2>/dev/null)" != "$LYRICS_VERSION" ]; then
+                echo "Downloading nd-lyrics version $LYRICS_VERSION..."
+                curl -fsSL -o "$LYRICS_PATH" \
+                  "https://github.com/J0R6IT0/navidrome-lyrics-plugin/releases/download/v${LYRICS_VERSION}/nd-lyrics.ndp"
+                echo "$LYRICS_VERSION" > "$LYRICS_VERSION_FILE"
               fi
 
-              mkdir -p /data/plugins
-              curl -fsSL -o "$PLUGIN_PATH" \
-                "https://github.com/J0R6IT0/navidrome-lyrics-plugin/releases/download/v${PLUGIN_VERSION}/nd-lyrics.ndp"
-              echo "$PLUGIN_VERSION" > "$EXPECTED_VERSION_FILE"
-              echo "Plugin installed successfully"
+              # Install AudioMuse-AI Plugin
+              AUDIOMUSE_VERSION="v9"
+              AUDIOMUSE_PATH="/data/plugins/audiomuseai.ndp"
+              AUDIOMUSE_VERSION_FILE="/data/plugins/.audiomuseai-version"
+
+              if [ ! -f "$AUDIOMUSE_VERSION_FILE" ] || [ "$(cat $AUDIOMUSE_VERSION_FILE 2>/dev/null)" != "$AUDIOMUSE_VERSION" ]; then
+                echo "Downloading audiomuseai version $AUDIOMUSE_VERSION..."
+                curl -fsSL -o "$AUDIOMUSE_PATH" \
+                  "https://github.com/NeptuneHub/AudioMuse-AI-NV-plugin/releases/download/${AUDIOMUSE_VERSION}/audiomuseai.ndp"
+                echo "$AUDIOMUSE_VERSION" > "$AUDIOMUSE_VERSION_FILE"
+              fi
+
+              echo "Plugins verified"
           volumeMounts:
             - name: navidrome-pvc
               mountPath: /data

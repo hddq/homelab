@@ -17,3 +17,7 @@ data:
 
     [PluginConfig.nd-lyrics]
     enabled = true
+
+    [PluginConfig.audiomuseai]
+    enabled = true
+    apiUrl = "http://audiomuse.audiomuse.svc.cluster.local:8000"
