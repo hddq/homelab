@@ -40,21 +40,9 @@ spec:
             - sh
             - -c
             - "until nc -z postgres-rw.postgres.svc.cluster.local 5432; do echo waiting for postgres; sleep 2; done"
-        - name: wait-for-redis
-          image: busybox:1.38.0@sha256:dc2d74b28e4cf8984fa52af1f39bc7c3d9c73760b41a74d629f5d11b1ab28616
-          securityContext:
-            readOnlyRootFilesystem: true
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-                - ALL
-          command:
-            - sh
-            - -c
-            - "until nc -z audiomuse-redis 6379; do echo waiting for redis; sleep 2; done"
       containers:
         - name: audiomuse-flask
-          image: ghcr.io/neptunehub/audiomuse-ai:3.1.1@sha256:15c50b3e7ec34f9c1e99340f54bf0a61135226d9b838bf75284e1ef55dfbc2ab
+          image: ghcr.io/neptunehub/audiomuse-ai:3.2.0@sha256:c24895c630214fcdf55ca3d5a0561d76056973beac45ed2a50022e949dcc94d9
           imagePullPolicy: IfNotPresent
           securityContext:
             readOnlyRootFilesystem: true
@@ -88,12 +76,6 @@ spec:
                 secretKeyRef:
                   name: audiomuse-secret
                   key: POSTGRES_DB
-            - name: REDIS_HOST
-              value: "audiomuse-redis"
-            - name: REDIS_PORT
-              value: "6379"
-            - name: REDIS_URL
-              value: "redis://audiomuse-redis:6379/0"
             - name: TZ
               value: "UTC"
           resources:
@@ -164,21 +146,9 @@ spec:
             - sh
             - -c
             - "until nc -z postgres-rw.postgres.svc.cluster.local 5432; do echo waiting for postgres; sleep 2; done"
-        - name: wait-for-redis
-          image: busybox:1.38.0@sha256:dc2d74b28e4cf8984fa52af1f39bc7c3d9c73760b41a74d629f5d11b1ab28616
-          securityContext:
-            readOnlyRootFilesystem: true
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-                - ALL
-          command:
-            - sh
-            - -c
-            - "until nc -z audiomuse-redis 6379; do echo waiting for redis; sleep 2; done"
       containers:
         - name: audiomuse-worker
-          image: ghcr.io/neptunehub/audiomuse-ai:3.1.1@sha256:15c50b3e7ec34f9c1e99340f54bf0a61135226d9b838bf75284e1ef55dfbc2ab
+          image: ghcr.io/neptunehub/audiomuse-ai:3.2.0@sha256:c24895c630214fcdf55ca3d5a0561d76056973beac45ed2a50022e949dcc94d9
           imagePullPolicy: IfNotPresent
           securityContext:
             readOnlyRootFilesystem: true
@@ -208,12 +178,6 @@ spec:
                 secretKeyRef:
                   name: audiomuse-secret
                   key: POSTGRES_DB
-            - name: REDIS_HOST
-              value: "audiomuse-redis"
-            - name: REDIS_PORT
-              value: "6379"
-            - name: REDIS_URL
-              value: "redis://audiomuse-redis:6379/0"
             - name: TZ
               value: "UTC"
           resources:

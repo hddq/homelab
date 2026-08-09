@@ -3,7 +3,6 @@ kind: Kustomization
 namespace: audiomuse
 resources:
   - namespace.yaml
-  - redis.yaml
   - deployment.yaml
   - service.yaml
   - ingress.yaml
