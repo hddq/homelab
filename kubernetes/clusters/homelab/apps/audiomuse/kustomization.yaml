@@ -3,7 +3,8 @@ kind: Kustomization
 namespace: audiomuse
 resources:
   - namespace.yaml
-  - secret.yaml
   - deployment.yaml
   - service.yaml
   - ingress.yaml
+generators:
+  - ksops-secret-generator.yaml

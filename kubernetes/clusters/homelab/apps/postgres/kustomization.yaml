@@ -6,6 +6,5 @@ resources:
   - cluster.yaml
   - immich.yaml
   - audiomuse.yaml
-  - audiomuse-secret.yaml
 generators:
   - ksops-secret-generator.yaml
