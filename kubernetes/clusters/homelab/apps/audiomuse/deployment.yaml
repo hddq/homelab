@@ -1,0 +1,203 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: audiomuse
+  namespace: audiomuse
+  labels:
+    app.kubernetes.io/name: audiomuse
+    app.kubernetes.io/component: flask
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: audiomuse
+      app.kubernetes.io/component: flask
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: audiomuse
+        app.kubernetes.io/component: flask
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      initContainers:
+        - name: wait-for-postgres
+          image: busybox:1.38.0
+          command:
+            - sh
+            - -c
+            - "until nc -z postgres-rw.postgres.svc.cluster.local 5432; do echo waiting for postgres; sleep 2; done"
+        - name: wait-for-redis
+          image: busybox:1.38.0
+          command:
+            - sh
+            - -c
+            - "until nc -z audiomuse-redis 6379; do echo waiting for redis; sleep 2; done"
+      containers:
+        - name: audiomuse-flask
+          image: ghcr.io/neptunehub/audiomuse-ai:3.1.1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          env:
+            - name: SERVICE_TYPE
+              value: "flask"
+            - name: POSTGRES_HOST
+              value: "postgres-rw.postgres.svc.cluster.local"
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: audiomuse-secret
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: audiomuse-secret
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: audiomuse-secret
+                  key: POSTGRES_DB
+            - name: REDIS_HOST
+              value: "audiomuse-redis"
+            - name: REDIS_PORT
+              value: "6379"
+            - name: REDIS_URL
+              value: "redis://audiomuse-redis:6379/0"
+            - name: TZ
+              value: "UTC"
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 2Gi
+          volumeMounts:
+            - name: music-nfs
+              subPath: music
+              mountPath: /music
+              readOnly: true
+            - name: tmp-dir
+              mountPath: /tmp
+            - name: temp-audio
+              mountPath: /app/temp_audio
+      volumes:
+        - name: music-nfs
+          nfs:
+            server: 192.168.20.12
+            path: /mnt/ssd1/media
+        - name: tmp-dir
+          emptyDir: {}
+        - name: temp-audio
+          emptyDir: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: audiomuse-worker
+  namespace: audiomuse
+  labels:
+    app.kubernetes.io/name: audiomuse-worker
+    app.kubernetes.io/component: worker
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: audiomuse-worker
+      app.kubernetes.io/component: worker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: audiomuse-worker
+        app.kubernetes.io/component: worker
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      initContainers:
+        - name: wait-for-postgres
+          image: busybox:1.38.0
+          command:
+            - sh
+            - -c
+            - "until nc -z postgres-rw.postgres.svc.cluster.local 5432; do echo waiting for postgres; sleep 2; done"
+        - name: wait-for-redis
+          image: busybox:1.38.0
+          command:
+            - sh
+            - -c
+            - "until nc -z audiomuse-redis 6379; do echo waiting for redis; sleep 2; done"
+      containers:
+        - name: audiomuse-worker
+          image: ghcr.io/neptunehub/audiomuse-ai:3.1.1
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: SERVICE_TYPE
+              value: "worker"
+            - name: POSTGRES_HOST
+              value: "postgres-rw.postgres.svc.cluster.local"
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: audiomuse-secret
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: audiomuse-secret
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: audiomuse-secret
+                  key: POSTGRES_DB
+            - name: REDIS_HOST
+              value: "audiomuse-redis"
+            - name: REDIS_PORT
+              value: "6379"
+            - name: REDIS_URL
+              value: "redis://audiomuse-redis:6379/0"
+            - name: TZ
+              value: "UTC"
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: 2000m
+              memory: 4Gi
+          volumeMounts:
+            - name: music-nfs
+              subPath: music
+              mountPath: /music
+              readOnly: true
+            - name: tmp-dir
+              mountPath: /tmp
+            - name: temp-audio
+              mountPath: /app/temp_audio
+      volumes:
+        - name: music-nfs
+          nfs:
+            server: 192.168.20.12
+            path: /mnt/ssd1/media
+        - name: tmp-dir
+          emptyDir: {}
+        - name: temp-audio
+          emptyDir: {}
