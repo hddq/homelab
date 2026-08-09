@@ -4,7 +4,6 @@ namespace: audiomuse
 resources:
   - namespace.yaml
   - secret.yaml
-  - redis.yaml
   - deployment.yaml
   - service.yaml
   - ingress.yaml
