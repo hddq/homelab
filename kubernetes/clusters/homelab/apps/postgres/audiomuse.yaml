@@ -1,0 +1,21 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: DatabaseRole
+metadata:
+  name: audiomuse
+spec:
+  name: audiomuse
+  login: true
+  cluster:
+    name: postgres
+  passwordSecret:
+    name: audiomuse-postgres
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: audiomuse
+spec:
+  name: audiomuse
+  owner: audiomuse
+  cluster:
+    name: postgres
