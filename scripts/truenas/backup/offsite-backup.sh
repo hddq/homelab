@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-VERSION="v3.8.7"
+VERSION="v3.9.0"
 
 echo -e "Offsite Backup Script ${VERSION}"
 
-set -e
+set -Eeuo pipefail
 
 # --- CONFIGURATION ---
 DAILY_POOLS=("ssd1")
@@ -14,34 +14,88 @@ BLACKLISTED_DATASETS=("ssd1/ix-apps" "ssd1/bitmonero")
 
 SNAP_NAME="restic-backup-$$"
 TMP_ROOT="/tmp/restic-backup"
+LOCK_FILE="/tmp/offsite-restic-backup.lock"
 
 REPO="rclone:gdrive3:/nas-backup/"
 CONFIG_DIR="/root/.config/restic"
 export RESTIC_PASSWORD_FILE="$CONFIG_DIR/password"
 export RCLONE_BWLIMIT="1.25M:12.5M"
 
-declare -a MOUNT_POINTS
 declare -a POOLS_TO_PROCESS
+LOCK_ACQUIRED=false
+
+mount_exists() {
+    findmnt -M "$1" -n >/dev/null 2>&1
+}
+
+unmount_all_at() {
+    local mountpoint=$1
+
+    # A failed/interrupted run can leave more than one mount stacked at the
+    # same target. Remove every layer, not just the visible one.
+    while mount_exists "$mountpoint"; do
+        echo "Unmounting: $mountpoint"
+        if ! umount "$mountpoint"; then
+            echo "Warning: Failed to unmount $mountpoint" >&2
+            return 1
+        fi
+    done
+}
+
+cleanup_tmp_mounts() {
+    local -a mountpoints=()
+
+    mapfile -t mountpoints < <(
+        findmnt -R -n -o TARGET "$TMP_ROOT" 2>/dev/null |
+            awk '{ depth = gsub(/\//, "/"); print depth "\t" $0 }' |
+            sort -rn -k1,1 |
+            cut -f2- |
+            awk '!seen[$0]++'
+    )
+
+    local mountpoint
+    for mountpoint in "${mountpoints[@]}"; do
+        unmount_all_at "$mountpoint" || return 1
+    done
+}
+
+prepare_tmp_root() {
+    if findmnt -R -n -o TARGET "$TMP_ROOT" >/dev/null 2>&1; then
+        echo "Removing stale temporary mounts below $TMP_ROOT..."
+        cleanup_tmp_mounts
+    fi
+
+    if findmnt -R -n -o TARGET "$TMP_ROOT" >/dev/null 2>&1; then
+        echo "FATAL: Mounts still exist below $TMP_ROOT; refusing to continue." >&2
+        exit 1
+    fi
+
+    rm -rf "$TMP_ROOT"
+    mkdir -p "$TMP_ROOT"
+}
 
 # --- CORE FUNCTIONS ---
 
 # shellcheck disable=SC2329
 cleanup() {
     echo "--- CLEANUP ---"
-    if [ "${#MOUNT_POINTS[@]}" -gt 0 ]; then
-        local sorted_mounts
-        mapfile -t sorted_mounts < <(printf "%s\n" "${MOUNT_POINTS[@]}" | sort -r)
-        for mp in "${sorted_mounts[@]}"; do
-            echo "Unmounting: $mp"
-            umount "$mp" || echo "Warning: Failed to unmount $mp"
-        done
+    if [ "$LOCK_ACQUIRED" != true ]; then
+        echo "Skipping cleanup because this process did not acquire the backup lock."
+        return
+    fi
+
+    if ! cleanup_tmp_mounts; then
+        echo "Warning: Failed to fully clean temporary mounts; retaining ZFS snapshots." >&2
+        return
     fi
 
     local ALL_POOLS
     mapfile -t ALL_POOLS < <(printf "%s\n" "${DAILY_POOLS[@]}" "${WEEKLY_POOLS[@]}" | sort -u)
     echo "Searching for and deleting old restic backup snapshots..."
     for pool in "${ALL_POOLS[@]}"; do
-        zfs list -H -o name -t snapshot | grep "${pool}@restic-backup-" | while IFS= read -r SNAP_TO_DESTROY; do
+        zfs list -H -o name -t snapshot -r "$pool" |
+            awk -v pool="$pool" '$0 ~ "^" pool "@restic-backup-"' |
+            while IFS= read -r SNAP_TO_DESTROY; do
             echo "  -> Deleting snapshot: $SNAP_TO_DESTROY"
             zfs destroy -r "$SNAP_TO_DESTROY" || echo "  -> Warning: Failed to destroy $SNAP_TO_DESTROY"
         done
@@ -102,18 +156,22 @@ mount_pool_datasets() {
     while IFS= read -r dataset; do
         [ -z "$dataset" ] && continue
         
-        local source_snap="/mnt/${dataset}/.zfs/snapshot/${SNAP_NAME}"
         local dest_mount="${TMP_ROOT}/${dataset}"
 
-        if [ -d "$source_snap" ]; then
-            mkdir -p "$dest_mount"
-            mount --bind "$source_snap" "$dest_mount"
-            MOUNT_POINTS+=("$dest_mount")
-            echo "  -> Mounted: $dataset"
-        else
-            echo "FATAL: Snapshot path '$source_snap' missing!" >&2
+        mkdir -p "$dest_mount"
+        # Mount the snapshot itself instead of bind-mounting its dynamic .zfs
+        # pathname. This avoids ZFS's lazy snapshot mount tree and gives
+        # Restic one stable path on every run.
+        mount -t zfs -o ro "${dataset}@${SNAP_NAME}" "$dest_mount"
+
+        local mounted_source
+        mounted_source=$(findmnt -M "$dest_mount" -n -o SOURCE | tail -n 1)
+        if [ "$mounted_source" != "${dataset}@${SNAP_NAME}" ]; then
+            echo "FATAL: $dest_mount is not mounted from ${dataset}@${SNAP_NAME} (got: ${mounted_source:-nothing})." >&2
             exit 1
         fi
+
+        echo "  -> Mounted: $dataset"
     done <<< "$dataset_list"
 }
 
@@ -158,6 +216,15 @@ trap error_handler ERR
 trap cleanup EXIT
 
 echo ">>> Starting backup process: $(date)"
+
+exec 9>"$LOCK_FILE"
+if ! flock -n 9; then
+    echo "FATAL: Another offsite backup process holds $LOCK_FILE." >&2
+    exit 1
+fi
+LOCK_ACQUIRED=true
+
+prepare_tmp_root
 
 determine_pools_to_process
 
