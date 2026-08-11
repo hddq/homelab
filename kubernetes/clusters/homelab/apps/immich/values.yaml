@@ -83,4 +83,4 @@ immich:
       globalMounts:
         - path: /tmp
   env:
-    TZ: "UTC"
+    TZ: "Europe/Warsaw"
