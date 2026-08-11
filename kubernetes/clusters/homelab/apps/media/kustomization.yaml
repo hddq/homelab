@@ -8,4 +8,5 @@ resources:
   - sonarr
   - prowlarr
   - qbittorrent
+  - qui
   - flaresolverr
