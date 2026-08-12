@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-VERSION="v3.9.0"
+VERSION="v3.9.1"
 
 echo -e "Offsite Backup Script ${VERSION}"
 
@@ -44,9 +44,20 @@ unmount_all_at() {
 
 cleanup_tmp_mounts() {
     local -a mountpoints=()
+    local targets
+
+    # TMP_ROOT is an ordinary directory, not a mountpoint. `findmnt -R
+    # "$TMP_ROOT"` therefore does not reliably discover mounts below it.
+    # List all mount targets and select this tree explicitly instead.
+    if ! targets=$(findmnt --all --list -n -o TARGET |
+        awk -v root="$TMP_ROOT" '$0 == root || index($0, root "/") == 1'); then
+        echo "Warning: Unable to list mounts below $TMP_ROOT" >&2
+        return 1
+    fi
+    [ -z "$targets" ] && return 0
 
     mapfile -t mountpoints < <(
-        findmnt -R -n -o TARGET "$TMP_ROOT" 2>/dev/null |
+        printf '%s\n' "$targets" |
             awk '{ depth = gsub(/\//, "/"); print depth "\t" $0 }' |
             sort -rn -k1,1 |
             cut -f2- |
@@ -57,20 +68,50 @@ cleanup_tmp_mounts() {
     for mountpoint in "${mountpoints[@]}"; do
         unmount_all_at "$mountpoint" || return 1
     done
+
+    if ! targets=$(findmnt --all --list -n -o TARGET |
+        awk -v root="$TMP_ROOT" '$0 == root || index($0, root "/") == 1'); then
+        echo "Warning: Unable to verify mounts below $TMP_ROOT" >&2
+        return 1
+    fi
+    if [ -n "$targets" ]; then
+        echo "Warning: Mounts remain below $TMP_ROOT:" >&2
+        printf '%s\n' "$targets" >&2
+        return 1
+    fi
+}
+
+remove_tmp_root() {
+    local targets
+
+    if ! targets=$(findmnt --all --list -n -o TARGET |
+        awk -v root="$TMP_ROOT" '$0 == root || index($0, root "/") == 1'); then
+        echo "FATAL: Unable to verify mounts below $TMP_ROOT" >&2
+        return 1
+    fi
+    if [ -n "$targets" ]; then
+        echo "FATAL: Refusing to delete $TMP_ROOT while mounts exist below it:" >&2
+        printf '%s\n' "$targets" >&2
+        return 1
+    fi
+
+    rm -rf -- "$TMP_ROOT"
 }
 
 prepare_tmp_root() {
-    if findmnt -R -n -o TARGET "$TMP_ROOT" >/dev/null 2>&1; then
+    local targets
+
+    if ! targets=$(findmnt --all --list -n -o TARGET |
+        awk -v root="$TMP_ROOT" '$0 == root || index($0, root "/") == 1'); then
+        echo "FATAL: Unable to list mounts below $TMP_ROOT" >&2
+        exit 1
+    fi
+    if [ -n "$targets" ]; then
         echo "Removing stale temporary mounts below $TMP_ROOT..."
         cleanup_tmp_mounts
     fi
 
-    if findmnt -R -n -o TARGET "$TMP_ROOT" >/dev/null 2>&1; then
-        echo "FATAL: Mounts still exist below $TMP_ROOT; refusing to continue." >&2
-        exit 1
-    fi
-
-    rm -rf "$TMP_ROOT"
+    remove_tmp_root
     mkdir -p "$TMP_ROOT"
 }
 
@@ -102,7 +143,10 @@ cleanup() {
     done
 
     echo "Deleting temporary folder: $TMP_ROOT"
-    rm -rf "$TMP_ROOT"
+    if ! remove_tmp_root; then
+        echo "Warning: Retaining ZFS snapshots because $TMP_ROOT could not be deleted safely." >&2
+        return
+    fi
     echo "Cleanup finished."
 }
 
