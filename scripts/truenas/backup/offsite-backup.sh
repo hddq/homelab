@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-VERSION="v3.9.1"
+VERSION="v3.9.2"
 
 echo -e "Offsite Backup Script ${VERSION}"
 
@@ -11,6 +11,11 @@ DAILY_POOLS=("ssd1")
 WEEKLY_POOLS=("hdd")
 WEEKLY_BACKUP_DAY="7"
 BLACKLISTED_DATASETS=("ssd1/ix-apps" "ssd1/bitmonero")
+
+# Retention matches the cadence of each pool. A weekly-only pool must not use
+# --keep-daily: Restic interprets that as seven backup days, i.e. seven weeks.
+DAILY_RETENTION_ARGS=(--keep-daily 7 --keep-weekly 4 --keep-monthly 6)
+WEEKLY_RETENTION_ARGS=(--keep-weekly 4 --keep-monthly 6)
 
 SNAP_NAME="restic-backup-$$"
 TMP_ROOT="/tmp/restic-backup"
@@ -176,6 +181,16 @@ determine_pools_to_process() {
     echo "Pools to process: ${POOLS_TO_PROCESS[*]}"
 }
 
+is_daily_pool() {
+    local pool=$1
+    local daily_pool
+
+    for daily_pool in "${DAILY_POOLS[@]}"; do
+        [ "$daily_pool" = "$pool" ] && return 0
+    done
+    return 1
+}
+
 mount_pool_datasets() {
     local pool=$1
 
@@ -236,7 +251,13 @@ run_maintenance() {
     echo "--- GLOBAL TASKS ---"
     for pool in "${POOLS_TO_PROCESS[@]}"; do
         echo "Applying retention policy for: $pool"
-        restic forget --repo "$REPO" --tag "$pool" --keep-daily 7 --keep-weekly 4 --keep-monthly 6
+        local -a retention_args
+        if is_daily_pool "$pool"; then
+            retention_args=("${DAILY_RETENTION_ARGS[@]}")
+        else
+            retention_args=("${WEEKLY_RETENTION_ARGS[@]}")
+        fi
+        restic forget --repo "$REPO" --tag "$pool" "${retention_args[@]}"
     done
 
     echo "Pruning repository..."
