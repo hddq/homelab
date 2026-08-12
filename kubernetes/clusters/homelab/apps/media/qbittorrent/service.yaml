@@ -11,11 +11,11 @@ spec:
       targetPort: http
       protocol: TCP
       name: http
-    - port: 6881
+    - port: 19669
       targetPort: torrent-tcp
       protocol: TCP
       name: torrent-tcp
-    - port: 6881
+    - port: 19669
       targetPort: torrent-udp
       protocol: UDP
       name: torrent-udp
