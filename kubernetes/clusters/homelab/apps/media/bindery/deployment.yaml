@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bindery
+  labels:
+    app.kubernetes.io/name: bindery
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: bindery
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: bindery
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: k8s-prod-cp-1
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+        - name: bindery
+          image: ghcr.io/vavallee/bindery:v1.30.3
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - NET_RAW
+          ports:
+            - name: http
+              containerPort: 8787
+              protocol: TCP
+          env:
+            - name: BINDERY_PORT
+              value: "8787"
+            - name: TZ
+              value: "Europe/Warsaw"
+            - name: BINDERY_PUID
+              value: "1000"
+            - name: BINDERY_PGID
+              value: "1000"
+            - name: BINDERY_LIBRARY_DIR
+              value: "/mnt/media/books"
+            - name: BINDERY_AUDIOBOOK_DIR
+              value: "/mnt/media/audiobooks"
+            - name: BINDERY_DOWNLOAD_DIR
+              value: "/mnt/media/qBit"
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 8787
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            timeoutSeconds: 2
+            failureThreshold: 5
+          livenessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 8787
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 2
+            failureThreshold: 5
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 512Mi
+          volumeMounts:
+            - name: bindery-pvc
+              mountPath: /config
+            - name: media-nfs
+              mountPath: /mnt/media
+              readOnly: false
+            - name: tmp-volume
+              mountPath: /tmp
+      volumes:
+        - name: bindery-pvc
+          persistentVolumeClaim:
+            claimName: bindery-pvc
+        - name: media-nfs
+          nfs:
+            server: 192.168.20.12
+            path: /mnt/ssd1/media
+        - name: tmp-volume
+          emptyDir: {}

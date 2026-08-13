@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: bindery
+spec:
+  ingressClassName: infra-traefik
+  rules:
+    - host: bindery.lab.hddq.org
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: bindery
+                port:
+                  number: 8787
