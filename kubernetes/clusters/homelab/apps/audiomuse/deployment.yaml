@@ -42,7 +42,7 @@ spec:
             - "until nc -z postgres-rw.postgres.svc.cluster.local 5432; do echo waiting for postgres; sleep 2; done"
       containers:
         - name: audiomuse-flask
-          image: ghcr.io/neptunehub/audiomuse-ai:3.2.0@sha256:c24895c630214fcdf55ca3d5a0561d76056973beac45ed2a50022e949dcc94d9
+          image: ghcr.io/neptunehub/audiomuse-ai:3.3.0@sha256:7405d46efa97a7ad80418db4e01c6bbd62de3b2b92f16bd40e2069be64ea1be6
           imagePullPolicy: IfNotPresent
           securityContext:
             readOnlyRootFilesystem: true
@@ -148,7 +148,7 @@ spec:
             - "until nc -z postgres-rw.postgres.svc.cluster.local 5432; do echo waiting for postgres; sleep 2; done"
       containers:
         - name: audiomuse-worker
-          image: ghcr.io/neptunehub/audiomuse-ai:3.2.0@sha256:c24895c630214fcdf55ca3d5a0561d76056973beac45ed2a50022e949dcc94d9
+          image: ghcr.io/neptunehub/audiomuse-ai:3.3.0@sha256:7405d46efa97a7ad80418db4e01c6bbd62de3b2b92f16bd40e2069be64ea1be6
           imagePullPolicy: IfNotPresent
           securityContext:
             readOnlyRootFilesystem: true
