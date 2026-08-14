@@ -106,6 +106,7 @@ resource "proxmox_virtual_environment_vm" "talos" {
     size         = 20
     iothread     = true
     discard      = "on"
+    backup       = each.value.environment != "staging"
   }
   # PVC Disk
   disk {
@@ -115,6 +116,7 @@ resource "proxmox_virtual_environment_vm" "talos" {
     size         = 20
     iothread     = true
     discard      = "on"
+    backup       = each.value.environment != "staging"
   }
 
   cdrom {
