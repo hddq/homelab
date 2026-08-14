@@ -24,7 +24,7 @@ locals {
       ip_address  = "192.168.20.100"
       cpu_cores   = 6
       memory      = 12288
-      balloon     = 6144
+      balloon     = 12288
     }
     production-worker-1 = {
       name        = "k8s-prod-worker-1"
@@ -36,7 +36,7 @@ locals {
       ip_address  = "192.168.20.101"
       cpu_cores   = 4
       memory      = 12288
-      balloon     = 6144
+      balloon     = 12288
     }
   }
 }
