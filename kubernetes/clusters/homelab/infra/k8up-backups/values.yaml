@@ -3,6 +3,7 @@
 # Individual PVCs can still be excluded by annotating them: k8up.io/backup: "false"
 includeNamespaces:
   - anki-sync-server
+  - audiobookshelf
   - media
   - monitoring
   - navidrome
