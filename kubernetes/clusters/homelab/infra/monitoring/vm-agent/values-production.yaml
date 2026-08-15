@@ -42,8 +42,6 @@ victoria-metrics-agent:
           - source_labels: [__meta_kubernetes_endpoint_port_name]
             regex: http
             action: keep
-          - source_labels: [__meta_kubernetes_namespace]
-            target_label: namespace
           - source_labels: [__meta_kubernetes_service_name]
             target_label: service
       - job_name: "kubelet-cadvisor"
