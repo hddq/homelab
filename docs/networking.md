@@ -26,4 +26,4 @@ The following table tracks the static IP addresses allocated to specific Kuberne
 | `192.168.41.11` | `unbound`  | `unbound-service`      | Unbound DNS server          |
 | `192.168.41.12` | `monitoring` | `graphite-exporter`    | Graphite metrics exporter   |
 | `192.168.41.13` | `blocky`   | `blocky`               | Blocky DNS proxy/ad-blocker |
-| `192.168.41.16` | `playground`| `postgres-service`     | PostgreSQL database         |
+| `192.168.41.14` | `tor`      | `tor`                  | Tor SOCKS5 proxy server     |

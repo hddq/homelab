@@ -17,6 +17,7 @@
     (dict "name" "postgres" "path" "kubernetes/clusters/homelab/apps/postgres" "namespace" "postgres")
     (dict "name" "immich" "path" "kubernetes/clusters/homelab/apps/immich" "namespace" "immich")
     (dict "name" "immich-secrets" "path" "kubernetes/clusters/homelab/apps/immich-secrets" "namespace" "immich")
+    (dict "name" "tor" "path" "kubernetes/clusters/homelab/apps/tor" "namespace" "tor")
 }}
 ---
 apiVersion: argoproj.io/v1alpha1

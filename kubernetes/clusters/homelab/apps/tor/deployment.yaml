@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tor
+  namespace: tor
+  labels:
+    app.kubernetes.io/name: tor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: tor
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: tor
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 100
+        runAsGroup: 101
+        fsGroup: 101
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: tor
+          image: docker.io/peterdavehello/tor-socks-proxy:latest
+          imagePullPolicy: IfNotPresent
+          command:
+            - /usr/bin/tor
+          args:
+            - -f
+            - /etc/tor/torrc
+            - DataDirectory
+            - /tmp/tor-data
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          ports:
+            - name: socks
+              containerPort: 9150
+              protocol: TCP
+            - name: dns
+              containerPort: 8853
+              protocol: UDP
+          livenessProbe:
+            tcpSocket:
+              port: 9150
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          readinessProbe:
+            tcpSocket:
+              port: 9150
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: run
+              mountPath: /run
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: run
+          emptyDir: {}
