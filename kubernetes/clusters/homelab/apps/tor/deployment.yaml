@@ -24,15 +24,17 @@ spec:
           type: RuntimeDefault
       containers:
         - name: tor
-          image: docker.io/peterdavehello/tor-socks-proxy:latest
+          image: dockurr/tor:0.4.9.11@sha256:446881b3366cbc2cc5cf8d13a76e3104f60824b7c15343d14defe903ded18f0d
           imagePullPolicy: IfNotPresent
           command:
             - /usr/bin/tor
           args:
-            - -f
-            - /etc/tor/torrc
             - DataDirectory
             - /tmp/tor-data
+            - SocksPort
+            - 0.0.0.0:9050
+            - DNSPort
+            - 0.0.0.0:8853
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
@@ -41,19 +43,19 @@ spec:
                 - ALL
           ports:
             - name: socks
-              containerPort: 9150
+              containerPort: 9050
               protocol: TCP
             - name: dns
               containerPort: 8853
               protocol: UDP
           livenessProbe:
             tcpSocket:
-              port: 9150
+              port: 9050
             initialDelaySeconds: 10
             periodSeconds: 15
           readinessProbe:
             tcpSocket:
-              port: 9150
+              port: 9050
             initialDelaySeconds: 5
             periodSeconds: 10
           resources:
