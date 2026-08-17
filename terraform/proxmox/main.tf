@@ -103,7 +103,7 @@ resource "proxmox_virtual_environment_vm" "talos" {
     datastore_id = "local-zfs"
     file_format  = "raw"
     interface    = "virtio0"
-    size         = 20
+    size         = 30
     iothread     = true
     discard      = "on"
     backup       = each.value.environment != "staging"
