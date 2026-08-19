@@ -12,6 +12,7 @@
     (dict "name" "feishin" "path" "kubernetes/clusters/homelab/apps/feishin" "namespace" "feishin")
     (dict "name" "restic-rest-server" "path" "kubernetes/clusters/homelab/apps/restic-rest-server" "namespace" "restic")
     (dict "name" "media" "path" "kubernetes/clusters/homelab/apps/media" "namespace" "media")
+    (dict "name" "qbittorrent" "path" "kubernetes/clusters/homelab/apps/qbittorrent" "namespace" "qbittorrent")
     (dict "name" "blocky" "path" "kubernetes/clusters/homelab/apps/blocky" "namespace" "blocky")
     (dict "name" "anki-sync-server" "path" "kubernetes/clusters/homelab/apps/anki-sync-server" "namespace" "anki-sync-server")
     (dict "name" "postgres" "path" "kubernetes/clusters/homelab/apps/postgres" "namespace" "postgres")

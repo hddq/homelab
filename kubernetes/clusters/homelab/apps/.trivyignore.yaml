@@ -7,3 +7,11 @@ misconfigurations:
     paths:
       - "postgres-playground/02-deployment.yaml"
     statement: Postgres requires GID 999
+  - id: KSV-0119
+    paths:
+      - "qbittorrent/deployment.yaml"
+    statement: Gluetun VPN container requires NET_RAW for iptables firewall rules and ping health checks
+  - id: KSV-0014
+    paths:
+      - "qbittorrent/deployment.yaml"
+    statement: Gluetun VPN container requires write access to root filesystem for OpenVPN, DNS, and network configuration

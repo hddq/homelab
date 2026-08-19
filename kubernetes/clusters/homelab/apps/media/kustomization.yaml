@@ -7,7 +7,6 @@ resources:
   - radarr
   - sonarr
   - prowlarr
-  - qbittorrent
   - qui
   - flaresolverr
   - bindery
