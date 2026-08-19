@@ -25,7 +25,7 @@ spec:
         fsGroup: 1000
       containers:
         - name: bindery
-          image: ghcr.io/vavallee/bindery:v1.31.0@sha256:8f14974034795f9ab59ea60891c6da477a79a349f236a028e6f3f43ec0d2d6b8
+          image: ghcr.io/vavallee/bindery:v1.32.0@sha256:495cdb4f840606e99b69843497ec6807cb3f7d7415483ced8616003fa53cae17
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
