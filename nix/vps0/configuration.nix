@@ -9,6 +9,7 @@
     ./unbound.nix
     ./blocky.nix
     ./qnetd.nix
+    ./qbittorrent.nix
   ];
 
   boot = {
