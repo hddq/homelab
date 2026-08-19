@@ -1,4 +1,8 @@
-{modulesPath, ...}: {
+{
+  pkgs,
+  modulesPath,
+  ...
+}: {
   imports = [
     (modulesPath + "/profiles/qemu-guest.nix")
     ./wireguard.nix
@@ -35,11 +39,15 @@
     };
   };
 
-  programs.ssh.startAgent = true;
+  programs = {
+    fish.enable = true;
+    ssh.startAgent = true;
+  };
   users.users.hddq = {
     isNormalUser = true;
     description = "hddq";
     extraGroups = ["wheel" "coroqnetd"];
+    shell = pkgs.fish;
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAKFgv0ykKB0lLGjkh3fI8tUy+o8qtUcgjFPSN1AyncW hddq@main"
     ];
