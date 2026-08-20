@@ -43,6 +43,7 @@ jobs:
               - '.github/workflows/main.yaml'
             k8s:
               - 'kubernetes/**'
+              - 'talos/versions.yaml'
               - '.github/workflows/ci-k8s.yaml'
               - 'scripts/ci/**'
               - '.github/workflows/main.yaml'
