@@ -35,6 +35,7 @@ in {
     "d /var/lib/qbittorrent 0755 1000 1000 -"
     "d /var/lib/qbittorrent/config 0755 1000 1000 -"
     "d /var/lib/qbittorrent/downloads 0755 1000 1000 -"
+    "d /var/lib/qbittorrent/pia 0700 root root -"
   ];
 
   virtualisation.oci-containers.containers = {
@@ -61,6 +62,7 @@ in {
         KEEPALIVE = "25";
       };
       volumes = [
+        "/var/lib/qbittorrent/pia:/pia"
         "${config.sops.secrets.pia_username.path}:/run/secrets/pia_username:ro"
         "${config.sops.secrets.pia_password.path}:/run/secrets/pia_password:ro"
         "${portForwardScript}:/scripts/port-forward.sh:ro"
