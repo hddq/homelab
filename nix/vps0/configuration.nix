@@ -10,6 +10,7 @@
     ./blocky.nix
     ./qnetd.nix
     ./qbittorrent.nix
+    ./node-exporter.nix
   ];
 
   boot = {

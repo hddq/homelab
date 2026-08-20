@@ -31,6 +31,10 @@ victoria-metrics-agent:
         static_configs:
           - targets:
               - "192.168.20.1:9100"
+      - job_name: "vps0-node-exporter"
+        static_configs:
+          - targets:
+              - "192.168.70.2:9100"
       - job_name: "kube-state-metrics"
         kubernetes_sd_configs:
           - role: endpoints
