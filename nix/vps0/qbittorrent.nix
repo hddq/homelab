@@ -52,7 +52,7 @@ in {
       environment = {
         USER_FILE = "/run/secrets/pia_username";
         PASS_FILE = "/run/secrets/pia_password";
-        LOC = "swiss";
+        LOC = "de-frankfurt";
         PORT_FORWARDING = "1";
         PORT_PERSIST = "1";
         PORT_SCRIPT = "/scripts/port-forward.sh";
