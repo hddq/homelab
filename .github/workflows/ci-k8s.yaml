@@ -157,6 +157,7 @@ jobs:
       - name: Use pluto
         run: |
           KUBERNETES_VERSION=$(awk '/^KUBERNETES_VERSION:/ { print $2 }' talos/versions.yaml)
+          KUBERNETES_VERSION="v${KUBERNETES_VERSION#v}"
           echo "Kubernetes version: $KUBERNETES_VERSION"
           pluto detect-files -d kubernetes --target-versions k8s=${KUBERNETES_VERSION}
 
