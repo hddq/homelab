@@ -46,7 +46,8 @@ in {
         "--sysctl=net.ipv4.conf.all.src_valid_mark=1"
       ];
       ports = [
-        "8080:8080"
+        "192.168.70.2:8080:8080"
+        "127.0.0.1:8080:8080"
       ];
       environment = {
         USER_FILE = "/run/secrets/pia_username";
