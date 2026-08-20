@@ -17,13 +17,6 @@ metallb:
     podMonitor:
       enabled: false
   frr-k8s:
-    frrk8s:
-      frr:
-        image:
-          # Default FRR image in chart (10.4.3) fails with 'exec format error' on CPUs lacking Intel CET (e.g. Core i3-8100 on worker-1).
-          # 10.7.0 includes fixed upstream multi-arch compilation flags that run on all x86_64 CPUs.
-          # Can be removed once MetalLB updates its bundled subchart default to 10.7.0+.
-          tag: "10.7.0"
     prometheus:
       serviceMonitor:
         enabled: false
