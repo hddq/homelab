@@ -13,6 +13,12 @@ grafana:
     targetPort: 3000
   containerSecurityContext:
     readOnlyRootFilesystem: true
+  extraVolumeMounts:
+    - name: tmp-volume
+      mountPath: /tmp
+  extraVolumes:
+    - name: tmp-volume
+      emptyDir: {}
   ingress:
     enabled: true
     ingressClassName: infra-traefik
@@ -98,6 +104,9 @@ grafana:
         url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-pods.json
         token: ""
 
+  deploymentStrategy:
+    type: Recreate
+
   downloadDashboards:
     securityContext:
       allowPrivilegeEscalation: false
@@ -118,5 +127,7 @@ grafana:
       capabilities:
         add:
           - CHOWN
+          - FOWNER
+          - DAC_OVERRIDE
         drop:
           - ALL
