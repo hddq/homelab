@@ -104,7 +104,7 @@ resource "proxmox_virtual_environment_vm" "talos" {
     file_format  = "raw"
     interface    = "virtio0"
     size         = 30
-    iothread     = true
+    iothread     = each.value.pve_node == "z690"
     discard      = "on"
     backup       = each.value.environment != "staging"
   }
@@ -114,7 +114,7 @@ resource "proxmox_virtual_environment_vm" "talos" {
     file_format  = "raw"
     interface    = "virtio1"
     size         = 20
-    iothread     = true
+    iothread     = each.value.pve_node == "z690"
     discard      = "on"
     backup       = each.value.environment != "staging"
   }
