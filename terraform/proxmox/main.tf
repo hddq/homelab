@@ -55,6 +55,12 @@ resource "proxmox_virtual_environment_file" "talos_iso" {
     path      = "https://factory.talos.dev/image/ce4c980550dd2ab1b17bbf2b08801c7eb59418eafe8f279833297925d67c7515/${local.talos_versions.TALOS_VERSION}/nocloud-amd64.iso"
     file_name = "talos-${local.talos_versions.TALOS_VERSION}-nocloud-amd64.iso"
   }
+
+  lifecycle {
+    ignore_changes = [
+      source_file,
+    ]
+  }
 }
 
 resource "proxmox_virtual_environment_vm" "talos" {
