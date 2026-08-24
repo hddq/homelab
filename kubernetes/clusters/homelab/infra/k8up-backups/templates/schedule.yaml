@@ -22,10 +22,12 @@ spec:
       bucket: {{ $.Values.s3.bucket }}
   backup:
     schedule: {{ $.Values.backup.schedule | quote }}
-    failedJobsHistoryLimit: 2
-    successfulJobsHistoryLimit: 2
+    failedJobsHistoryLimit: {{ $.Values.backup.failedJobsHistoryLimit }}
+    successfulJobsHistoryLimit: {{ $.Values.backup.successfulJobsHistoryLimit }}
   prune:
     schedule: {{ $.Values.prune.schedule | quote }}
+    failedJobsHistoryLimit: {{ $.Values.prune.failedJobsHistoryLimit }}
+    successfulJobsHistoryLimit: {{ $.Values.prune.successfulJobsHistoryLimit }}
     retention:
       keepLast: {{ $.Values.prune.retention.keepLast }}
       keepDaily: {{ $.Values.prune.retention.keepDaily }}
@@ -33,4 +35,6 @@ spec:
       keepMonthly: {{ $.Values.prune.retention.keepMonthly }}
   check:
     schedule: {{ $.Values.check.schedule | quote }}
+    failedJobsHistoryLimit: {{ $.Values.check.failedJobsHistoryLimit }}
+    successfulJobsHistoryLimit: {{ $.Values.check.successfulJobsHistoryLimit }}
 {{- end }}
