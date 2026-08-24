@@ -62,7 +62,6 @@ spec:
             - name: media-nfs
               subPath: audiobooks
               mountPath: /audiobooks
-              readOnly: true
       volumes:
         - name: audiobookshelf-pvc
           persistentVolumeClaim:
