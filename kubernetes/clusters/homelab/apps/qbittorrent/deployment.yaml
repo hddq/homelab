@@ -57,7 +57,7 @@ spec:
               value: "0.0.0.0:9999"
             - name: VPN_PORT_FORWARDING_UP_COMMAND
               value: >-
-                /bin/sh -c 'wget -O- -nv --retry-connrefused --post-data "json={\"listen_port\":{{PORT}},\"current_network_interface\":\"{{VPN_INTERFACE}}\",\"random_port\":false,\"upnp\":false}" http://127.0.0.1:8080/api/v2/app/setPreferences && if [ -n "$MAM_ID" ]; then echo "Updating MyAnonaMouse dynamic seedbox IP..." && wget -qO- --header="Cookie: mam_id=$MAM_ID" https://t.myanonamouse.net/json/dynamicSeedbox.php || true; fi'
+                /bin/sh -c 'wget -O- -nv --retry-connrefused --post-data "json={\"listen_port\":{{PORT}},\"current_network_interface\":\"{{VPN_INTERFACE}}\",\"random_port\":false,\"upnp\":false}" http://127.0.0.1:8080/api/v2/app/setPreferences'
             - name: OPENVPN_USER
               valueFrom:
                 secretKeyRef:
@@ -73,12 +73,6 @@ spec:
                 secretKeyRef:
                   name: qbittorrent-pia-secret
                   key: SERVER_REGIONS
-            - name: MAM_ID
-              valueFrom:
-                secretKeyRef:
-                  name: qbittorrent-pia-secret
-                  key: MAM_ID
-                  optional: true
           volumeMounts:
             - name: dev-net-tun
               mountPath: /dev/net/tun
@@ -138,6 +132,47 @@ spec:
               readOnly: false
             - name: tmp-volume
               mountPath: /tmp
+        - name: mam-updater
+          image: curlimages/curl:8.21.0@sha256:7c12af72ceb38b7432ab85e1a265cff6ae58e06f95539d539b654f2cfa64bb13
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            capabilities:
+              drop:
+                - ALL
+          command:
+            - /bin/sh
+            - -c
+            - |
+              echo "Starting MyAnonaMouse dynamic seedbox updater..."
+              while true; do
+                if [ -n "$MAM_ID" ]; then
+                  echo "$(date -u +'%Y-%m-%dT%H:%M:%SZ') Pinging MyAnonaMouse dynamic seedbox endpoint..."
+                  curl -s -S --max-time 15 --cookie "mam_id=$MAM_ID" https://t.myanonamouse.net/json/dynamicSeedbox.php || true
+                  echo ""
+                else
+                  echo "MAM_ID is not set. Sleeping..."
+                fi
+                sleep 300
+              done
+          env:
+            - name: MAM_ID
+              valueFrom:
+                secretKeyRef:
+                  name: qbittorrent-pia-secret
+                  key: MAM_ID
+                  optional: true
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 50m
+              memory: 64Mi
       volumes:
         - name: qbittorrent-pvc
           persistentVolumeClaim:
