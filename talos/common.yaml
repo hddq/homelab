@@ -26,6 +26,10 @@ controlPlane:
       machine:
         features:
           diskQuotaSupport: true
+      ---
+      apiVersion: v1alpha1
+      kind: FilesystemTrimConfig
+      interval: 24h0m0s
 worker:
   schematic:
     customization:
@@ -49,3 +53,7 @@ worker:
       machine:
         features:
           diskQuotaSupport: true
+      ---
+      apiVersion: v1alpha1
+      kind: FilesystemTrimConfig
+      interval: 24h0m0s
