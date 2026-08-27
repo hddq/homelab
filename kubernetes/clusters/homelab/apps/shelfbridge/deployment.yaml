@@ -26,7 +26,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: shelfbridge
-          image: ghcr.io/rohit-purandare/shelfbridge:1.23.13
+          image: ghcr.io/rohit-purandare/shelfbridge:1.23.13@sha256:b7fd1afbecec671bc2c1c9b0e0eaa07db051f573fd3e253a47ff395c9ea5f739
           imagePullPolicy: IfNotPresent
           command:
             - node
