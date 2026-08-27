@@ -5,7 +5,7 @@ nodes:
   - hostname: k8s-prod-cp-1
     ipAddress: 192.168.20.100
     controlPlane: true
-    installDisk: /dev/vda
+    installDisk: /dev/sda
     networkInterfaces:
       - deviceSelector:
           physical: true
@@ -23,7 +23,7 @@ nodes:
   - hostname: k8s-prod-worker-1
     ipAddress: 192.168.20.101
     controlPlane: false
-    installDisk: /dev/vda
+    installDisk: /dev/sda
     networkInterfaces:
       - deviceSelector:
           physical: true

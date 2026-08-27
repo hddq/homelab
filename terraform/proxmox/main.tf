@@ -108,9 +108,9 @@ resource "proxmox_virtual_environment_vm" "talos" {
   disk {
     datastore_id = "local-zfs"
     file_format  = "raw"
-    interface    = "virtio0"
+    interface    = "scsi0"
     size         = 30
-    iothread     = each.value.pve_node == "z690"
+    iothread     = false
     discard      = "on"
     backup       = each.value.environment != "staging"
   }
@@ -118,9 +118,9 @@ resource "proxmox_virtual_environment_vm" "talos" {
   disk {
     datastore_id = "local-zfs"
     file_format  = "raw"
-    interface    = "virtio1"
+    interface    = "scsi1"
     size         = 20
-    iothread     = each.value.pve_node == "z690"
+    iothread     = false
     discard      = "on"
     backup       = each.value.environment != "staging"
   }
@@ -150,5 +150,5 @@ resource "proxmox_virtual_environment_vm" "talos" {
     type = "l26"
   }
 
-  boot_order = ["virtio0", "ide2"]
+  boot_order = ["scsi0", "ide2"]
 }

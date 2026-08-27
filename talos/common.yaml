@@ -16,7 +16,7 @@ controlPlane:
       name: openebs
       provisioning:
         diskSelector:
-          match: disk.dev_path == '/dev/vdb'
+          match: disk.dev_path == '/dev/sdb'
         minSize: 0
         grow: true
       filesystem:
@@ -39,7 +39,7 @@ worker:
       name: openebs
       provisioning:
         diskSelector:
-          match: disk.dev_path == '/dev/vdb'
+          match: disk.dev_path == '/dev/sdb'
         minSize: 0
         grow: true
       filesystem:

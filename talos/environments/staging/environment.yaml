@@ -5,7 +5,7 @@ nodes:
   - hostname: k8s-staging-1
     ipAddress: 192.168.20.120
     controlPlane: true
-    installDisk: /dev/vda
+    installDisk: /dev/sda
     networkInterfaces:
       - deviceSelector:
           physical: true
