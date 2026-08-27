@@ -8,6 +8,7 @@
     (dict "name" "opodsync" "path" "kubernetes/clusters/homelab/apps/opodsync" "namespace" "opodsync")
     (dict "name" "navidrome" "path" "kubernetes/clusters/homelab/apps/navidrome" "namespace" "navidrome")
     (dict "name" "audiobookshelf" "path" "kubernetes/clusters/homelab/apps/audiobookshelf" "namespace" "audiobookshelf")
+    (dict "name" "shelfbridge" "path" "kubernetes/clusters/homelab/apps/shelfbridge" "namespace" "audiobookshelf")
     (dict "name" "audiomuse" "path" "kubernetes/clusters/homelab/apps/audiomuse" "namespace" "audiomuse")
     (dict "name" "feishin" "path" "kubernetes/clusters/homelab/apps/feishin" "namespace" "feishin")
     (dict "name" "restic-rest-server" "path" "kubernetes/clusters/homelab/apps/restic-rest-server" "namespace" "restic")

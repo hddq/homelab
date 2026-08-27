@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shelfbridge
+  namespace: audiobookshelf
+  labels:
+    app.kubernetes.io/name: shelfbridge
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: shelfbridge
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: shelfbridge
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: shelfbridge
+          image: ghcr.io/rohit-purandare/shelfbridge:1.23.13
+          imagePullPolicy: IfNotPresent
+          command:
+            - node
+            - src/main.js
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: TZ
+              value: "Europe/Warsaw"
+            - name: SHELFBRIDGE_TIMEZONE
+              value: "Europe/Warsaw"
+            - name: SHELFBRIDGE_AUTO_ADD_BOOKS
+              value: "true"
+            - name: SHELFBRIDGE_SYNC_SCHEDULE
+              value: "0 */6 * * *"
+          envFrom:
+            - secretRef:
+                name: shelfbridge-secret
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+            - name: logs
+              mountPath: /app/logs
+            - name: config
+              mountPath: /app/config
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: shelfbridge-pvc
+        - name: logs
+          emptyDir: {}
+        - name: config
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
