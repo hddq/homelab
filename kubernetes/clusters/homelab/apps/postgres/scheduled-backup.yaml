@@ -1,10 +1,11 @@
 apiVersion: postgresql.cnpg.io/v1
 kind: ScheduledBackup
 metadata:
-  name: postgres-backup-every-6h
+  name: postgres-backup
   namespace: postgres
 spec:
-  schedule: "0 0 */6 * * *"
+  # Weekly on Friday at 23:30
+  schedule: "0 30 23 * * 5"
   backupOwnerReference: cluster
   cluster:
     name: postgres
