@@ -84,6 +84,12 @@ grafana:
         datasource:
           - name: DS_PROMETHEUS
             value: VictoriaMetrics
+      cloudnative-pg:
+        url: https://raw.githubusercontent.com/cloudnative-pg/grafana-dashboards/main/charts/cluster/grafana-dashboard.json
+        token: ""
+        datasource:
+          - name: DS_PROMETHEUS
+            value: VictoriaMetrics
     grafana-dashboards-kubernetes:
       k8s-system-api-server:
         url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-system-api-server.json
