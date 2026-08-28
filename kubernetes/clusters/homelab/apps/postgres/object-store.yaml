@@ -1,0 +1,22 @@
+apiVersion: barmancloud.cnpg.io/v1
+kind: ObjectStore
+metadata:
+  name: postgres-s3-store
+  namespace: postgres
+spec:
+  retentionPolicy: "30d"
+  configuration:
+    destinationPath: "s3://postgres-backups"
+    endpointURL: "http://192.168.20.12:30188"
+    s3Credentials:
+      accessKeyId:
+        name: postgres-backup-s3
+        key: ACCESS_KEY_ID
+      secretAccessKey:
+        name: postgres-backup-s3
+        key: SECRET_ACCESS_KEY
+    wal:
+      compression: gzip
+      maxParallel: 1
+    data:
+      compression: gzip

@@ -6,5 +6,7 @@ resources:
   - cluster.yaml
   - immich.yaml
   - audiomuse.yaml
+  - scheduled-backup.yaml
+  - object-store.yaml
 generators:
   - ksops-secret-generator.yaml
