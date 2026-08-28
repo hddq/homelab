@@ -1,0 +1,10 @@
+apiVersion: v2
+name: plugin-barman-cloud-wrapper
+description: Wrapper for CloudNativePG Barman Cloud Plugin
+type: application
+version: 1.0.0
+appVersion: "v0.14.0"
+dependencies:
+  - name: plugin-barman-cloud
+    version: 0.7.1
+    repository: https://cloudnative-pg.github.io/charts
