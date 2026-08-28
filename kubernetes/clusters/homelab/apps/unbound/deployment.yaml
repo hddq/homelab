@@ -85,6 +85,35 @@ spec:
             - name: unbound-data
               mountPath: /usr/local/unbound/iana.d
               subPath: iana
+        - name: unbound-exporter
+          image: ghcr.io/cyb3r-jak3/unbound-exporter:0.6.0
+          args:
+            - "-unbound.host=tcp://127.0.0.1:8953"
+            - "-unbound.ca="
+            - "-unbound.cert="
+            - "-unbound.key="
+          ports:
+            - containerPort: 9167
+              name: metrics
+              protocol: TCP
+          resources:
+            limits:
+              memory: 64Mi
+              cpu: 100m
+            requests:
+              memory: 32Mi
+              cpu: 10m
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
       volumes:
         - name: config
           configMap:

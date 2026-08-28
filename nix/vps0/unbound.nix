@@ -9,6 +9,11 @@ _: {
     };
   };
 
-  networking.firewall.allowedTCPPorts = [5353];
+  services.prometheus.exporters.unbound = {
+    enable = true;
+    openFirewall = true;
+  };
+
+  networking.firewall.allowedTCPPorts = [5353 9167];
   networking.firewall.allowedUDPPorts = [5353];
 }

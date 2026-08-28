@@ -19,3 +19,7 @@ spec:
       protocol: TCP
       port: 53
       targetPort: 5353
+    - name: metrics
+      protocol: TCP
+      port: 9167
+      targetPort: 9167

@@ -188,3 +188,14 @@ victoria-metrics-agent:
             target_label: namespace
           - source_labels: [__meta_kubernetes_service_name]
             target_label: service
+      - job_name: "unbound"
+        static_configs:
+          - targets:
+              - "unbound-service.unbound.svc.cluster.local:9167"
+            labels:
+              instance: "k8s-homelab"
+          - targets:
+              - "192.168.70.2:9167"
+            labels:
+              instance: "vps0"
+        metrics_path: /metrics
