@@ -6,6 +6,9 @@ spec:
   instances: 1
   enablePDB: false
 
+  smartShutdownTimeout: 15
+  stopDelay: 60
+
   storage:
     size: 8Gi
 
