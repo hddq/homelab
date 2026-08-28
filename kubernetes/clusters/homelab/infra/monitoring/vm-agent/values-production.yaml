@@ -137,6 +137,7 @@ victoria-metrics-agent:
               - "192.168.70.2:4000"
         metrics_path: /metrics
       - job_name: "cnpg"
+        honor_labels: true
         kubernetes_sd_configs:
           - role: pod
         relabel_configs:
@@ -156,6 +157,22 @@ victoria-metrics-agent:
             target_label: instance
           - source_labels: [__meta_kubernetes_pod_label_cnpg_io_instanceRole]
             target_label: role
+      - job_name: "cnpg-operator"
+        honor_labels: true
+        kubernetes_sd_configs:
+          - role: pod
+        relabel_configs:
+          - source_labels:
+              [__meta_kubernetes_pod_label_app_kubernetes_io_name]
+            regex: cloudnative-pg
+            action: keep
+          - source_labels: [__meta_kubernetes_pod_container_port_name]
+            regex: metrics
+            action: keep
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod
       - job_name: "k8up"
         kubernetes_sd_configs:
           - role: endpoints
