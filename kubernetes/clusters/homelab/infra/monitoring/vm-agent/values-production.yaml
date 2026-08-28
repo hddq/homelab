@@ -213,3 +213,10 @@ victoria-metrics-agent:
             labels:
               instance: "vmagent"
         metrics_path: /metrics
+      - job_name: "vmalert"
+        static_configs:
+          - targets:
+              - "infra-monitoring-vmalert-victoria-metrics-alert-server.monitoring.svc.cluster.local:8880"
+            labels:
+              instance: "vmalert"
+        metrics_path: /metrics

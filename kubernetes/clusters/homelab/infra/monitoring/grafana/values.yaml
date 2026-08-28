@@ -59,6 +59,14 @@ grafana:
           editable: true
           options:
             path: /var/lib/grafana/dashboards/grafana-dashboards-kubernetes
+        - name: "victoriametrics"
+          orgId: 1
+          folder: "Victoria Metrics"
+          type: file
+          disableDeletion: true
+          editable: true
+          options:
+            path: /var/lib/grafana/dashboards/victoriametrics
 
   dashboards:
     default:
@@ -102,8 +110,25 @@ grafana:
         datasource:
           - name: DS_PROMETHEUS
             value: VictoriaMetrics
+    victoriametrics:
       victoriametrics:
         url: https://raw.githubusercontent.com/VictoriaMetrics/VictoriaMetrics/master/dashboards/victoriametrics.json
+        token: ""
+        datasource:
+          - name: DS_PROMETHEUS
+            value: VictoriaMetrics
+          - name: ds
+            value: VictoriaMetrics
+      vmagent:
+        url: https://raw.githubusercontent.com/VictoriaMetrics/VictoriaMetrics/master/dashboards/vmagent.json
+        token: ""
+        datasource:
+          - name: DS_PROMETHEUS
+            value: VictoriaMetrics
+          - name: ds
+            value: VictoriaMetrics
+      vmalert:
+        url: https://raw.githubusercontent.com/VictoriaMetrics/VictoriaMetrics/master/dashboards/vmalert.json
         token: ""
         datasource:
           - name: DS_PROMETHEUS
