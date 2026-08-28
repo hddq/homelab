@@ -102,6 +102,14 @@ grafana:
         datasource:
           - name: DS_PROMETHEUS
             value: VictoriaMetrics
+      victoriametrics:
+        url: https://raw.githubusercontent.com/VictoriaMetrics/VictoriaMetrics/master/dashboards/victoriametrics.json
+        token: ""
+        datasource:
+          - name: DS_PROMETHEUS
+            value: VictoriaMetrics
+          - name: ds
+            value: VictoriaMetrics
     grafana-dashboards-kubernetes:
       k8s-system-api-server:
         url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-system-api-server.json

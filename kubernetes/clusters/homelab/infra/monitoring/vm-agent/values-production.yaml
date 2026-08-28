@@ -199,3 +199,17 @@ victoria-metrics-agent:
             labels:
               instance: "vps0"
         metrics_path: /metrics
+      - job_name: "victoriametrics"
+        static_configs:
+          - targets:
+              - "vm-single-server.monitoring.svc.cluster.local:8428"
+            labels:
+              instance: "vm-single-server"
+        metrics_path: /metrics
+      - job_name: "vmagent"
+        static_configs:
+          - targets:
+              - "127.0.0.1:8429"
+            labels:
+              instance: "vmagent"
+        metrics_path: /metrics
