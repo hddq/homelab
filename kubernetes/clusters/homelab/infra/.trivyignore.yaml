@@ -26,6 +26,8 @@ misconfigurations:
       - "cert-manager/charts/cert-manager/templates/cainjector-rbac.yaml"
       - "cert-manager/charts/cert-manager/templates/rbac.yaml"
       - "cloudnative-pg/charts/cloudnative-pg/templates/rbac.yaml"
+      - "plugin-barman-cloud/charts/plugin-barman-cloud/templates/rbac.yaml"
+      - "charts/plugin-barman-cloud/templates/rbac.yaml"
 
   - id: KSV-0118
     statement: Third-party Helm charts often use default security contexts; fixing requires specific chart support in values.yaml. frr-k8s and openebs use default contexts.
