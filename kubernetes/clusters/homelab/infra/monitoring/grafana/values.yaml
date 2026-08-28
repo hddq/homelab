@@ -90,6 +90,12 @@ grafana:
         datasource:
           - name: DS_PROMETHEUS
             value: VictoriaMetrics
+      k8up:
+        gnetId: 24597
+        revision: 1
+        datasource:
+          - name: DS_PROMETHEUS
+            value: VictoriaMetrics
     grafana-dashboards-kubernetes:
       k8s-system-api-server:
         url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-system-api-server.json
