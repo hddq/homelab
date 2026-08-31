@@ -1,5 +1,0 @@
-homelab:
-  metallb:
-    myASN: 65002
-    addressPool:
-      - 192.168.42.10-192.168.42.250
