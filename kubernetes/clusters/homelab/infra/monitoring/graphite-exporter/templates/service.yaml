@@ -6,7 +6,7 @@ metadata:
   labels:
     app: graphite-exporter
   annotations:
-    metallb.io/loadBalancerIPs: "{{ .Values.homelab.serviceIps.graphiteExporter }}"
+    lbipam.cilium.io/ips: "{{ .Values.homelab.serviceIps.graphiteExporter }}"
 spec:
   type: LoadBalancer
   externalTrafficPolicy: Local

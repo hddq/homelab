@@ -20,7 +20,7 @@ traefik:
       type: LoadBalancer
       externalTrafficPolicy: Local
     annotations:
-      metallb.io/loadBalancerIPs: "192.168.41.10"
+      lbipam.cilium.io/ips: "192.168.41.10"
 
   ports:
     web:

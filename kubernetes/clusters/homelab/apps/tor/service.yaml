@@ -6,7 +6,7 @@ metadata:
   labels:
     app.kubernetes.io/name: tor
   annotations:
-    metallb.io/loadBalancerIPs: 192.168.41.14
+    lbipam.cilium.io/ips: 192.168.41.14
 spec:
   type: LoadBalancer
   externalTrafficPolicy: Local
