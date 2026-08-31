@@ -18,7 +18,7 @@ The network is heavily segmented into several VLANs to isolate traffic and impro
 
 ## Kubernetes Container IP Allocations
 
-The following table tracks the static IP addresses allocated to specific Kubernetes containers/services (via MetalLB LoadBalancers) in the Production cluster (VLAN 41).
+The following table tracks the static IP addresses allocated to specific Kubernetes containers/services (via Cilium LoadBalancers) in the Production cluster (VLAN 41).
 
 | IP Address      | Namespace  | Service                | Description                 |
 | --------------- | ---------- | ---------------------- | --------------------------- |

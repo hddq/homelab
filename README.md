@@ -13,7 +13,7 @@ Personal homelab managed through Infrastructure as Code — built to minimize ma
 | Area | Technology | Role |
 | --- | --- | --- |
 | Hypervisor | Proxmox VE | Hosts local virtual machines, including Talos nodes. |
-| Network | OpenWrt + FRR | Routing, VLAN segmentation, firewalling, and BGP peers for MetalLB. |
+| Network | OpenWrt + FRR | Routing, VLAN segmentation, firewalling, and BGP peers for Cilium. |
 | Storage | TrueNAS | Network-attached storage for shared data, storage services, and backups. |
 | Public DNS | Cloudflare | DNS records, wildcard ingress records, and DNS-01 certificate support. |
 | External compute | Oracle Cloud + NixOS | `vps0`, including WireGuard, DNS, and corosync qdevice services. |
@@ -33,10 +33,10 @@ and regular manifests under `kubernetes/clusters/homelab/`.
 | Area | Technology | Role |
 | --- | --- | --- |
 | Node OS | Talos Linux | Immutable Kubernetes host OS, rendered with Talhelper. |
+| CNI & Load balancing | Cilium | eBPF CNI, kube-proxy replacement, and BGP Control Plane. |
 | Provisioning | OpenTofu/Terraform | Creates the Proxmox VMs and their disks. |
 | GitOps | Argo CD | Reconciles the cluster from this repository using App of Apps. |
 | Packaging | Helm | Wraps infrastructure charts and the bootstrap chart. |
-| Load balancing | MetalLB | Announces service addresses through BGP. |
 | Ingress | Traefik | Handles ingress traffic and TLS termination. |
 | Certificates | cert-manager + Cloudflare | Issues certificates through DNS-01. |
 | Storage | OpenEBS LocalPV Hostpath | Provides node-local persistent volumes at `/var/openebs/local`. |
@@ -58,7 +58,7 @@ Oracle Cloud (vps0: DNS / qdevice)
        |
    WireGuard
        |
-OpenWrt + FRR ---- BGP ---- MetalLB ---- Kubernetes Services
+OpenWrt + FRR ---- BGP ---- Cilium ---- Kubernetes Services
        |                             |
        |                             +---- Traefik ---- Cloudflare DNS
        |
