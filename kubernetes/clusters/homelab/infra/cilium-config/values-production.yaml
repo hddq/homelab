@@ -1,0 +1,6 @@
+homelab:
+  cilium:
+    myASN: 65001
+    addressPools:
+      - start: "192.168.41.10"
+        stop: "192.168.41.250"

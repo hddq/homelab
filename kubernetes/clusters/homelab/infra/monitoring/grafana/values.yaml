@@ -13,12 +13,6 @@ grafana:
     targetPort: 3000
   containerSecurityContext:
     readOnlyRootFilesystem: true
-  extraVolumeMounts:
-    - name: tmp-volume
-      mountPath: /tmp
-  extraVolumes:
-    - name: tmp-volume
-      emptyDir: {}
   ingress:
     enabled: true
     ingressClassName: infra-traefik

@@ -1,0 +1,5 @@
+apiVersion: v2
+name: cilium-config
+description: Cilium BGP Control Plane and IPAM configurations
+type: application
+version: 1.0.0

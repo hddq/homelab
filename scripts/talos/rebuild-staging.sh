@@ -99,9 +99,7 @@ echo "⏳ Waiting for Kubernetes Node k8s-staging-1 to register..."
 until kubectl --kubeconfig="${KUBECONFIG_OUT}" get node/k8s-staging-1 >/dev/null 2>&1; do
   sleep 3
 done
-
-echo "⏳ Waiting for Kubernetes Node k8s-staging-1 to become Ready..."
-kubectl --kubeconfig="${KUBECONFIG_OUT}" wait --for=condition=Ready node/k8s-staging-1 --timeout=300s
+echo "ℹ️ Node registered with API server."
 
 # 7. Create clean Proxmox Snapshot
 echo "📸 7/7 Creating clean Proxmox snapshot '${SNAPSHOT_NAME}' on node ${PVE_NODE}..."

@@ -12,6 +12,7 @@ AGE_KEY_PATH="${3:-}"
 KUBECONFIG_PATH="${4:-}"
 REPO_SECRET_PATH="kubernetes/clusters/homelab/infra/argocd-secrets/repo-secret.yaml"
 ADMIN_SECRET_PATH="kubernetes/clusters/homelab/infra/argocd-secrets/admin-secret.yaml"
+CILIUM_CHART_PATH="kubernetes/clusters/homelab/infra/cilium"
 ARGOCD_CHART_PATH="kubernetes/clusters/homelab/infra/argocd"
 BOOTSTRAP_CHART_PATH="kubernetes/clusters/homelab/bootstrap"
 REPO_URL="ssh://git@ssh.github.com:443/hddq/homelab.git"
@@ -73,13 +74,29 @@ echo "🔐 Decrypting and applying ArgoCD secrets..."
 SOPS_AGE_KEY_FILE="${AGE_KEY_PATH}" sops -d "${REPO_SECRET_PATH}" | "${KUBECTL[@]}" apply -f -
 SOPS_AGE_KEY_FILE="${AGE_KEY_PATH}" sops -d "${ADMIN_SECRET_PATH}" | "${KUBECTL[@]}" apply -f -
 
-# 5. Build Helm dependencies using isolated repo config
-echo "📦 Building ArgoCD Helm dependencies..."
+# 5. Build Helm dependencies and install Cilium & ArgoCD
+echo "📦 Building Helm dependencies..."
 TMP_HELM_REPO_CONF=$(mktemp)
 trap 'rm -f "${TMP_HELM_REPO_CONF}"' EXIT
 
+helm repo add cilium https://helm.cilium.io/ --repository-config "${TMP_HELM_REPO_CONF}" >/dev/null 2>&1
 helm repo add argo-cd https://argoproj.github.io/argo-helm --repository-config "${TMP_HELM_REPO_CONF}" >/dev/null 2>&1
+
+helm dependency build "${CILIUM_CHART_PATH}" --repository-config "${TMP_HELM_REPO_CONF}"
 helm dependency build "${ARGOCD_CHART_PATH}" --repository-config "${TMP_HELM_REPO_CONF}"
+
+echo "🐝 Installing Cilium CNI..."
+CILIUM_VALUES_ARGS=("-f" "${CILIUM_CHART_PATH}/values.yaml")
+if [ -f "${CILIUM_CHART_PATH}/values-${ENVIRONMENT}.yaml" ]; then
+  CILIUM_VALUES_ARGS+=("-f" "${CILIUM_CHART_PATH}/values-${ENVIRONMENT}.yaml")
+fi
+
+helm upgrade --install cilium "${CILIUM_CHART_PATH}" \
+  --namespace kube-system \
+  "${CILIUM_VALUES_ARGS[@]}" \
+  "${HELM_KUBECONFIG_ARGS[@]}" \
+  --wait \
+  --timeout 10m
 
 echo "⚓ Installing/Upgrading ArgoCD..."
 helm upgrade --install infra-argocd "${ARGOCD_CHART_PATH}" \

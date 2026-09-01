@@ -2,6 +2,15 @@
 talosVersion: ${TALOS_VERSION}
 kubernetesVersion: ${KUBERNETES_VERSION}
 allowSchedulingOnControlPlanes: true
+cniConfig:
+  name: none
+
+patches:
+  - |-
+    cluster:
+      proxy:
+        disabled: true
+
 
 controlPlane:
   schematic:
