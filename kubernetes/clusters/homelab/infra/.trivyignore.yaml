@@ -43,9 +43,11 @@ misconfigurations:
       - "cilium/charts/cilium/templates/cilium-agent/daemonset.yaml"
       - "cilium/charts/cilium/templates/cilium-envoy/daemonset.yaml"
       - "cilium/charts/cilium/templates/cilium-operator/deployment.yaml"
+      - "cilium/charts/cilium/templates/hubble-ui/deployment.yaml"
       - "charts/cilium/templates/cilium-agent/daemonset.yaml"
       - "charts/cilium/templates/cilium-envoy/daemonset.yaml"
       - "charts/cilium/templates/cilium-operator/deployment.yaml"
+      - "charts/cilium/templates/hubble-ui/deployment.yaml"
 
   - id: KSV-0045
     statement: OpenEBS roles require broad permissions to manage storage resources, volumes, namespaces, pods, and endpoints.

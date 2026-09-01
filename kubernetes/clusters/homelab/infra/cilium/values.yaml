@@ -28,6 +28,14 @@ cilium:
         - SYS_RESOURCE
   bgpControlPlane:
     enabled: true
+  hubble:
+    enabled: true
+    relay:
+      enabled: true
+      rollOutPods: true
+    ui:
+      enabled: true
+      rollOutPods: true
   rollOutCiliumPods: true
   operator:
     replicas: 1
