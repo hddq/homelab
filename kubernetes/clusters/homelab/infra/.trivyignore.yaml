@@ -32,9 +32,11 @@ misconfigurations:
       - "charts/cilium/templates/cilium-operator/clusterrole.yaml"
 
   - id: KSV-0118
-    statement: Third-party Helm charts often use default security contexts; fixing requires specific chart support in values.yaml. frr-k8s and openebs use default contexts.
+    statement: Third-party Helm charts often use default security contexts; fixing requires specific chart support in values.yaml. openebs and cilium use default contexts.
     paths:
       - "openebs/charts/openebs/charts/localpv-provisioner/templates/deployment.yaml"
+      - "cilium/charts/cilium/templates/cilium-envoy/daemonset.yaml"
+      - "charts/cilium/templates/cilium-envoy/daemonset.yaml"
 
   - id: KSV-0014
     statement: Infrastructure components (OpenEBS, Cilium) require writable FS for eBPF maps, sockets, binaries, or backup operations.
