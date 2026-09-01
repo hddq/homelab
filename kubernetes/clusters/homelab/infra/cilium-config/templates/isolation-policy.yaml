@@ -1,0 +1,117 @@
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: default-namespace-isolation
+spec:
+  description: "Enforce baseline namespace isolation for application workloads while permitting essential infra and explicit cross-namespace service traffic"
+  endpointSelector:
+    matchExpressions:
+      - key: "k8s:io.kubernetes.pod.namespace"
+        operator: NotIn
+        values:
+          - "kube-system"
+          - "argocd"
+          - "cert-manager"
+          - "cnpg-system"
+          - "k8up"
+          - "monitoring"
+          - "openebs"
+          - "traefik"
+
+  ingress:
+    # 1. Allow traffic from pods within the SAME namespace
+    - fromEndpoints:
+        - matchExpressions:
+            - key: "k8s:io.kubernetes.pod.namespace"
+              operator: In
+              values: ["@namespace"]
+
+    # 2. Allow incoming traffic from Traefik Ingress Controller
+    - fromEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": "traefik"
+
+    # 3. Allow incoming metrics scraping from VictoriaMetrics / vmagent
+    - fromEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": "monitoring"
+
+    # 4. Allow incoming database connections from allowed client namespaces to postgres
+    - fromEndpoints:
+        - matchExpressions:
+            - key: "k8s:io.kubernetes.pod.namespace"
+              operator: In
+              values:
+                - "audiomuse"
+                - "immich"
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+
+    # 5. Allow incoming requests from navidrome to audiomuse
+    - fromEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": "navidrome"
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP
+
+    # 6. Allow incoming requests from media apps (qui, prowlarr, radarr, sonarr, lidarr) to qbittorrent
+    - fromEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": "media"
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+
+  egress:
+    # 1. Allow egress to pods within the SAME namespace
+    - toEndpoints:
+        - matchExpressions:
+            - key: "k8s:io.kubernetes.pod.namespace"
+              operator: In
+              values: ["@namespace"]
+
+    # 2. Allow DNS resolution to CoreDNS in kube-system
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": "kube-system"
+            "k8s-app": "kube-dns"
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+
+    # 3. Allow database egress to postgres namespace
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": "postgres"
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+
+    # 4. Allow navidrome egress to audiomuse namespace
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": "audiomuse"
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP
+
+    # 5. Allow media apps egress to qbittorrent namespace
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": "qbittorrent"
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+
+    # 6. Allow Outbound Internet and External LAN traffic
+    - toEntities:
+        - world
