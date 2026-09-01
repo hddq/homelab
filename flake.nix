@@ -40,6 +40,8 @@
         talhelper
         yq-go
         kyverno
+        cilium-cli
+        hubble
       ];
 
       shellHook = ''
