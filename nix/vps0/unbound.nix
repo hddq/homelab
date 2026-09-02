@@ -21,6 +21,11 @@ _: {
       certificate = null;
       key = null;
     };
+    extraFlags = [
+      "-unbound.ca="
+      "-unbound.cert="
+      "-unbound.key="
+    ];
   };
 
   networking.firewall.allowedTCPPorts = [5353 9167];
