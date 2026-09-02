@@ -7,13 +7,13 @@ victoria-metrics-agent:
     scrape_configs:
       - job_name: "k8s-node-exporter"
         kubernetes_sd_configs:
-          - role: endpoints
+          - role: endpointslice
         relabel_configs:
           - source_labels:
               [__meta_kubernetes_service_label_app_kubernetes_io_name]
             regex: prometheus-node-exporter
             action: keep
-          - source_labels: [__meta_kubernetes_endpoint_port_name]
+          - source_labels: [__meta_kubernetes_endpointslice_port_name]
             regex: metrics
             action: keep
           - source_labels: [__meta_kubernetes_namespace]
@@ -37,13 +37,13 @@ victoria-metrics-agent:
               - "192.168.70.2:9100"
       - job_name: "kube-state-metrics"
         kubernetes_sd_configs:
-          - role: endpoints
+          - role: endpointslice
         relabel_configs:
           - source_labels:
               [__meta_kubernetes_service_label_app_kubernetes_io_name]
             regex: kube-state-metrics
             action: keep
-          - source_labels: [__meta_kubernetes_endpoint_port_name]
+          - source_labels: [__meta_kubernetes_endpointslice_port_name]
             regex: http
             action: keep
           - source_labels: [__meta_kubernetes_service_name]
@@ -82,25 +82,25 @@ victoria-metrics-agent:
           insecure_skip_verify: false
         bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
         kubernetes_sd_configs:
-          - role: endpoints
+          - role: endpointslice
         relabel_configs:
           - source_labels:
               [
                 __meta_kubernetes_namespace,
                 __meta_kubernetes_service_name,
-                __meta_kubernetes_endpoint_port_name,
+                __meta_kubernetes_endpointslice_port_name,
               ]
             regex: default;kubernetes;https
             action: keep
       - job_name: "coredns"
         kubernetes_sd_configs:
-          - role: endpoints
+          - role: endpointslice
         relabel_configs:
           - source_labels:
               [__meta_kubernetes_namespace, __meta_kubernetes_service_name]
             regex: kube-system;kube-dns
             action: keep
-          - source_labels: [__meta_kubernetes_endpoint_port_name]
+          - source_labels: [__meta_kubernetes_endpointslice_port_name]
             regex: metrics
             action: keep
       - job_name: "pve-exporter"
@@ -117,13 +117,13 @@ victoria-metrics-agent:
             replacement: "pve-exporter.monitoring.svc.cluster.local:9221"
       - job_name: "graphite-exporter"
         kubernetes_sd_configs:
-          - role: endpoints
+          - role: endpointslice
         relabel_configs:
           - source_labels:
               [__meta_kubernetes_service_label_app]
             regex: graphite-exporter
             action: keep
-          - source_labels: [__meta_kubernetes_endpoint_port_name]
+          - source_labels: [__meta_kubernetes_endpointslice_port_name]
             regex: metrics
             action: keep
           - source_labels: [__meta_kubernetes_namespace]
@@ -175,13 +175,13 @@ victoria-metrics-agent:
             target_label: pod
       - job_name: "k8up"
         kubernetes_sd_configs:
-          - role: endpoints
+          - role: endpointslice
         relabel_configs:
           - source_labels:
               [__meta_kubernetes_service_label_app_kubernetes_io_name]
             regex: k8up
             action: keep
-          - source_labels: [__meta_kubernetes_endpoint_port_name]
+          - source_labels: [__meta_kubernetes_endpointslice_port_name]
             regex: http
             action: keep
           - source_labels: [__meta_kubernetes_namespace]
