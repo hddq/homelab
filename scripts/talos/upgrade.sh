@@ -50,7 +50,7 @@ if [[ "${target_component}" == "all" || "${target_component}" == "os" ]]; then
 
   nodes_json=$(yq eval -o=json '.nodes' "${topfconfig}")
 
-  while IFS= read -r node; do
+  while IFS= read -u 3 -r node; do
     node_ip=$(echo "${node}" | jq -r '.ip')
     hostname=$(echo "${node}" | jq -r '.host')
 
@@ -69,7 +69,7 @@ if [[ "${target_component}" == "all" || "${target_component}" == "os" ]]; then
     else
       echo "✅ ${hostname} (${node_ip}) is already running Talos v${current_talos_clean}."
     fi
-  done < <(echo "${nodes_json}" | jq -c '.[]')
+  done 3< <(echo "${nodes_json}" | jq -c '.[]')
 fi
 
 # 2. Kubernetes Upgrade
