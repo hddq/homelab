@@ -26,6 +26,7 @@
       ],
       "depNameTemplate": "siderolabs/talos",
       "datasourceTemplate": "github-releases",
+      "versioningTemplate": "semver",
       "extractVersionTemplate": "^v?(?<version>.+)$"
     },
     {
@@ -45,6 +46,7 @@
       ],
       "depNameTemplate": "kubernetes/kubernetes",
       "datasourceTemplate": "github-releases",
+      "versioningTemplate": "semver",
       "extractVersionTemplate": "^v?(?<version>.+)$"
     },
     {
@@ -139,6 +141,11 @@
     {
       "matchUpdateTypes": ["patch", "digest", "pinDigest"],
       "automerge": true
+    },
+    {
+      "matchPackageNames": ["siderolabs/talos", "kubernetes/kubernetes"],
+      "separateMinorPatch": true,
+      "automerge": false
     }
   ]
 }
