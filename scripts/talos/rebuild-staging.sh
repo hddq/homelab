@@ -27,7 +27,10 @@ echo "🛠️ 1/7 Rendering Talos configuration..."
 echo "🔥 2/7 Recreating Proxmox VM via OpenTofu..."
 (
   cd terraform/proxmox
-  tofu apply -replace="proxmox_virtual_environment_vm.talos[\"staging-cp-1\"]"
+  TARGET_RESOURCE='proxmox_virtual_environment_vm.talos["staging-cp-1"]'
+  tofu apply \
+    -target="${TARGET_RESOURCE}" \
+    -replace="${TARGET_RESOURCE}"
 )
 
 # 3. Wait for Talos node reachability (Port 50000 maintenance mode)
