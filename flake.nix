@@ -8,9 +8,23 @@
   outputs = {nixpkgs, ...}: let
     system = "x86_64-linux";
     pkgs = nixpkgs.legacyPackages.${system};
+
+    topf = pkgs.stdenv.mkDerivation rec {
+      pname = "topf";
+      version = "0.6.0";
+      src = pkgs.fetchurl {
+        url = "https://github.com/postfinance/topf/releases/download/v${version}/topf_linux_amd64.tar.gz";
+        hash = "sha256-RY30sl9BgaMe02HAWSGU9+uebnsT5wlvh0VFOv3qrfs=";
+      };
+      sourceRoot = ".";
+      installPhase = ''
+        install -m755 -D topf $out/bin/topf
+      '';
+    };
   in {
     devShells.${system}.default = pkgs.mkShell {
       packages = with pkgs; [
+        topf
         python3
         kubectl
         kubectl-cnpg
@@ -37,7 +51,6 @@
         alejandra
         ruff
         talosctl
-        talhelper
         yq-go
         kyverno
         cilium-cli

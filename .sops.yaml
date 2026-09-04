@@ -17,7 +17,7 @@ creation_rules:
     age:
       - *hddq
       - *k8s
-  - path_regex: talos/environments/.*/talsecret\.yaml$
+  - path_regex: talos/environments/.*/secrets\.yaml$
     age:
       - *hddq
   - path_regex: terraform/.*\.yaml$

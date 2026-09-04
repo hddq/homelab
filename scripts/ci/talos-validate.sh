@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-# Script to render and validate each Talos environment using talhelper and talosctl.
+# Script to render and validate each Talos environment using topf and talosctl.
 
 echo "⚙️ Validating Talos configurations..."
 
@@ -19,24 +19,21 @@ DUMMY_SECRET=$(mktemp)
 VALIDATION_DIR=$(mktemp -d)
 trap 'rm -f "${DUMMY_SECRET}"; rm -rf "${VALIDATION_DIR}"' EXIT
 
+talosctl gen secrets -o "${DUMMY_SECRET}" --force
+
 for env_dir in "${ENVIRONMENTS_DIR}"/*; do
   [ -d "${env_dir}" ] || continue
-  [ -f "${env_dir}/environment.yaml" ] || continue
+  [ -f "${env_dir}/topf.yaml" ] || continue
 
   environment=$(basename "${env_dir}")
   output_dir="${VALIDATION_DIR}/${environment}"
   mkdir -p "${output_dir}"
 
   echo "🔍 Validating Talos environment: ${environment}..."
-  yq eval-all 'select(fileIndex == 0) * select(fileIndex == 1)' \
-    "${TALOS_DIR}/common.yaml" "${env_dir}/environment.yaml" > "${output_dir}/talconfig.yaml"
-  talhelper gensecret > "${DUMMY_SECRET}"
-  talhelper genconfig \
-    --config-file "${output_dir}/talconfig.yaml" \
-    --env-file "${TALOS_DIR}/versions.yaml" \
-    --env-file "${env_dir}/talenv.yaml" \
-    --secret-file "${DUMMY_SECRET}" \
-    --out-dir "${output_dir}/clusterconfig"
+  cp -r "${env_dir}"/* "${output_dir}/"
+  cp "${DUMMY_SECRET}" "${output_dir}/secrets.yaml"
+
+  topf --topfconfig "${output_dir}/topf.yaml" render -o "${output_dir}/clusterconfig"
 
   for config_file in "${output_dir}"/clusterconfig/*.yaml; do
     if [[ "$(basename "${config_file}")" == "talosconfig" ]]; then

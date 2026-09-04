@@ -1,0 +1,9 @@
+clusterName: homelab-staging
+clusterEndpoint: https://192.168.20.120:6443
+kubernetesVersion: 1.36.4
+talosVersion: 1.13.9
+schematicId: "@schematic.yaml"
+nodes:
+  - host: k8s-staging-1
+    ip: 192.168.20.120
+    role: control-plane
