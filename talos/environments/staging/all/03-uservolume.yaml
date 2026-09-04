@@ -1,0 +1,11 @@
+apiVersion: v1alpha1
+kind: UserVolumeConfig
+name: openebs
+provisioning:
+  diskSelector:
+    match: disk.dev_path == '/dev/sdb'
+  minSize: 0
+  grow: true
+filesystem:
+  type: xfs
+  projectQuotaSupport: true

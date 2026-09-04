@@ -12,7 +12,7 @@ VM_ID="499"
 SNAPSHOT_NAME="clean-bootstrapped"
 KUBECONFIG_OUT="${REPO_ROOT}/kubeconfig-staging"
 TALOS_CONFIG_DIR="${REPO_ROOT}/talos/generated/staging/clusterconfig"
-TALOS_CONFIG_FILE="${TALOS_CONFIG_DIR}/homelab-staging-k8s-staging-1.yaml"
+TALOS_CONFIG_FILE="${TALOS_CONFIG_DIR}/k8s-staging-1.yaml"
 TALOSCONFIG_FILE="${TALOS_CONFIG_DIR}/talosconfig"
 
 echo "===================================================="

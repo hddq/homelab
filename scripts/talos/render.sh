@@ -12,19 +12,16 @@ repository_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
 talos_dir="${repository_root}/talos"
 environment_dir="${talos_dir}/environments/${environment}"
 output_dir="${talos_dir}/generated/${environment}"
+clusterconfig_dir="${output_dir}/clusterconfig"
 
-if [[ ! -f "${environment_dir}/environment.yaml" ]]; then
+if [[ ! -f "${environment_dir}/topf.yaml" ]]; then
   echo "Unknown Talos environment: ${environment}" >&2
   exit 1
 fi
 
-mkdir -p "${output_dir}"
-yq eval-all 'select(fileIndex == 0) * select(fileIndex == 1)' \
-  "${talos_dir}/common.yaml" "${environment_dir}/environment.yaml" > "${output_dir}/talconfig.yaml"
+mkdir -p "${clusterconfig_dir}"
 
-talhelper genconfig \
-  --config-file "${output_dir}/talconfig.yaml" \
-  --env-file "${talos_dir}/versions.yaml" \
-  --env-file "${environment_dir}/talenv.yaml" \
-  --secret-file "${environment_dir}/talsecret.yaml" \
-  --out-dir "${output_dir}/clusterconfig"
+topf --topfconfig "${environment_dir}/topf.yaml" render -o "${clusterconfig_dir}"
+topf --topfconfig "${environment_dir}/topf.yaml" talosconfig > "${clusterconfig_dir}/talosconfig"
+
+echo "✅ Talos configuration rendered for ${environment} in ${clusterconfig_dir}"

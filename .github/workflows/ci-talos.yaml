@@ -13,16 +13,16 @@ jobs:
 
       - name: Install talosctl
         run: |
-          talos_version="$(awk '/^TALOS_VERSION:/ { print $2 }' talos/versions.yaml)"
+          talos_version="$(yq '.talosVersion' talos/environments/staging/topf.yaml)"
           curl -fsSL -o /tmp/talosctl "https://github.com/siderolabs/talos/releases/download/v${talos_version}/talosctl-linux-amd64"
           sudo mv /tmp/talosctl /usr/local/bin/talosctl
           sudo chmod +x /usr/local/bin/talosctl
 
-      - name: Install talhelper
+      - name: Install topf
         run: |
-          curl -fsSL https://github.com/budimanjojo/talhelper/releases/download/v3.1.13/talhelper_linux_amd64.tar.gz | tar -xz -C /tmp
-          sudo mv /tmp/talhelper /usr/local/bin/talhelper
-          sudo chmod +x /usr/local/bin/talhelper
+          curl -fsSL https://github.com/postfinance/topf/releases/download/v0.6.0/topf_linux_amd64.tar.gz | tar -xz -C /tmp
+          sudo mv /tmp/topf /usr/local/bin/topf
+          sudo chmod +x /usr/local/bin/topf
 
       - name: Install yq
         run: |

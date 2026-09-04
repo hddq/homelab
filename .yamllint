@@ -25,3 +25,4 @@ ignore: |
   kubernetes/clusters/homelab/infra/*/charts/
   kubernetes/clusters/homelab/infra/*/*/charts/
   .ansible
+  talos/generated/

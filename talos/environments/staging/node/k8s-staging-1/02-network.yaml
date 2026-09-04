@@ -1,0 +1,15 @@
+machine:
+  network:
+    interfaces:
+      - deviceSelector:
+          physical: true
+        dhcp: false
+        addresses:
+          - 192.168.20.120/24
+        routes:
+          - network: 0.0.0.0/0
+            gateway: 192.168.20.1
+    nameservers:
+      - 192.168.70.2
+      - 192.168.41.13
+      - 1.1.1.1

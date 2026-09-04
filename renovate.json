@@ -19,8 +19,11 @@
   "customManagers": [
     {
       "customType": "regex",
-      "managerFilePatterns": ["talos/versions.yaml"],
-      "matchStrings": ["TALOS_VERSION: (?<currentValue>v?\\d+\\.\\d+\\.\\d+)"],
+      "managerFilePatterns": ["talos/versions.yaml", "talos/environments/**/topf.yaml"],
+      "matchStrings": [
+        "TALOS_VERSION: (?<currentValue>v?\\d+\\.\\d+\\.\\d+)",
+        "talosVersion: (?<currentValue>v?\\d+\\.\\d+\\.\\d+)"
+      ],
       "depNameTemplate": "siderolabs/talos",
       "datasourceTemplate": "github-releases",
       "extractVersionTemplate": "^v?(?<version>.+)$"
@@ -35,8 +38,11 @@
     },
     {
       "customType": "regex",
-      "managerFilePatterns": ["talos/versions.yaml"],
-      "matchStrings": ["KUBERNETES_VERSION: (?<currentValue>v?\\d+\\.\\d+\\.\\d+)"],
+      "managerFilePatterns": ["talos/versions.yaml", "talos/environments/**/topf.yaml"],
+      "matchStrings": [
+        "KUBERNETES_VERSION: (?<currentValue>v?\\d+\\.\\d+\\.\\d+)",
+        "kubernetesVersion: (?<currentValue>v?\\d+\\.\\d+\\.\\d+)"
+      ],
       "depNameTemplate": "kubernetes/kubernetes",
       "datasourceTemplate": "github-releases",
       "extractVersionTemplate": "^v?(?<version>.+)$"

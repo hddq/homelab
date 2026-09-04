@@ -32,7 +32,7 @@ and regular manifests under `kubernetes/clusters/homelab/`.
 
 | Area | Technology | Role |
 | --- | --- | --- |
-| Node OS | Talos Linux | Immutable Kubernetes host OS, rendered with Talhelper. |
+| Node OS | Talos Linux | Immutable Kubernetes host OS, managed with TOPF. |
 | CNI & Load balancing | Cilium | eBPF CNI, kube-proxy replacement, and BGP Control Plane. |
 | Provisioning | OpenTofu/Terraform | Creates the Proxmox VMs and their disks. |
 | GitOps | Argo CD | Reconciles the cluster from this repository using App of Apps. |
@@ -93,9 +93,8 @@ environment.
 ├── scripts/                         # Bootstrap, validation, migration, and administration tools
 ├── shared/dns/                      # Shared Blocky and Unbound configuration
 ├── talos/
-│   ├── common.yaml                  # Shared Talhelper configuration
-│   ├── environments/                # Per-cluster topology, environment values, and SOPS secrets
-│   └── versions.yaml                # Talos and Kubernetes version source of truth
+│   ├── environments/                # Per-cluster topf.yaml, patches, and SOPS secrets.yaml
+│   └── versions.yaml                # Talos and Kubernetes version source of truth for Terraform
 ├── terraform/
 │   ├── cloudflare/                  # DNS and email-routing resources
 │   ├── oracle-cloud/                # VPS infrastructure
@@ -118,9 +117,9 @@ environment and installs pre-commit hooks.
 
 ### Talos Configuration
 
-Talhelper renders each environment by merging `talos/common.yaml` with its
-environment definition. `talos/versions.yaml` is the shared source for Talos
-and Kubernetes versions and is consumed by both Talos and Terraform.
+TOPF manages each environment via `talos/environments/<env>/topf.yaml` and patch
+files under `all/` and `node/<host>/`. `talos/versions.yaml` is the shared source for Talos
+and Kubernetes versions consumed by Terraform and CI.
 
 ```bash
 bash scripts/talos/render.sh staging
@@ -129,7 +128,7 @@ bash scripts/talos/render.sh production
 
 Rendered machine configurations are written to `talos/generated/<environment>/`
 and are intentionally not committed. Each environment has a separate
-SOPS-encrypted `talsecret.yaml`.
+SOPS-encrypted `secrets.yaml`.
 
 ### Provisioning and Bootstrap
 
