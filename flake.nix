@@ -21,6 +21,19 @@
         install -m755 -D topf $out/bin/topf
       '';
     };
+
+    talosctl = pkgs.stdenv.mkDerivation rec {
+      pname = "talosctl";
+      version = "1.14.0";
+      src = pkgs.fetchurl {
+        url = "https://github.com/siderolabs/talos/releases/download/v${version}/talosctl-linux-amd64";
+        hash = "sha256-LBR8SpnRJMlb1cGQ/gVOCzyTSV8iQ/1lLr1COtuDd8c=";
+      };
+      dontUnpack = true;
+      installPhase = ''
+        install -m755 -D $src $out/bin/talosctl
+      '';
+    };
   in {
     devShells.${system}.default = pkgs.mkShell {
       packages = with pkgs; [
@@ -84,5 +97,6 @@
         echo "✅ Ready! Python: $(which python)"
       '';
     };
+    packages.${system}.talosctl = talosctl;
   };
 }
