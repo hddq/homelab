@@ -1,7 +1,7 @@
-cluster:
-  proxy:
-    disabled: true
-  allowSchedulingOnControlPlanes: true
-  network:
-    cni:
-      name: none
+apiVersion: v1alpha1
+kind: KubeProxyConfig
+$patch: delete
+---
+apiVersion: v1alpha1
+kind: KubeFlannelCNIConfig
+$patch: delete
