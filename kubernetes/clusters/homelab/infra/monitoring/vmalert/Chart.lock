@@ -1,6 +1,6 @@
 dependencies:
 - name: victoria-metrics-alert
   repository: https://victoriametrics.github.io/helm-charts
-  version: 0.47.0
-digest: sha256:017746d8acb05475901df91be25cfd898af9ece45d133da09f015bef2d071efa
-generated: "2026-08-17T22:10:48.118146375Z"
+  version: 0.48.0
+digest: sha256:119898509c610a421c1dc7ca0657ae223928443e3ea4d7b7f09b6a2800573283
+generated: "2026-09-10T16:24:15.25918836Z"
