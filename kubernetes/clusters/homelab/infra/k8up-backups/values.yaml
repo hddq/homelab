@@ -8,6 +8,7 @@ includeNamespaces:
   - monitoring
   - navidrome
   - opodsync
+  - qbittorrent
 
 # S3-compatible backend (Garage on TrueNAS).
 s3:
