@@ -139,6 +139,16 @@
       "groupName": "Minor ci"
     },
     {
+      "matchFileNames": ["terraform/**"],
+      "matchUpdateTypes": ["patch", "digest", "pinDigest"],
+      "groupName": "Patch terraform"
+    },
+    {
+      "matchFileNames": ["terraform/**"],
+      "matchUpdateTypes": ["minor"],
+      "groupName": "Minor terraform"
+    },
+    {
       "matchUpdateTypes": ["patch", "digest", "pinDigest"],
       "automerge": true
     },
