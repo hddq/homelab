@@ -89,8 +89,15 @@ render_charts() {
     id=$(chart_id "$chart_dir")
     release="${TYPE}-$id"
 
+    local ns
+    ns=$(grep -E "\"path\"\s+\"$chart_dir\"\s+\"namespace\"\s+\"[^\"]+\"" kubernetes/clusters/homelab/bootstrap/templates/*.yaml 2>/dev/null \
+      | sed -E 's/.*"namespace"\s+"([^"]+)".*/\1/' | head -n 1)
+
     for env in staging production; do
       args=()
+      if [ -n "$ns" ]; then
+        args+=(--namespace "$ns")
+      fi
       if [ -f "$chart_dir/values.yaml" ]; then
         args+=(-f "$chart_dir/values.yaml")
       fi
