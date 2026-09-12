@@ -52,6 +52,8 @@ immich:
         size: 10Gi
         accessMode: ReadWriteOnce
         storageClass: openebs-hostpath
+        annotations:
+          k8up.io/backup: "false"
     controllers:
       main:
         containers:
