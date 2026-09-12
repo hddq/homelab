@@ -98,6 +98,10 @@ jobs:
           done
           kyverno apply kubernetes/policies/ "${resources[@]}"
 
+      - name: Validate K8up backup coverage
+        run: |
+          python3 scripts/ci/check-backup-namespaces.py
+
   trivy:
     name: 🛡️ Security Scan (Trivy)
     runs-on: ubuntu-latest
