@@ -1,7 +1,7 @@
 clusterName: homelab-staging
 clusterEndpoint: https://192.168.20.120:6443
 kubernetesVersion: 1.37.0
-talosVersion: 1.14.0
+talosVersion: 1.14.1
 schematicId: "@schematic.yaml"
 nodes:
   - host: k8s-staging-1
