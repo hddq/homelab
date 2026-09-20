@@ -1,0 +1,35 @@
+name: Renovate - Update talosctl Hash
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: ["master"]
+    paths:
+      - "flake.nix"
+
+jobs:
+  update-hash:
+    name: ⚡ Update talosctl Hash
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Update talosctl hash
+        id: hasher
+        run: python3 scripts/ci/update-talosctl-hash.py
+
+      - name: Commit and push changes
+        if: steps.hasher.outputs.updated == 'true'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add flake.nix
+          git commit -m "build(flake): update talosctl sha256 hash for v${{ steps.hasher.outputs.version }}"
+          git push
