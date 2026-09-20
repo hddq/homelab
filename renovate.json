@@ -19,10 +19,11 @@
   "customManagers": [
     {
       "customType": "regex",
-      "managerFilePatterns": ["talos/versions.yaml", "talos/environments/**/topf.yaml"],
+      "managerFilePatterns": ["talos/versions.yaml", "talos/environments/**/topf.yaml", "flake.nix"],
       "matchStrings": [
         "TALOS_VERSION: (?<currentValue>v?\\d+\\.\\d+\\.\\d+)",
-        "talosVersion: (?<currentValue>v?\\d+\\.\\d+\\.\\d+)"
+        "talosVersion: (?<currentValue>v?\\d+\\.\\d+\\.\\d+)",
+        "pname\\s*=\\s*\"talosctl\";\\s+version\\s*=\\s*\"(?<currentValue>v?\\d+\\.\\d+\\.\\d+)\";"
       ],
       "depNameTemplate": "siderolabs/talos",
       "datasourceTemplate": "github-releases",
