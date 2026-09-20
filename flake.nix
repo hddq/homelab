@@ -24,7 +24,7 @@
 
     talosctl = pkgs.stdenv.mkDerivation rec {
       pname = "talosctl";
-      version = "1.14.0";
+      version = "1.14.1";
       src = pkgs.fetchurl {
         url = "https://github.com/siderolabs/talos/releases/download/v${version}/talosctl-linux-amd64";
         hash = "sha256-LBR8SpnRJMlb1cGQ/gVOCzyTSV8iQ/1lLr1COtuDd8c=";
