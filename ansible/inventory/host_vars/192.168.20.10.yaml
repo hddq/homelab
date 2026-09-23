@@ -8,3 +8,20 @@ zram_swap_enabled: true
 zram_swap_algorithm: "zstd"
 zram_swap_percent: 50
 zram_swap_priority: 100
+
+# Power management configuration
+power_management_enabled: true
+power_profile_default: "powersave"
+power_profiles:
+  powersave:
+    governor: "powersave"
+    epp: "balance_power"
+    pl1: "65000000"
+    pl2: "90000000"
+    aspm: "powersave"
+  turbo:
+    governor: "performance"
+    epp: "performance"
+    pl1: "125000000"
+    pl2: "181000000"
+    aspm: "default"

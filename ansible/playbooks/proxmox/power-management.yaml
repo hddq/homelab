@@ -1,0 +1,183 @@
+---
+- name: Manage Intel CPU power profiles on Proxmox hosts
+  hosts: "{{ target | default('proxmox') }}"
+  become: true
+  gather_facts: false
+
+  vars:
+    power_profile: "{{ profile | default(power_profile_default | default('powersave')) }}"
+
+  tasks:
+    - name: Manage CPU power profile configuration
+      when: power_management_enabled | default(true)
+      block:
+        - name: Validate requested power profile
+          ansible.builtin.assert:
+            that:
+              - power_profile in ['powersave', 'turbo']
+            fail_msg: "profile must be either 'powersave' or 'turbo'"
+
+        - name: Install CPU power-profile helper
+          ansible.builtin.copy:
+            dest: /usr/local/sbin/apply-cpu-power-profile
+            owner: root
+            group: root
+            mode: "0755"
+            content: |
+              #!/usr/bin/env bash
+              # Managed by Ansible. Applies CPU settings when the matching sysfs
+              # interfaces are available; unsupported hardware is left untouched.
+              set -u
+
+              profile="${1:-{{ power_profile_default | default('powersave') }}}"
+              changed=0
+
+              case "${profile}" in
+                powersave)
+                  governor="{{ power_profiles.powersave.governor | default('powersave') }}"
+                  epp="{{ power_profiles.powersave.epp | default('balance_power') }}"
+                  pl1="{{ power_profiles.powersave.pl1 | default('65000000') }}"
+                  pl2="{{ power_profiles.powersave.pl2 | default('90000000') }}"
+                  aspm="{{ power_profiles.powersave.aspm | default('powersave') }}"
+                  ;;
+                turbo)
+                  governor="{{ power_profiles.turbo.governor | default('performance') }}"
+                  epp="{{ power_profiles.turbo.epp | default('performance') }}"
+                  pl1="{{ power_profiles.turbo.pl1 | default('181000000') }}"
+                  pl2="{{ power_profiles.turbo.pl2 | default('181000000') }}"
+                  aspm="{{ power_profiles.turbo.aspm | default('default') }}"
+                  ;;
+                *)
+                  echo "Unsupported profile: ${profile}" >&2
+                  exit 2
+                  ;;
+              esac
+
+              write_if_needed() {
+                local path="$1"
+                local value="$2"
+                local current
+
+                [[ -e "${path}" && -w "${path}" ]] || return 0
+                current="$(<"${path}")"
+                [[ "${current}" == "${value}" ]] && return 0
+
+                if printf '%s\n' "${value}" > "${path}"; then
+                  changed=1
+                else
+                  echo "Warning: unable to write ${path}" >&2
+                fi
+              }
+
+              write_aspm_if_needed() {
+                local path=/sys/module/pcie_aspm/parameters/policy
+                local current
+
+                [[ -e "${path}" && -w "${path}" ]] || return 0
+                current="$(<"${path}")"
+                [[ "${current}" == *"[${aspm}]"* ]] && return 0
+
+                if printf '%s\n' "${aspm}" > "${path}"; then
+                  changed=1
+                else
+                  echo "Warning: unable to write ${path}" >&2
+                fi
+              }
+
+              for path in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do
+                [[ -e "${path}" ]] || continue
+                write_if_needed "${path}" "${governor}"
+              done
+
+              for path in /sys/devices/system/cpu/cpu*/cpufreq/energy_performance_preference; do
+                [[ -e "${path}" ]] || continue
+                write_if_needed "${path}" "${epp}"
+              done
+
+              if [[ -n "${pl1:-}" ]]; then
+                write_if_needed \
+                  /sys/class/powercap/intel-rapl/intel-rapl:0/constraint_0_power_limit_uw \
+                  "${pl1}"
+              fi
+              if [[ -n "${pl2:-}" ]]; then
+                write_if_needed \
+                  /sys/class/powercap/intel-rapl/intel-rapl:0/constraint_1_power_limit_uw \
+                  "${pl2}"
+              fi
+              if [[ -n "${aspm:-}" ]]; then
+                write_aspm_if_needed
+              fi
+
+              echo "profile=${profile} changed=${changed}"
+
+        - name: Create boot-time powersave profile service
+          ansible.builtin.copy:
+            dest: /etc/systemd/system/cpu-powersave-profile.service
+            owner: root
+            group: root
+            mode: "0644"
+            content: |
+              [Unit]
+              Description=Apply Intel CPU powersave profile
+              ConditionPathExists=/sys/devices/system/cpu
+              After=systemd-modules-load.service
+              Before=multi-user.target
+
+              [Service]
+              Type=oneshot
+              ExecStart=/usr/local/sbin/apply-cpu-power-profile {{ power_profile_default | default('powersave') }}
+
+              [Install]
+              WantedBy=multi-user.target
+          notify: Reload systemd
+
+        - name: Enable powersave profile at boot
+          ansible.builtin.systemd_service:
+            name: cpu-powersave-profile.service
+            enabled: true
+            daemon_reload: true
+
+        - name: Apply requested profile now
+          ansible.builtin.command:
+            argv:
+              - /usr/local/sbin/apply-cpu-power-profile
+              - "{{ power_profile }}"
+          register: power_profile_apply
+          changed_when: "'changed=1' in power_profile_apply.stdout"
+
+        - name: Read applied power settings
+          ansible.builtin.shell: |
+            set -o pipefail
+            {
+              echo "Requested profile: {{ power_profile }}"
+              echo "CPU governors:"
+              for path in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do
+                [[ -r "${path}" ]] && echo "${path}: $(<"${path}")"
+              done
+              echo "CPU EPP:"
+              for path in /sys/devices/system/cpu/cpu*/cpufreq/energy_performance_preference; do
+                [[ -r "${path}" ]] && echo "${path}: $(<"${path}")"
+              done
+              echo "Intel RAPL:"
+              for path in \
+                /sys/class/powercap/intel-rapl/intel-rapl:0/constraint_0_power_limit_uw \
+                /sys/class/powercap/intel-rapl/intel-rapl:0/constraint_1_power_limit_uw; do
+                [[ -r "${path}" ]] && echo "${path}: $(<"${path}")"
+              done
+              echo "PCIe ASPM:"
+              path=/sys/module/pcie_aspm/parameters/policy
+              [[ -r "${path}" ]] && echo "${path}: $(<"${path}")"
+            }
+          args:
+            executable: /bin/bash
+          register: power_profile_settings
+          changed_when: false
+
+        - name: Display applied power settings
+          ansible.builtin.debug:
+            msg: "{{ power_profile_settings.stdout_lines }}"
+
+  handlers:
+    - name: Reload systemd
+      ansible.builtin.systemd_service:
+        daemon_reload: true
