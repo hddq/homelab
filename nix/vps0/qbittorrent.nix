@@ -70,7 +70,7 @@ in {
     };
 
     qbittorrent = {
-      image = "ghcr.io/home-operations/qbittorrent:5.2.3";
+      image = "ghcr.io/home-operations/qbittorrent:5.2.4";
       dependsOn = ["wireguard-pia"];
       user = "1000:1000";
       extraOptions = [
