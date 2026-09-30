@@ -22,7 +22,7 @@ spec:
         seccompProfile:
           type: RuntimeDefault
       containers:
-        - image: madnuttah/unbound:1.26.0-1@sha256:a48db2fbf382cf5f5969987ef3552cbd8043cbb30817e95661ab49ec3819505c
+        - image: madnuttah/unbound:1.26.1-1@sha256:d86e1adab0f6bf546d94898b5ca7effc34a09d554f21be5ddfc08112257f2254
           name: unbound
           env:
             - name: UNBOUND_UID
