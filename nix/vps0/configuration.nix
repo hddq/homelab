@@ -24,7 +24,7 @@
   networking = {
     hostName = "vps0";
     useDHCP = true;
-    nameservers = ["192.168.40.11" "192.168.40.12"];
+    nameservers = ["192.168.41.13" "127.0.0.1"];
     firewall = {
       enable = true;
       allowedTCPPorts = [2222];
