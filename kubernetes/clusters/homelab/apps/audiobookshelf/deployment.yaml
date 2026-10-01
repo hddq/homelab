@@ -62,6 +62,9 @@ spec:
             - name: media-nfs
               subPath: audiobooks
               mountPath: /audiobooks
+            - name: media-nfs
+              subPath: podcasts
+              mountPath: /podcasts
       volumes:
         - name: audiobookshelf-pvc
           persistentVolumeClaim:
