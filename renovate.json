@@ -157,6 +157,10 @@
       "matchPackageNames": ["siderolabs/talos", "kubernetes/kubernetes"],
       "separateMinorPatch": true,
       "automerge": false
+    },
+    {
+      "matchPackageNames": ["astral-sh/ruff", "astral-sh/ruff-pre-commit"],
+      "groupName": "ruff"
     }
   ]
 }
