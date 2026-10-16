@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-import sys
 import re
+import sys
 
 if len(sys.argv) < 3:
     print("Usage: patch_updater.py <makefile> <uri>")
