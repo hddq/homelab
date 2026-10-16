@@ -13,20 +13,14 @@ repos:
     hooks:
       - id: shellcheck
         exclude: ^\.envrc$
-  - repo: local
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.19
     hooks:
       - id: ruff
-        name: ruff
-        entry: ruff check --fix
-        language: system
-        types_or: [python, pyi]
-        require_serial: true
+        args: [--fix]
       - id: ruff-format
-        name: ruff-format
-        entry: ruff format
-        language: system
-        types_or: [python, pyi]
-        require_serial: true
+  - repo: local
+    hooks:
       - id: alejandra
         name: alejandra
         entry: alejandra
