@@ -35,8 +35,8 @@ locals {
       vm_id       = 401
       ip_address  = "192.168.20.101"
       cpu_cores   = 4
-      memory      = 12288
-      balloon     = 12288
+      memory      = 10240
+      balloon     = 10240
     }
   }
 }
