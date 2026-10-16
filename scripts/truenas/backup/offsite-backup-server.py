@@ -7,11 +7,11 @@ import subprocess
 import sys
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import parse_qs, urlparse
 
 HOST = "0.0.0.0"
 PORT = 8787
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 ENDPOINT = "/offsite-backup"
 POLL_SECONDS = 1
 READ_SIZE = 1024
