@@ -2,13 +2,47 @@
 
 set -euo pipefail
 
-if [[ $# -lt 1 || $# -gt 2 ]]; then
-  echo "Usage: $0 <staging|production> [all|os|k8s]" >&2
+environment=""
+target_component=""
+drain="true"
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --no-drain)
+      drain="false"
+      shift
+      ;;
+    -h|--help)
+      echo "Usage: $0 <staging|production> [all|os|k8s] [--no-drain]" >&2
+      exit 0
+      ;;
+    -*)
+      echo "❌ Unknown option: $1" >&2
+      echo "Usage: $0 <staging|production> [all|os|k8s] [--no-drain]" >&2
+      exit 1
+      ;;
+    *)
+      if [[ -z "${environment}" ]]; then
+        environment="$1"
+      elif [[ -z "${target_component}" ]]; then
+        target_component="$1"
+      else
+        echo "❌ Unexpected argument: $1" >&2
+        echo "Usage: $0 <staging|production> [all|os|k8s] [--no-drain]" >&2
+        exit 1
+      fi
+      shift
+      ;;
+  esac
+done
+
+if [[ -z "${environment}" ]]; then
+  echo "Usage: $0 <staging|production> [all|os|k8s] [--no-drain]" >&2
   exit 1
 fi
 
-environment=$1
-target_component="${2:-all}"
+target_component="${target_component:-all}"
+
 
 repository_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
 talos_dir="${repository_root}/talos"
@@ -64,8 +98,8 @@ if [[ "${target_component}" == "all" || "${target_component}" == "os" ]]; then
     current_talos_clean="${current_talos#v}"
 
     if [[ "${current_talos_clean}" != "${target_talos_clean}" ]]; then
-      echo "🚀 Upgrading Talos OS on ${hostname} (${node_ip}): v${current_talos_clean} -> v${target_talos_clean}..."
-      topf --topfconfig "${topfconfig}" upgrade --nodes-filter "^${hostname}$"
+      echo "🚀 Upgrading Talos OS on ${hostname} (${node_ip}): v${current_talos_clean} -> v${target_talos_clean} (drain=${drain})..."
+      topf --topfconfig "${topfconfig}" upgrade --nodes-filter "^${hostname}$" --drain="${drain}"
     else
       echo "✅ ${hostname} (${node_ip}) is already running Talos v${current_talos_clean}."
     fi
