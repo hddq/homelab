@@ -19,6 +19,7 @@
     (dict "name" "postgres" "path" "kubernetes/clusters/homelab/apps/postgres" "namespace" "postgres")
     (dict "name" "immich" "path" "kubernetes/clusters/homelab/apps/immich" "namespace" "immich")
     (dict "name" "immich-secrets" "path" "kubernetes/clusters/homelab/apps/immich-secrets" "namespace" "immich")
+    (dict "name" "stirling" "path" "kubernetes/clusters/homelab/apps/stirling-pdf" "namespace" "stirling-pdf")
     (dict "name" "tor" "path" "kubernetes/clusters/homelab/apps/tor" "namespace" "tor")
 }}
 ---

@@ -1,0 +1,39 @@
+stirling-pdf-chart:
+  ingress:
+    enabled: true
+    ingressClassName: infra-traefik
+    hosts:
+      - name: stirling.lab.hddq.org
+        path: /
+  persistence:
+    enabled: true
+    storageClass: openebs-hostpath
+    size: 1Gi
+  deployment:
+    extraVolumeMounts:
+      - name: storage-volume
+        mountPath: /configs
+        subPath: configs
+      - name: storage-volume
+        mountPath: /storage
+        subPath: storage
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 1Gi
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 1000
+  envs:
+    - name: TZ
+      value: Europe/Warsaw
+    - name: SYSTEM_DEFAULTLOCALE
+      value: en-US
