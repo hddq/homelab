@@ -1,5 +1,5 @@
 apiVersion: v2
-name: stirling-pdf-wrapper
+name: stirling-wrapper
 description: Wrapper chart for Stirling PDF
 type: application
 version: 1.0.0
