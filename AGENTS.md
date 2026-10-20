@@ -22,7 +22,7 @@ Use Conventional Commits: `<type>(<scope>): <description>`. Use the most specifi
 
 ### Scopes
 - K8s: use the application or infrastructure service name.
-- Talos, Ansible, and Terraform: use `talos`, `ansible`, or `tf`, respectively.
+- Talos, Ansible, and Terraform: use `talos`, `ansible`, or `tf` for broad changes; use the affected service scope for targeted work (for example, `pve` for Proxmox changes in Ansible or Terraform).
 - Nix: use `flake` for the root `flake.nix`; otherwise use the host name (for example, `vps0`).
 - Scripts: use the script target (for example, `talos` or `backup`); use `scripts` only for general script-related changes.
 - Documentation: use the specific doc or topic name (e.g., `agents`, `readme`).
