@@ -10,7 +10,28 @@ stirling-pdf-chart:
     storageClass: openebs-hostpath
     size: 1Gi
   deployment:
+    extraVolumes:
+      - name: tmp
+        emptyDir: {}
+      - name: local-bin
+        emptyDir: {}
+      - name: home
+        emptyDir: {}
+      - name: logs
+        emptyDir: {}
+      - name: pipeline
+        emptyDir: {}
     extraVolumeMounts:
+      - name: tmp
+        mountPath: /tmp
+      - name: local-bin
+        mountPath: /usr/local/bin
+      - name: home
+        mountPath: /home/stirlingpdfuser
+      - name: logs
+        mountPath: /logs
+      - name: pipeline
+        mountPath: /pipeline
       - name: storage-volume
         mountPath: /configs
         subPath: configs
@@ -23,6 +44,11 @@ stirling-pdf-chart:
       memory: 256Mi
     limits:
       memory: 1Gi
+  probes:
+    liveness:
+      initialDelaySeconds: 60
+    readiness:
+      initialDelaySeconds: 30
   containerSecurityContext:
     allowPrivilegeEscalation: false
     capabilities:
@@ -32,6 +58,8 @@ stirling-pdf-chart:
     runAsNonRoot: true
     runAsUser: 1000
     runAsGroup: 1000
+    seccompProfile:
+      type: RuntimeDefault
   envs:
     - name: TZ
       value: Europe/Warsaw
