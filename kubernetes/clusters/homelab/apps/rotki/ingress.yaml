@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rotki
+  namespace: rotki
+spec:
+  ingressClassName: infra-traefik
+  rules:
+    - host: rotki.lab.hddq.org
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: rotki
+                port:
+                  number: 80

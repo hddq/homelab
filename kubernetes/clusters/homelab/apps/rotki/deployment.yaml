@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rotki
+  namespace: rotki
+  labels:
+    app.kubernetes.io/name: rotki
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: rotki
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: rotki
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: rotki
+          image: rotki/rotki:v1.44.1
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+          volumeMounts:
+            - name: rotki-pvc
+              mountPath: /data
+            - name: logs-dir
+              mountPath: /logs
+            - name: run-dir
+              mountPath: /run
+            - name: tmp-dir
+              mountPath: /tmp
+      volumes:
+        - name: rotki-pvc
+          persistentVolumeClaim:
+            claimName: rotki-pvc
+        - name: logs-dir
+          emptyDir: {}
+        - name: run-dir
+          emptyDir: {}
+        - name: tmp-dir
+          emptyDir: {}
