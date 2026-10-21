@@ -38,6 +38,12 @@ spec:
             - name: http
               containerPort: 80
               protocol: TCP
+          env:
+            - name: ROTKI_SESSION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: rotki-secret
+                  key: ROTKI_SESSION_KEY
           resources:
             requests:
               cpu: 100m
