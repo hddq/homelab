@@ -26,7 +26,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: rotki
-          image: rotki/rotki:v1.44.1
+          image: rotki/rotki:v1.44.1@sha256:1b6defb5aef37cee38ca6746c594b2b843a4e909cd977234e7aee0c00b6266c5
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
