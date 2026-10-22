@@ -161,6 +161,10 @@
     {
       "matchPackageNames": ["astral-sh/ruff", "astral-sh/ruff-pre-commit"],
       "groupName": "ruff"
+    },
+    {
+      "matchPackageNames": ["ghcr.io/home-operations/qbittorrent"],
+      "groupName": "qbittorrent"
     }
   ]
 }
