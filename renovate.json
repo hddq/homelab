@@ -1,6 +1,14 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended"],
+  "hostRules": [
+    {
+      "matchHost": "ghcr.io",
+      "hostType": "docker",
+      "username": "hddq",
+      "password": "{{ secrets.GHCR_PAT }}"
+    }
+  ],
   "kubernetes": {
     "enabled": true,
     "managerFilePatterns": ["/kubernetes/.+\\.yaml$/"]
