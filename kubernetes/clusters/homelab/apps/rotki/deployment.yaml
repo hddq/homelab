@@ -17,6 +17,8 @@ spec:
       labels:
         app.kubernetes.io/name: rotki
     spec:
+      imagePullSecrets:
+        - name: ghcr-pull-secret
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -26,7 +28,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: rotki
-          image: rotki/rotki:v1.44.2@sha256:b9dba08f80c7676b7975eb0b1a78769fd6ac10e626fb435dfd40a7e2885dad02
+          image: ghcr.io/hddq/rotki:v1.44.2
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
