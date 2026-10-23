@@ -173,6 +173,12 @@
     {
       "matchPackageNames": ["ghcr.io/home-operations/qbittorrent"],
       "groupName": "qbittorrent"
+    },
+    {
+      "matchPackageNames": ["ghcr.io/hddq/rotki"],
+      "groupName": "rotki",
+      "versioning": "regex:^v?(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:-hddq\\.(?<build>\\d+))?$",
+      "allowedVersions": "/-hddq\\.\\d+$/"
     }
   ]
 }
