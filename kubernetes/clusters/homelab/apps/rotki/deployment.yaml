@@ -28,7 +28,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: rotki
-          image: ghcr.io/hddq/rotki:v1.44.2
+          image: ghcr.io/hddq/rotki:v1.44.2-hddq.5@sha256:80e61fcb72976c5a2a53011b60297f5371d7ba0ffb1e22d10acfc20a431249d7
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
