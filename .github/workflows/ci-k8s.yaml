@@ -91,7 +91,7 @@ jobs:
 
       - name: Run Kyverno validation
         run: |
-          mapfile -t manifest_files < <(find kubernetes/clusters/homelab/apps/ .ci/rendered/ -type f \( -name "*.yaml" -o -name "*.yml" \) -exec grep -q "apiVersion:" {} \; -print)
+          mapfile -t manifest_files < <(find kubernetes/clusters/homelab/apps/ .ci/rendered/ -type f \( -name "*.yaml" -o -name "*.yml" \) -exec grep -q "apiVersion:" {} \; ! -exec grep -q "^sops:" {} \; -print)
           resources=()
           for file in "${manifest_files[@]}"; do
             resources+=("--resource" "$file")
