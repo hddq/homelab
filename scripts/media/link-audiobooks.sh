@@ -20,6 +20,13 @@ if [ ! -d "$SOURCE_DIR" ]; then
     exit 1
 fi
 
+mkdir -p "$TARGET_DIR"
+if [ "$(stat -c '%d' "$SOURCE_DIR")" != "$(stat -c '%d' "$TARGET_DIR")" ]; then
+    echo "Error: Source and target directories reside on different filesystems." >&2
+    echo "       Hard links cannot cross filesystem boundaries." >&2
+    exit 1
+fi
+
 # Check if exiftool is installed
 if ! command -v exiftool &>/dev/null; then
     echo "[WARNING] 'exiftool' is not installed or not in PATH."
@@ -28,7 +35,7 @@ fi
 
 # Find all audio files that have not yet been hard-linked (link count == 1)
 mapfile -t unlinked_audio_files < <(
-    find "$SOURCE_DIR" -type f \( -name "*.m4b" -o -name "*.mp3" -o -name "*.m4a" \) -links 1 | sort
+    find "$SOURCE_DIR" -type f \( -iname "*.m4b" -o -iname "*.mp3" -o -iname "*.m4a" \) -links 1 | sort
 )
 
 if [ "${#unlinked_audio_files[@]}" -eq 0 ]; then
@@ -75,8 +82,8 @@ clean_string() {
     str=$(echo "$str" | sed -E 's/[[:space:]]*\[(M4B|MP3|Audio Connoisseur)\][[:space:]]*//gi')
     # Remove filesystem illegal characters
     str=$(echo "$str" | tr -d ':/')
-    # Strip leading/trailing whitespace
-    str=$(echo "$str" | xargs)
+    # Collapse multiple spaces and strip leading/trailing whitespace
+    str=$(echo "$str" | sed -E 's/[[:space:]]+/ /g; s/^[[:space:]]+|[[:space:]]+$//g')
     echo "$str"
 }
 
@@ -91,11 +98,11 @@ for item in "${books[@]}"; do
 
     if [ "$type" = "DIR" ]; then
         book_dir="$target_path"
-        first_audio=$(find "$book_dir" -maxdepth 1 -type f \( -name "*.m4b" -o -name "*.mp3" -o -name "*.m4a" \) | sort | head -n 1)
+        first_audio=$(find "$book_dir" -maxdepth 1 -type f \( -iname "*.m4b" -o -iname "*.mp3" -o -iname "*.m4a" \) | sort | head -n 1)
 
         # Collect unlinked files in this directory (exclude standalone .epub files)
         while IFS= read -r f; do
-            [ -f "$f" ] && [ "$(stat -c '%h' "$f")" -eq 1 ] && [[ "$f" != *.epub ]] && files_to_link+=("$f")
+            [ -f "$f" ] && [ "$(stat -c '%h' "$f")" -eq 1 ] && [[ "${f,,}" != *.epub ]] && files_to_link+=("$f")
         done < <(find "$book_dir" -maxdepth 1 -type f | sort)
 
         # 1. Try reading embedded tags via exiftool
@@ -107,10 +114,10 @@ for item in "${books[@]}"; do
 
         # 2. Try .nfo file if tags are empty
         if [ -z "$artist" ] || [ -z "$album" ]; then
-            nfo_file=$(find "$book_dir" -maxdepth 1 -name "*.nfo" | head -n 1)
+            nfo_file=$(find "$book_dir" -maxdepth 1 -iname "*.nfo" | head -n 1)
             if [ -n "$nfo_file" ]; then
-                [ -z "$artist" ] && artist=$(grep -i "^[[:space:]]*Author:" "$nfo_file" | head -n 1 | awk -F ':' '{print $2}' | xargs || true)
-                [ -z "$album" ] && album=$(grep -i "^[[:space:]]*Title:" "$nfo_file" | head -n 1 | awk -F ':' '{print $2}' | xargs || true)
+                [ -z "$artist" ] && artist=$(grep -i "^[[:space:]]*Author:" "$nfo_file" | head -n 1 | sed -E 's/^[[:space:]]*Author:[[:space:]]*//I' || true)
+                [ -z "$album" ] && album=$(grep -i "^[[:space:]]*Title:" "$nfo_file" | head -n 1 | sed -E 's/^[[:space:]]*Title:[[:space:]]*//I' || true)
             fi
         fi
 
@@ -135,7 +142,7 @@ for item in "${books[@]}"; do
 
         # Check for companion files with same base name (e.g., .jpg, .cue)
         base="${audio_file%.*}"
-        for ext in jpg jpeg png cue nfo; do
+        for ext in jpg jpeg png cue nfo JPG JPEG PNG CUE NFO; do
             if [ -f "$base.$ext" ] && [ "$(stat -c '%h' "$base.$ext")" -eq 1 ]; then
                 files_to_link+=("$base.$ext")
             fi
@@ -194,11 +201,18 @@ for item in "${books[@]}"; do
             [yY]|[yY][eE][sS])
                 mkdir -p "$dest_dir"
                 echo "Creating hard links in: $dest_dir"
+                link_failed=0
                 for f in "${files_to_link[@]}"; do
-                    ln "$f" "$dest_dir/"
+                    if ! ln "$f" "$dest_dir/"; then
+                        link_failed=1
+                    fi
                 done
-                echo -e "\e[32m✓ Linked successfully!\e[0m"
-                ((linked_count++))
+                if [ "$link_failed" -eq 0 ]; then
+                    echo -e "\e[32m✓ Linked successfully!\e[0m"
+                    ((linked_count++))
+                else
+                    echo -e "\e[31m✗ Errors occurred while creating hard links.\e[0m"
+                fi
                 break
                 ;;
             [nN]|[nN][oO])
@@ -211,8 +225,12 @@ for item in "${books[@]}"; do
                 read -r -p "Enter Book title : " custom_album < /dev/tty
                 artist=$(clean_string "$custom_artist")
                 album=$(clean_string "$custom_album")
-                dest_dir="$TARGET_DIR/$artist/$album"
-                echo "Updated Target: $dest_dir"
+                if [ -z "$artist" ] || [ -z "$album" ]; then
+                    echo "Author and Book title cannot be empty."
+                else
+                    dest_dir="$TARGET_DIR/$artist/$album"
+                    echo "Updated Target: $dest_dir"
+                fi
                 ;;
             *)
                 echo "Please enter 'y', 'n', or 'm'."
