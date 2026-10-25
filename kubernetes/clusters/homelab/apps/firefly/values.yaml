@@ -43,6 +43,43 @@ firefly-iii:
       DEFAULT_LOCALE: equal
       TZ: Europe/Warsaw
       TRUSTED_PROXIES: "**"
+      APP_CONFIG_CACHE: /tmp/config.php
+      APP_EVENTS_CACHE: /tmp/events.php
+      APP_ROUTES_CACHE: /tmp/routes.php
+      DISABLE_DEFAULT_CONFIG: "true"
+      S6_READ_ONLY_ROOT: "1"
+      S6_YES_I_WANT_A_WORLD_WRITABLE_RUN_BECAUSE_KUBERNETES: "1"
+
+  extraVolumes:
+    - name: tmp
+      emptyDir: {}
+    - name: run
+      emptyDir: {}
+    - name: nginx-cache
+      emptyDir: {}
+    - name: nginx-log
+      emptyDir: {}
+    - name: storage
+      emptyDir: {}
+    - name: nginx-config
+      configMap:
+        name: firefly-nginx
+
+  extraVolumeMounts:
+    - name: tmp
+      mountPath: /tmp
+    - name: run
+      mountPath: /run
+    - name: nginx-cache
+      mountPath: /var/cache/nginx
+    - name: nginx-log
+      mountPath: /var/log/nginx
+    - name: storage
+      mountPath: /var/www/html/storage
+    - name: nginx-config
+      mountPath: /etc/nginx/nginx.conf
+      subPath: nginx.conf
+      readOnly: true
 
   secrets:
     # Deterministic static placeholder so ArgoCD diff does not change on each sync; overridden by existingSecret
