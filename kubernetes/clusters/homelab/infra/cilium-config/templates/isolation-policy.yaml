@@ -44,6 +44,7 @@ spec:
               values:
                 - "audiomuse"
                 - "immich"
+                - "firefly"
       toPorts:
         - ports:
             - port: "5432"

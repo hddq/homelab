@@ -22,6 +22,8 @@
     (dict "name" "stirling" "path" "kubernetes/clusters/homelab/apps/stirling" "namespace" "stirling")
     (dict "name" "tor" "path" "kubernetes/clusters/homelab/apps/tor" "namespace" "tor")
     (dict "name" "rotki" "path" "kubernetes/clusters/homelab/apps/rotki" "namespace" "rotki")
+    (dict "name" "firefly" "path" "kubernetes/clusters/homelab/apps/firefly" "namespace" "firefly")
+    (dict "name" "firefly-secrets" "path" "kubernetes/clusters/homelab/apps/firefly-secrets" "namespace" "firefly")
 }}
 ---
 apiVersion: argoproj.io/v1alpha1

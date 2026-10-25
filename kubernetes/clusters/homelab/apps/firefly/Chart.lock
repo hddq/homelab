@@ -1,0 +1,6 @@
+dependencies:
+- name: firefly-iii
+  repository: https://firefly-iii.github.io/kubernetes/
+  version: 1.10.2
+digest: sha256:1f1f961179ae50657d886a7bf297a73de7e102cd9d69ade53bd55ce77a88ad59
+generated: "2026-10-25T01:12:25.851528233+02:00"

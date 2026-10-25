@@ -1,0 +1,46 @@
+firefly-iii:
+  fullnameOverride: firefly
+
+  image:
+    registry: docker.io
+    repository: fireflyiii/core
+    # renovate: datasource=docker depName=docker.io/fireflyiii/core
+    tag: version-6.7.9
+
+  persistence:
+    enabled: false
+
+  config:
+    existingSecret: firefly-secret
+    env:
+      DB_HOST: postgres-rw.postgres.svc.cluster.local
+      DB_CONNECTION: pgsql
+      DB_PORT: "5432"
+      DB_DATABASE: firefly
+      DB_USERNAME: firefly
+      APP_URL: https://firefly.lab.hddq.org
+      DEFAULT_LANGUAGE: en_US
+      DEFAULT_LOCALE: equal
+      TZ: Europe/Warsaw
+      TRUSTED_PROXIES: "**"
+
+  secrets:
+    # Deterministic static placeholder so ArgoCD diff does not change on each sync; overridden by existingSecret
+    appKey: "01234567890123456789012345678901"
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  ingress:
+    enabled: true
+    className: infra-traefik
+    hosts:
+      - firefly.lab.hddq.org
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 512Mi

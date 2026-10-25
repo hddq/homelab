@@ -1,0 +1,9 @@
+apiVersion: v2
+name: firefly-wrapper
+description: Wrapper chart for Firefly III
+type: application
+version: 1.0.0
+dependencies:
+  - name: firefly-iii
+    version: 1.10.2
+    repository: https://firefly-iii.github.io/kubernetes/
