@@ -104,7 +104,7 @@ spec:
             - name: tmp-dir
               mountPath: /tmp
         - name: redis
-          image: redis:8.8.4-alpine@sha256:be8dfdf58574d626e0abe03073ce9178509e0e9564a316e34e71d2289b8370e1
+          image: redis:8.10.3-alpine@sha256:896f241f438ab6a210cfb24f573b84bea721a4cbe67f1b4fd07eb638b3b02a7b
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
