@@ -23,6 +23,21 @@ spec:
         runAsUser: 1000
         runAsGroup: 1000
         fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+        - name: wait-for-postgres
+          image: busybox:1.38.0@sha256:fd7dc98638c8e305f4dc34e979f1c0fdfdcaeb0fbf8fcff77ae834b6da3d7e6e
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          command:
+            - sh
+            - -c
+            - "until nc -z postgres-rw.postgres.svc.cluster.local 5432; do echo waiting for postgres; sleep 2; done"
       containers:
         - name: radarr
           image: ghcr.io/home-operations/radarr:7.0.0@sha256:c044b4df8e7b2546ef389481626a56fabe291575ff2d65481b1555432d6161ff
@@ -40,6 +55,21 @@ spec:
           env:
             - name: TZ
               value: "Europe/Warsaw"
+            - name: RADARR__POSTGRES__HOST
+              value: "postgres-rw.postgres.svc.cluster.local"
+            - name: RADARR__POSTGRES__PORT
+              value: "5432"
+            - name: RADARR__POSTGRES__USER
+              value: "media"
+            - name: RADARR__POSTGRES__PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: media-secret
+                  key: POSTGRES_PASSWORD
+            - name: RADARR__POSTGRES__MAINDB
+              value: "radarr-main"
+            - name: RADARR__POSTGRES__LOGDB
+              value: "radarr-log"
           readinessProbe:
             httpGet:
               path: /ping

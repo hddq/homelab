@@ -9,3 +9,5 @@ resources:
   - prowlarr
   - qui
   - flaresolverr
+generators:
+  - ksops-secret-generator.yaml

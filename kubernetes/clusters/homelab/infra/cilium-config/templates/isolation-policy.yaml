@@ -46,6 +46,7 @@ spec:
                 - "immich"
                 - "firefly"
                 - "ghostfolio"
+                - "media"
       toPorts:
         - ports:
             - port: "5432"

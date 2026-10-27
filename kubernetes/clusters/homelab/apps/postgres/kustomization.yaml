@@ -10,5 +10,6 @@ resources:
   - databases/audiomuse.yaml
   - databases/firefly.yaml
   - databases/ghostfolio.yaml
+  - databases/media.yaml
 generators:
   - ksops-secret-generator.yaml

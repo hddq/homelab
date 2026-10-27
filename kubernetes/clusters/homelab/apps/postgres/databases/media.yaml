@@ -1,0 +1,91 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: DatabaseRole
+metadata:
+  name: media
+spec:
+  name: media
+  login: true
+  cluster:
+    name: postgres
+  passwordSecret:
+    name: media-postgres
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: sonarr-main
+spec:
+  name: sonarr-main
+  owner: media
+  cluster:
+    name: postgres
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: sonarr-log
+spec:
+  name: sonarr-log
+  owner: media
+  cluster:
+    name: postgres
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: radarr-main
+spec:
+  name: radarr-main
+  owner: media
+  cluster:
+    name: postgres
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: radarr-log
+spec:
+  name: radarr-log
+  owner: media
+  cluster:
+    name: postgres
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: lidarr-main
+spec:
+  name: lidarr-main
+  owner: media
+  cluster:
+    name: postgres
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: lidarr-log
+spec:
+  name: lidarr-log
+  owner: media
+  cluster:
+    name: postgres
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: prowlarr-main
+spec:
+  name: prowlarr-main
+  owner: media
+  cluster:
+    name: postgres
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: prowlarr-log
+spec:
+  name: prowlarr-log
+  owner: media
+  cluster:
+    name: postgres
