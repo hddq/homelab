@@ -68,6 +68,7 @@
         kyverno
         cilium-cli
         hubble
+        openssl
       ];
 
       shellHook = ''
