@@ -25,6 +25,7 @@
     (dict "name" "firefly" "path" "kubernetes/clusters/homelab/apps/firefly" "namespace" "firefly")
     (dict "name" "firefly-secrets" "path" "kubernetes/clusters/homelab/apps/firefly-secrets" "namespace" "firefly")
     (dict "name" "wealthfolio" "path" "kubernetes/clusters/homelab/apps/wealthfolio" "namespace" "wealthfolio")
+    (dict "name" "ghostfolio" "path" "kubernetes/clusters/homelab/apps/ghostfolio" "namespace" "ghostfolio")
 }}
 ---
 apiVersion: argoproj.io/v1alpha1

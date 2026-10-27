@@ -1,0 +1,21 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: DatabaseRole
+metadata:
+  name: ghostfolio
+spec:
+  name: ghostfolio
+  login: true
+  cluster:
+    name: postgres
+  passwordSecret:
+    name: ghostfolio-postgres
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: ghostfolio
+spec:
+  name: ghostfolio
+  owner: ghostfolio
+  cluster:
+    name: postgres

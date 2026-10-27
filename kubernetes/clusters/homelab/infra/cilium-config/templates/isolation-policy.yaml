@@ -45,6 +45,7 @@ spec:
                 - "audiomuse"
                 - "immich"
                 - "firefly"
+                - "ghostfolio"
       toPorts:
         - ports:
             - port: "5432"

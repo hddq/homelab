@@ -7,6 +7,7 @@ resources:
   - immich.yaml
   - audiomuse.yaml
   - firefly.yaml
+  - ghostfolio.yaml
   - scheduled-backup.yaml
   - object-store.yaml
 generators:
