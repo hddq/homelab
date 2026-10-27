@@ -4,11 +4,11 @@ namespace: postgres
 resources:
   - namespace.yaml
   - cluster.yaml
-  - immich.yaml
-  - audiomuse.yaml
-  - firefly.yaml
-  - ghostfolio.yaml
-  - scheduled-backup.yaml
   - object-store.yaml
+  - scheduled-backup.yaml
+  - databases/immich.yaml
+  - databases/audiomuse.yaml
+  - databases/firefly.yaml
+  - databases/ghostfolio.yaml
 generators:
   - ksops-secret-generator.yaml
