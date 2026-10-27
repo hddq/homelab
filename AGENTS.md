@@ -27,3 +27,10 @@ Use Conventional Commits: `<type>(<scope>): <description>`. Use the most specifi
 - Scripts: use the script target (for example, `talos` or `backup`); use `scripts` only for general script-related changes.
 - Documentation: use the specific doc or topic name (e.g., `agents`, `readme`).
 - CI & Tooling: use the specific workflow target or tool (e.g., `k8s`, `lint`, `renovate`, `pre-commit`).
+
+## Kubernetes Apps (`kubernetes/clusters/homelab/apps/<app>/`)
+- Register new apps in `kubernetes/clusters/homelab/bootstrap/templates/apps.yaml`.
+- If using PVCs, add the namespace to `includeNamespaces` in `kubernetes/clusters/homelab/infra/k8up-backups/values.yaml` (or annotate cache PVCs with `k8up.io/backup: "false"`).
+- For shared PostgreSQL (`apps/postgres/`) or cross-namespace traffic, update `kubernetes/clusters/homelab/infra/cilium-config/templates/isolation-policy.yaml`.
+- Defaults: `storageClassName: openebs-hostpath` (`ReadWriteOnce`, `Recreate` strategy), `ingressClassName: infra-traefik` at `<app>.lab.hddq.org`, images pinned with `@sha256`, and Trivy-compliant rootless `securityContext` (`readOnlyRootFilesystem: true`, `runAsNonRoot: true`, `drop: ["ALL"]`, `RuntimeDefault`).
+- Secrets: use `stringData` in `secret.yaml`, wire via `ksops-secret-generator.yaml` in `kustomization.yaml` (`generators:`), and encrypt with `sops -e -i`.
