@@ -1,6 +1,6 @@
 clusterName: homelab-production
 clusterEndpoint: https://192.168.20.100:6443
-kubernetesVersion: 1.37.1
+kubernetesVersion: 1.37.2
 talosVersion: 1.14.5
 schematicId: "@schematic.yaml"
 nodes:
