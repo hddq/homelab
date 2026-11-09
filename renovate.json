@@ -175,6 +175,10 @@
       "groupName": "qbittorrent"
     },
     {
+      "matchPackageNames": ["ghcr.io/0xerr0r/blocky"],
+      "groupName": "blocky"
+    },
+    {
       "matchPackageNames": ["ghcr.io/hddq/rotki"],
       "groupName": "rotki",
       "versioning": "regex:^v?(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:-hddq\\.(?<build>\\d+))?$",
