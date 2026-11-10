@@ -33,8 +33,8 @@ immich:
           main:
             image:
               # renovate: datasource=docker depName=ghcr.io/immich-app/immich-server
-              tag: v3.3.5
-              digest: sha256:485d546a2e31d6a8b4db8423fcba5c109de8c218d93410af115fd1ccfc4352a6
+              tag: v3.3.6
+              digest: sha256:e1981983b1c13f6024b57d72e7ecae3342eed1581201ab09fb248932d86c593a
             env:
               DB_HOSTNAME: postgres-rw.postgres.svc.cluster.local
               DB_USERNAME: immich
