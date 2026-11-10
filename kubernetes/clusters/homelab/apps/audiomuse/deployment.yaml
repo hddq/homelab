@@ -29,7 +29,7 @@ spec:
           type: RuntimeDefault
       initContainers:
         - name: wait-for-postgres
-          image: busybox:1.38.0@sha256:fd7dc98638c8e305f4dc34e979f1c0fdfdcaeb0fbf8fcff77ae834b6da3d7e6e
+          image: busybox:1.38.0@sha256:a46257e06c82ad85242d0d38077d0a52d9896389ca60a1a59d3463db586e5fa4
           securityContext:
             readOnlyRootFilesystem: true
             allowPrivilegeEscalation: false
@@ -42,7 +42,7 @@ spec:
             - "until nc -z postgres-rw.postgres.svc.cluster.local 5432; do echo waiting for postgres; sleep 2; done"
       containers:
         - name: audiomuse-flask
-          image: ghcr.io/neptunehub/audiomuse-ai:3.7.0@sha256:38ac3c2cdb1a82e89c1bd405e5865e2efe5ad924a53b8373f5989f964a7de110
+          image: ghcr.io/neptunehub/audiomuse-ai:3.7.1@sha256:5bdf6c6c15073ddb85eaa2d6662439c176e35c7f5c00c0a3e59c3b119d800f30
           imagePullPolicy: IfNotPresent
           securityContext:
             readOnlyRootFilesystem: true
@@ -135,7 +135,7 @@ spec:
           type: RuntimeDefault
       initContainers:
         - name: wait-for-postgres
-          image: busybox:1.38.0@sha256:fd7dc98638c8e305f4dc34e979f1c0fdfdcaeb0fbf8fcff77ae834b6da3d7e6e
+          image: busybox:1.38.0@sha256:a46257e06c82ad85242d0d38077d0a52d9896389ca60a1a59d3463db586e5fa4
           securityContext:
             readOnlyRootFilesystem: true
             allowPrivilegeEscalation: false
@@ -148,7 +148,7 @@ spec:
             - "until nc -z postgres-rw.postgres.svc.cluster.local 5432; do echo waiting for postgres; sleep 2; done"
       containers:
         - name: audiomuse-worker
-          image: ghcr.io/neptunehub/audiomuse-ai:3.7.0@sha256:38ac3c2cdb1a82e89c1bd405e5865e2efe5ad924a53b8373f5989f964a7de110
+          image: ghcr.io/neptunehub/audiomuse-ai:3.7.1@sha256:5bdf6c6c15073ddb85eaa2d6662439c176e35c7f5c00c0a3e59c3b119d800f30
           imagePullPolicy: IfNotPresent
           securityContext:
             readOnlyRootFilesystem: true
