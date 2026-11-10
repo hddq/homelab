@@ -105,6 +105,10 @@
       "pinDigests": false
     },
     {
+      "matchPackageNames": ["docker.io/fireflyiii/core"],
+      "pinDigests": false
+    },
+    {
       "matchFileNames": ["ansible/**"],
       "matchUpdateTypes": ["patch", "digest", "pinDigest"],
       "groupName": "Patch ansible"
