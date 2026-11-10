@@ -27,7 +27,7 @@ spec:
           type: RuntimeDefault
       initContainers:
         - name: wait-for-postgres
-          image: busybox:1.38.0@sha256:fd7dc98638c8e305f4dc34e979f1c0fdfdcaeb0fbf8fcff77ae834b6da3d7e6e
+          image: busybox:1.38.0@sha256:a46257e06c82ad85242d0d38077d0a52d9896389ca60a1a59d3463db586e5fa4
           securityContext:
             readOnlyRootFilesystem: true
             allowPrivilegeEscalation: false
@@ -40,7 +40,7 @@ spec:
             - "until nc -z postgres-rw.postgres.svc.cluster.local 5432; do echo waiting for postgres; sleep 2; done"
       containers:
         - name: prowlarr
-          image: ghcr.io/home-operations/prowlarr:3.0.0.5737@sha256:262f02fc00831fa8ab26555e82a71d3d7b32ec220af6ce9cff6b53048eadddd5
+          image: ghcr.io/home-operations/prowlarr:3.0.1.5752@sha256:83cc967a3b7b754634e31773d4d58ea606714490b7e8592d41b608f7c249afe6
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
