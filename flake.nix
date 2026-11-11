@@ -27,7 +27,7 @@
       version = "1.14.6";
       src = pkgs.fetchurl {
         url = "https://github.com/siderolabs/talos/releases/download/v${version}/talosctl-linux-amd64";
-        hash = "sha256-/0MraJhnCea2nFY6CKLO1CMtUZaw3M1tLng+nXFNfX0=";
+        hash = "sha256-Eazef3V4/+nL5vuDSbNFlQZfWX3ghCYVmC41CzZd6Yc=";
       };
       dontUnpack = true;
       installPhase = ''
