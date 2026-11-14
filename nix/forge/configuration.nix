@@ -65,11 +65,6 @@ in {
     };
   };
 
-  environment.systemPackages = with pkgs; [
-    git
-    gh
-  ];
-
   users.users.hddq = {
     isNormalUser = true;
     description = "hddq";
@@ -107,6 +102,11 @@ in {
       ];
 
       programs = {
+        gh = {
+          enable = true;
+          gitCredentialHelper.enable = true;
+        };
+
         git = {
           enable = true;
           settings.user = {
