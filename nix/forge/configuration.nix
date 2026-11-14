@@ -88,14 +88,6 @@ in {
     users.hddq = {
       home.stateVersion = "26.05";
 
-      programs.git = {
-        enable = true;
-        settings.user = {
-          name = "hddq";
-          email = "git@hddq.org";
-        };
-      };
-
       home.file.".config/direnv/agent-env.sh".text = ''
         unset BASH_ENV ENV
 
@@ -108,29 +100,39 @@ in {
         fi
       '';
 
-      programs.direnv = {
-        enable = true;
-        nix-direnv.enable = true;
-        config.whitelist.prefix = ["/home/hddq/.t3"];
-      };
-
       systemd.user.services.t3code.Service.Environment = [
         "SHELL=/run/current-system/sw/bin/bash"
         "DIRENV_CONFIG=/etc/direnv"
         "BASH_ENV=%h/.config/direnv/agent-env.sh"
       ];
 
-      programs.t3code = {
-        enable = true;
-        package = pkgs-unstable.t3code;
-        server = {
+      programs = {
+        git = {
           enable = true;
-          extraArgs = [
-            "--host"
-            "0.0.0.0"
-            "--port"
-            "3773"
-          ];
+          settings.user = {
+            name = "hddq";
+            email = "git@hddq.org";
+          };
+        };
+
+        direnv = {
+          enable = true;
+          nix-direnv.enable = true;
+          config.whitelist.prefix = ["/home/hddq/.t3"];
+        };
+
+        t3code = {
+          enable = true;
+          package = pkgs-unstable.t3code;
+          server = {
+            enable = true;
+            extraArgs = [
+              "--host"
+              "0.0.0.0"
+              "--port"
+              "3773"
+            ];
+          };
         };
       };
     };
