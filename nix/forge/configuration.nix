@@ -86,6 +86,19 @@ in {
     extraSpecialArgs = {inherit pkgs-unstable;};
     users.hddq = {
       home.stateVersion = "26.05";
+
+      home.file.".config/direnv/agent-env.sh".text = ''
+        if command -v direnv >/dev/null 2>&1; then
+          eval "$(direnv export bash 2>/dev/null)"
+        fi
+      '';
+
+      programs.direnv.config.whitelist.prefix = ["/home/hddq/.t3"];
+
+      systemd.user.services.t3code.Service.Environment = [
+        "BASH_ENV=%h/.config/direnv/agent-env.sh"
+      ];
+
       programs.t3code = {
         enable = true;
         package = pkgs-unstable.t3code;
