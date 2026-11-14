@@ -27,16 +27,18 @@ locals {
       balloon     = 12288
     }
     production-worker-1 = {
-      name        = "k8s-prod-worker-1"
-      pve_node    = "b360"
-      description = "Talos production worker"
-      environment = "production"
-      role        = "worker"
-      vm_id       = 401
-      ip_address  = "192.168.20.101"
-      cpu_cores   = 4
-      memory      = 10240
-      balloon     = 10240
+      name         = "k8s-prod-worker-1"
+      pve_node     = "b360"
+      description  = "Talos production worker"
+      environment  = "production"
+      role         = "worker"
+      vm_id        = 401
+      ip_address   = "192.168.20.101"
+      cpu_cores    = 4
+      memory       = 8192
+      balloon      = 8192
+      disk_aio     = "native"
+      disk_discard = "ignore"
     }
   }
 }
@@ -111,7 +113,8 @@ resource "proxmox_virtual_environment_vm" "talos" {
     interface    = "scsi0"
     size         = 30
     iothread     = false
-    discard      = "on"
+    aio          = try(each.value.disk_aio, "io_uring")
+    discard      = try(each.value.disk_discard, "on")
     backup       = each.value.environment != "staging"
   }
   # PVC Disk
@@ -121,7 +124,8 @@ resource "proxmox_virtual_environment_vm" "talos" {
     interface    = "scsi1"
     size         = 24
     iothread     = false
-    discard      = "on"
+    aio          = try(each.value.disk_aio, "io_uring")
+    discard      = try(each.value.disk_discard, "on")
     backup       = each.value.environment != "staging"
   }
 
