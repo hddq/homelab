@@ -26,6 +26,7 @@ resource "proxmox_virtual_environment_vm" "nix_forge" {
       started,
       disk[0].import_from,
       initialization,
+      cdrom,
     ]
   }
 
