@@ -20,7 +20,7 @@ lineage_vms:
     ip: "192.168.20.15"
     gateway: "192.168.20.1"
     vlan: 20
-    dns: "192.168.40.11 192.168.40.12"
+    dns: "192.168.41.13 192.168.70.2"
 
 # Build Environment Variables
 build_user: "hddq"
