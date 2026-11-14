@@ -1,8 +1,13 @@
 {
+  inputs,
   pkgs,
   modulesPath,
   ...
-}: {
+}: let
+  pkgs-unstable = import inputs.nixpkgs-unstable {
+    inherit (pkgs.stdenv.hostPlatform) system;
+  };
+in {
   imports = [
     (modulesPath + "/profiles/qemu-guest.nix")
   ];
@@ -24,7 +29,7 @@
     useNetworkd = true;
     firewall = {
       enable = true;
-      allowedTCPPorts = [22];
+      allowedTCPPorts = [22 3773];
     };
   };
 
@@ -52,16 +57,45 @@
   programs = {
     fish.enable = true;
     ssh.startAgent = true;
+    nix-ld.enable = true;
   };
+
+  environment.systemPackages = with pkgs; [
+    git
+    gh
+  ];
 
   users.users.hddq = {
     isNormalUser = true;
     description = "hddq";
     extraGroups = ["wheel"];
+    linger = true;
     shell = pkgs.fish;
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAKFgv0ykKB0lLGjkh3fI8tUy+o8qtUcgjFPSN1AyncW hddq@main"
     ];
+  };
+
+  home-manager = {
+    useGlobalPkgs = true;
+    useUserPackages = true;
+    extraSpecialArgs = {inherit pkgs-unstable;};
+    users.hddq = {
+      home.stateVersion = "26.05";
+      programs.t3code = {
+        enable = true;
+        package = pkgs-unstable.t3code;
+        server = {
+          enable = true;
+          extraArgs = [
+            "--host"
+            "0.0.0.0"
+            "--port"
+            "3773"
+          ];
+        };
+      };
+    };
   };
 
   security.sudo.wheelNeedsPassword = false;

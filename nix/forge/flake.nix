@@ -3,12 +3,17 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     disko = {
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     deploy-rs = {
       url = "github:serokell/deploy-rs";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    home-manager = {
+      url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -18,6 +23,7 @@
     nixpkgs,
     disko,
     deploy-rs,
+    home-manager,
     ...
   } @ inputs: {
     nixosConfigurations."forge" = nixpkgs.lib.nixosSystem {
@@ -25,6 +31,7 @@
       specialArgs = {inherit inputs;};
       modules = [
         disko.nixosModules.disko
+        home-manager.nixosModules.home-manager
         ./disk-config.nix
         ./configuration.nix
       ];
