@@ -1,5 +1,5 @@
 # Swap configuration for z690
-zvol_swap_enabled: true
+zvol_swap_enabled: false
 zvol_swap_dataset: "rpool/swap"
 zvol_swap_size: "16G"
 zvol_swap_priority: 25
