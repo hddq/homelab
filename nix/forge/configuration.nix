@@ -88,6 +88,14 @@ in {
     users.hddq = {
       home.stateVersion = "26.05";
 
+      programs.git = {
+        enable = true;
+        settings.user = {
+          name = "hddq";
+          email = "git@hddq.org";
+        };
+      };
+
       home.file.".config/direnv/agent-env.sh".text = ''
         unset BASH_ENV ENV
 
