@@ -58,6 +58,10 @@ in {
     fish.enable = true;
     ssh.startAgent = true;
     nix-ld.enable = true;
+    direnv = {
+      enable = true;
+      nix-direnv.enable = true;
+    };
   };
 
   environment.systemPackages = with pkgs; [
