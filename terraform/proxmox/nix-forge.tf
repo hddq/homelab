@@ -35,8 +35,8 @@ resource "proxmox_virtual_environment_vm" "nix_forge" {
   }
 
   memory {
-    dedicated = 6144
-    floating  = 6144
+    dedicated = 8192
+    floating  = 8192
   }
 
   # Disabled during initial Debian cloud-image bootstrap so apply does not wait
