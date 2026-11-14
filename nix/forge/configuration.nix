@@ -61,6 +61,7 @@ in {
     direnv = {
       enable = true;
       nix-direnv.enable = true;
+      settings.whitelist.prefix = ["/home/hddq/.t3"];
     };
   };
 
@@ -88,14 +89,26 @@ in {
       home.stateVersion = "26.05";
 
       home.file.".config/direnv/agent-env.sh".text = ''
-        if command -v direnv >/dev/null 2>&1; then
-          eval "$(direnv export bash 2>/dev/null)"
+        unset BASH_ENV ENV
+
+        if [ -z "''${IN_NIX_SHELL:-}" ] && [ -z "''${DIRENV_DIR:-}" ]; then
+          export PATH="/run/current-system/sw/bin:/etc/profiles/per-user/hddq/bin:$PATH"
+          if command -v direnv >/dev/null 2>&1; then
+            eval "$(direnv export bash 2>/dev/null)"
+          fi
+          unset BASH_ENV ENV
         fi
       '';
 
-      programs.direnv.config.whitelist.prefix = ["/home/hddq/.t3"];
+      programs.direnv = {
+        enable = true;
+        nix-direnv.enable = true;
+        config.whitelist.prefix = ["/home/hddq/.t3"];
+      };
 
       systemd.user.services.t3code.Service.Environment = [
+        "SHELL=/run/current-system/sw/bin/bash"
+        "DIRENV_CONFIG=/etc/direnv"
         "BASH_ENV=%h/.config/direnv/agent-env.sh"
       ];
 
