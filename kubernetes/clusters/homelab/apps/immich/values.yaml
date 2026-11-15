@@ -44,6 +44,13 @@ immich:
                   secretKeyRef:
                     name: immich-postgres
                     key: password
+            resources:
+              requests:
+                cpu: 100m
+                memory: 512Mi
+              limits:
+                cpu: 2000m
+                memory: 2Gi
   machine-learning:
     persistence:
       cache:
@@ -62,8 +69,26 @@ immich:
               # renovate: datasource=docker depName=ghcr.io/immich-app/immich-machine-learning
               tag: v3.4.1
               digest: sha256:8adebf414256f6e4f837bfbb66fa94f14f4da7260e3a1d65cbba49e4e35d8764
+            resources:
+              requests:
+                cpu: 100m
+                memory: 512Mi
+              limits:
+                cpu: 2000m
+                memory: 2Gi
   valkey:
     enabled: true
+    controllers:
+      main:
+        containers:
+          main:
+            resources:
+              requests:
+                cpu: 25m
+                memory: 64Mi
+              limits:
+                cpu: 250m
+                memory: 256Mi
   controllers:
     main:
       containers:
