@@ -15,6 +15,11 @@
             allowedIPs = ["192.168.70.1/32" "192.168.40.0/24" "192.168.41.0/24" "192.168.10.0/24" "192.168.20.0/24" "192.168.50.0/24"];
           }
           {
+            # marble
+            publicKey = "QLhIaS1kCzangxkyJeVCSdFFqduDlksEreraO+AhmXI=";
+            allowedIPs = ["192.168.70.11/32"];
+          }
+          {
             # tundra
             publicKey = "kJWA/gR6RTYrJm+XMC1DDLuTq079SvVZE5QDST/qATc=";
             allowedIPs = ["192.168.70.15/32"];
