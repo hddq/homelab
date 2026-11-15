@@ -61,7 +61,22 @@ in {
     direnv = {
       enable = true;
       nix-direnv.enable = true;
-      settings.whitelist.prefix = ["/home/hddq/.t3"];
+      settings.whitelist.prefix = ["/home/hddq/.t3" "/home/hddq"];
+      direnvrcExtra = ''
+        direnv_layout_dir() {
+          if [ -f "$PWD/flake.nix" ]; then
+            local hash dir
+            hash=$(sha256sum "$PWD/flake.nix" "$PWD/flake.lock" 2>/dev/null | cut -d' ' -f1 | sha256sum | cut -d' ' -f1)
+            dir="$HOME/.cache/direnv-layouts/$hash"
+            if [ -d "$dir" ]; then
+              touch -c "$dir"/flake-profile*.rc 2>/dev/null || true
+            fi
+            echo "$dir"
+          else
+            echo "$PWD/.direnv"
+          fi
+        }
+      '';
     };
   };
 
@@ -89,7 +104,7 @@ in {
         if [ -z "''${IN_NIX_SHELL:-}" ] && [ -z "''${DIRENV_DIR:-}" ]; then
           export PATH="/run/current-system/sw/bin:/etc/profiles/per-user/hddq/bin:$PATH"
           if command -v direnv >/dev/null 2>&1; then
-            eval "$(direnv export bash 2>/dev/null)"
+            eval "$(flock -w 120 /tmp/direnv-agent.lock direnv export bash 2>/dev/null)"
           fi
           unset BASH_ENV ENV
         fi
@@ -99,6 +114,7 @@ in {
         "SHELL=/run/current-system/sw/bin/bash"
         "DIRENV_CONFIG=/etc/direnv"
         "BASH_ENV=%h/.config/direnv/agent-env.sh"
+        "T3CODE_NO_AGENT_SCOPES=1"
       ];
 
       programs = {
@@ -113,12 +129,6 @@ in {
             name = "hddq";
             email = "git@hddq.org";
           };
-        };
-
-        direnv = {
-          enable = true;
-          nix-direnv.enable = true;
-          config.whitelist.prefix = ["/home/hddq/.t3"];
         };
 
         t3code = {
