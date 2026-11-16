@@ -153,6 +153,12 @@ in {
   nix = {
     settings.experimental-features = ["nix-command" "flakes"];
     settings.trusted-users = ["hddq"];
+    gc = {
+      automatic = true;
+      dates = "daily";
+      options = "--delete-older-than 3d";
+    };
+    optimise.automatic = true;
   };
 
   system.stateVersion = "26.05";
