@@ -13,3 +13,4 @@ sealed-secrets-master-key.yaml
 *.tfstate.*
 .ci/
 talos/generated/
+.ruff_cache/
