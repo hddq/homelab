@@ -39,7 +39,7 @@
 
     deploy.nodes.forge = {
       hostname = "192.168.20.18";
-      remoteBuild = false;
+      remoteBuild = true;
       profiles.system = {
         user = "root";
         sshUser = "hddq";
