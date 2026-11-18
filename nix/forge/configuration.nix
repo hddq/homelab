@@ -10,6 +10,7 @@
 in {
   imports = [
     (modulesPath + "/profiles/qemu-guest.nix")
+    ./disk-cleanup.nix
   ];
 
   boot = {
@@ -69,7 +70,7 @@ in {
             hash=$(sha256sum "$PWD/flake.nix" "$PWD/flake.lock" 2>/dev/null | cut -d' ' -f1 | sha256sum | cut -d' ' -f1)
             dir="$HOME/.cache/direnv-layouts/$hash"
             if [ -d "$dir" ]; then
-              touch -c "$dir"/flake-profile*.rc 2>/dev/null || true
+              touch -c "$dir" "$dir"/flake-profile*.rc 2>/dev/null || true
             fi
             echo "$dir"
           else
@@ -150,9 +151,24 @@ in {
 
   security.sudo.wheelNeedsPassword = false;
 
+  services.journald.extraConfig = ''
+    SystemMaxUse=200M
+    MaxRetentionSec=7day
+  '';
+
+  systemd.coredump.settings.Coredump = {
+    MaxUse = "100M";
+    KeepFree = "2G";
+  };
+
   nix = {
-    settings.experimental-features = ["nix-command" "flakes"];
-    settings.trusted-users = ["hddq"];
+    settings = {
+      experimental-features = ["nix-command" "flakes"];
+      trusted-users = ["hddq"];
+      auto-optimise-store = true;
+      min-free = 5 * 1024 * 1024 * 1024;
+      max-free = 12 * 1024 * 1024 * 1024;
+    };
     gc = {
       automatic = true;
       dates = "daily";
