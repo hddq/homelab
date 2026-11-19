@@ -9,7 +9,6 @@ includeNamespaces:
   - navidrome
   - opodsync
   - qbittorrent
-  - rotki
   - stirling
 
 # S3-compatible backend (Garage on TrueNAS).
