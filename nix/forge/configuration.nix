@@ -6,6 +6,7 @@
 }: let
   pkgs-unstable = import inputs.nixpkgs-unstable {
     inherit (pkgs.stdenv.hostPlatform) system;
+    config.allowUnfree = true;
   };
 in {
   imports = [
@@ -120,6 +121,10 @@ in {
         "DIRENV_CONFIG=/etc/direnv"
         "BASH_ENV=%h/.config/direnv/agent-env.sh"
         "T3CODE_NO_AGENT_SCOPES=1"
+      ];
+
+      home.packages = [
+        pkgs-unstable.kiro-cli
       ];
 
       programs = {
