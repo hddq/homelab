@@ -24,11 +24,20 @@ GO_MOD_CACHE = HOME / "go" / "pkg" / "mod"
 GRADLE_DIR = HOME / ".gradle"
 PRE_COMMIT_CACHE = HOME / ".cache" / "pre-commit"
 PIP_CACHE = HOME / ".cache" / "pip"
+# Bare mirrors of submodule upstreams (shared object store, see dedupe_submodules).
+GIT_MIRRORS_DIR = HOME / ".cache" / "git-mirrors"
+# Written here, included from the global gitconfig (missing file is ignored by git).
+GIT_MIRRORS_INCLUDE = HOME / ".config" / "git" / "forge-mirrors.inc"
+# Prebuilt native libs keyed by submodule sha (populated by the gradle init script).
+NATIVE_LIB_CACHE = HOME / ".cache" / "native-lib-cache"
 
 HIGH_USAGE_PERCENT = 80.0
 CRITICAL_USAGE_PERCENT = 85.0
 MIN_FREE_BYTES = 10 * 1024**3  # 10 GiB
-GO_BUILD_MAX_BYTES = 1500 * 1024**2  # 1.5 GiB
+# rclone+restic for two ABIs need ~3 GiB of warm cache; a smaller cap meant the
+# cache was wiped every run and every build recompiled everything from scratch.
+GO_BUILD_MAX_BYTES = 5 * 1024**3  # 5 GiB
+MIRROR_MIN_MODULE_BYTES = 20 * 1024**2  # don't bother deduping tiny submodules
 
 WORKTREE_ARTIFACT_DIRS = (
     "app/build",
@@ -37,6 +46,12 @@ WORKTREE_ARTIFACT_DIRS = (
     "target",
     ".direnv",
     "node_modules/.cache",
+)
+# Gitignored build outputs living inside tracked dirs (jniLibs also contains the
+# tracked libssh_askpass.so, so the directory itself must not be removed).
+WORKTREE_ARTIFACT_GLOBS = (
+    "app/src/main/jniLibs/*/librestic.so",
+    "app/src/main/jniLibs/*/librclone.so",
 )
 
 
@@ -347,6 +362,9 @@ def cleanup_worktrees(dry_run: bool, high_pressure: bool) -> None:
                         target = wt / rel
                         if target.exists() or target.is_symlink():
                             remove_tree(target, dry_run=dry_run)
+                    for pattern in WORKTREE_ARTIFACT_GLOBS:
+                        for target in wt.glob(pattern):
+                            remove_tree(target, dry_run=dry_run)
             else:
                 # Not tracked in T3 DB (or DB unavailable: only remove if DB opened cleanly).
                 if refs_by_wt and (now - wt_mtime) > orphan_age and clean:
@@ -404,16 +422,268 @@ def cleanup_direnv_layouts(dry_run: bool, high_pressure: bool) -> int:
     return removed
 
 
+def git_out(args: list[str], timeout: int = 120) -> str | None:
+    try:
+        res = subprocess.run(
+            ["git", *args],
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=timeout,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    return res.stdout.strip() if res.returncode == 0 else None
+
+
+def mirror_path_for(url: str) -> Path | None:
+    """Map https://host/org/repo(.git) -> ~/.cache/git-mirrors/host/org/repo.git."""
+    if not url.startswith("https://"):
+        return None
+    rel = url[len("https://") :].rstrip("/")
+    parts = rel.split("/")
+    if len(parts) < 2 or "@" in parts[0] or ".." in parts:
+        return None
+    if not rel.endswith(".git"):
+        rel += ".git"
+    return GIT_MIRRORS_DIR / rel
+
+
+def submodule_urls(repos: set[Path]) -> set[str]:
+    urls: set[str] = set()
+    for repo in repos:
+        gm = repo / ".gitmodules"
+        if not gm.is_file():
+            continue
+        out = git_out(
+            ["config", "-f", str(gm), "--get-regexp", r"^submodule\..*\.url$"]
+        )
+        for line in (out or "").splitlines():
+            parts = line.split(None, 1)
+            if len(parts) == 2:
+                urls.add(parts[1].strip())
+    return urls
+
+
+def module_gitdirs(repos: set[Path]) -> list[Path]:
+    """Submodule git dirs: <repo>/.git/modules/* and <repo>/.git/worktrees/*/modules/*."""
+    found: list[Path] = []
+
+    def scan(base: Path, depth: int = 0) -> None:
+        if not base.is_dir():
+            return
+        for entry in sorted(base.iterdir()):
+            if not entry.is_dir():
+                continue
+            if (entry / "HEAD").is_file() and (entry / "objects").is_dir():
+                found.append(entry)
+            elif depth < 2:
+                scan(entry, depth + 1)
+
+    for repo in sorted(repos):
+        git_dir = repo / ".git"
+        if not git_dir.is_dir():
+            continue
+        scan(git_dir / "modules")
+        wts = git_dir / "worktrees"
+        if wts.is_dir():
+            for wt in sorted(wts.iterdir()):
+                scan(wt / "modules")
+    return found
+
+
+def _mirror_git(
+    args: list[str], timeout: int
+) -> subprocess.CompletedProcess[str] | None:
+    # Ignore the global gitconfig: it contains the insteadOf rewrite to the mirror
+    # itself, which would make the mirror "fetch" from itself.
+    env = {**os.environ, "GIT_CONFIG_GLOBAL": "/dev/null", "GIT_CONFIG_NOSYSTEM": "1"}
+    try:
+        return subprocess.run(
+            ["git", *args],
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=timeout,
+            env=env,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        log(f"WARN: git {' '.join(args)} failed: {exc}")
+        return None
+
+
+def ensure_mirror(url: str, dry_run: bool) -> Path | None:
+    mirror = mirror_path_for(url)
+    if mirror is None:
+        return None
+    exists = (mirror / "HEAD").is_file()
+    if dry_run:
+        log(f"DRY-RUN ensure mirror {mirror} (exists={exists})")
+        return mirror if exists else None
+
+    if not exists:
+        mirror.parent.mkdir(parents=True, exist_ok=True)
+        tmp = mirror.with_name(mirror.name + ".tmp")
+        remove_tree(tmp, dry_run=False)
+        log(f"Creating mirror {mirror} from {url}")
+        res = _mirror_git(["clone", "--bare", "--quiet", url, str(tmp)], timeout=3600)
+        if res is None or res.returncode != 0:
+            err = res.stderr.strip() if res else "timeout"
+            log(f"WARN: mirror clone of {url} failed: {err}")
+            remove_tree(tmp, dry_run=False)
+            return None
+        # Never gc/prune: worktrees borrow objects from here via alternates.
+        for key, value in (
+            ("remote.origin.fetch", "+refs/heads/*:refs/heads/*"),
+            ("gc.auto", "0"),
+            ("gc.pruneExpire", "never"),
+        ):
+            _mirror_git(["-C", str(tmp), "config", key, value], timeout=30)
+        os.rename(tmp, mirror)
+        return mirror
+
+    res = _mirror_git(
+        [
+            "-C",
+            str(mirror),
+            "fetch",
+            "--quiet",
+            "--no-auto-gc",
+            "--tags",
+            "--force",
+            "origin",
+        ],
+        timeout=900,
+    )
+    if res is None or res.returncode != 0:
+        err = res.stderr.strip() if res else "timeout"
+        log(f"WARN: mirror fetch for {url} failed (using stale mirror): {err}")
+    return mirror
+
+
+def write_mirror_include(mirrors: dict[str, Path], dry_run: bool) -> None:
+    lines = ["# Managed by forge-disk-cleanup; do not edit.\n"]
+    for url, mirror in sorted(mirrors.items()):
+        if not (mirror / "HEAD").is_file():
+            continue
+        lines.append(f'[url "{mirror}"]\n\tinsteadOf = {url}\n')
+        # Keep pushes pointed at the real upstream, never the read-only mirror.
+        lines.append(f'[url "{url}"]\n\tpushInsteadOf = {url}\n')
+    content = "".join(lines)
+    if dry_run:
+        log(f"DRY-RUN write {GIT_MIRRORS_INCLUDE}")
+        return
+    try:
+        if GIT_MIRRORS_INCLUDE.is_file() and GIT_MIRRORS_INCLUDE.read_text() == content:
+            return
+        GIT_MIRRORS_INCLUDE.parent.mkdir(parents=True, exist_ok=True)
+        tmp = GIT_MIRRORS_INCLUDE.with_name(GIT_MIRRORS_INCLUDE.name + ".tmp")
+        tmp.write_text(content)
+        os.replace(tmp, GIT_MIRRORS_INCLUDE)
+        log(f"Updated {GIT_MIRRORS_INCLUDE}")
+    except OSError as exc:
+        log(f"WARN: could not write {GIT_MIRRORS_INCLUDE}: {exc}")
+
+
+def refresh_mirrors(dry_run: bool) -> dict[str, Path]:
+    """Create/fetch a bare mirror for every submodule upstream we know about."""
+    _refs, project_roots = load_t3_worktree_refs()
+    repos = discover_repos(project_roots)
+    urls = submodule_urls(repos)
+    for gd in module_gitdirs(repos):
+        url = git_out(["--git-dir", str(gd), "config", "--get", "remote.origin.url"])
+        if url:
+            urls.add(url)
+
+    mirrors: dict[str, Path] = {}
+    for url in sorted(urls):
+        mirror = ensure_mirror(url, dry_run=dry_run)
+        if mirror is not None:
+            mirrors[url] = mirror
+    # Only advertise mirrors that actually exist, so clones can never break.
+    write_mirror_include(mirrors, dry_run=dry_run)
+    return mirrors
+
+
+def dedupe_submodules(dry_run: bool) -> None:
+    """Make per-worktree submodule clones borrow objects from the shared mirror.
+
+    `git worktree add` + `git submodule update --init` clones every submodule into
+    .git/worktrees/<wt>/modules/<name> (hundreds of MB for rclone). Pointing them at
+    the mirror via objects/info/alternates and repacking with -l drops every object
+    the mirror already has.
+    """
+    mirrors = refresh_mirrors(dry_run=dry_run)
+    if not mirrors:
+        return
+    _refs, project_roots = load_t3_worktree_refs()
+    repos = discover_repos(project_roots)
+
+    for gd in module_gitdirs(repos):
+        url = git_out(["--git-dir", str(gd), "config", "--get", "remote.origin.url"])
+        mirror = mirrors.get(url or "")
+        if mirror is None:
+            continue
+        objects = gd / "objects"
+        alternates = objects / "info" / "alternates"
+        mirror_objects = str(mirror / "objects")
+        try:
+            if (
+                alternates.is_file()
+                and mirror_objects in alternates.read_text().splitlines()
+            ):
+                continue
+        except OSError:
+            continue
+        before = dir_size(objects)
+        if before < MIRROR_MIN_MODULE_BYTES:
+            continue
+        if any(gd.glob("*.lock")):
+            log(f"Skipping busy submodule git dir {gd}")
+            continue
+        if dry_run:
+            log(f"DRY-RUN dedupe {gd} ({before / 1024**2:.0f} MiB) against {mirror}")
+            continue
+        try:
+            alternates.parent.mkdir(parents=True, exist_ok=True)
+            with alternates.open("a", encoding="utf-8") as fh:
+                fh.write(mirror_objects + "\n")
+        except OSError as exc:
+            log(f"WARN: could not write {alternates}: {exc}")
+            continue
+        res = run_cmd(["git", "--git-dir", str(gd), "repack", "-a", "-d", "-l", "-q"])
+        if res is None or res.returncode != 0:
+            err = res.stderr.strip() if res else ""
+            log(f"WARN: repack failed in {gd}: {err}")
+            continue
+        after = dir_size(objects)
+        log(f"Deduped {gd}: {before / 1024**2:.0f} -> {after / 1024**2:.0f} MiB")
+
+
 def cleanup_caches(dry_run: bool, high_pressure: bool, critical: bool) -> None:
-    # 1. Go build cache
+    # 1. Go build cache: keep it warm (shared across worktrees thanks to -trimpath).
     if GO_BUILD_CACHE.exists():
-        if critical or dir_size(GO_BUILD_CACHE) > GO_BUILD_MAX_BYTES:
+        max_days = 1.0 if high_pressure else 3.0
+        if critical:
             remove_tree(GO_BUILD_CACHE, dry_run=dry_run)
         else:
-            max_days = 1.0 if high_pressure else 3.0
             n = prune_old_files(GO_BUILD_CACHE, max_days, dry_run=dry_run)
             if n:
                 log(f"Pruned {n} old files from {GO_BUILD_CACHE}")
+            if not dry_run and dir_size(GO_BUILD_CACHE) > GO_BUILD_MAX_BYTES:
+                log(f"{GO_BUILD_CACHE} still above cap after pruning, removing")
+                remove_tree(GO_BUILD_CACHE, dry_run=dry_run)
+
+    # 1b. Prebuilt native libs (restoid librestic/librclone); a few dozen MB per entry.
+    if NATIVE_LIB_CACHE.exists():
+        native_days = 3.0 if critical else (14.0 if high_pressure else 30.0)
+        cutoff = time.time() - native_days * 86400
+        for entry in sorted(NATIVE_LIB_CACHE.iterdir()):
+            try:
+                if entry.is_dir() and entry.stat().st_mtime < cutoff:
+                    remove_tree(entry, dry_run=dry_run)
+            except OSError:
+                pass
 
     # 2. Go module cache (only under critical disk pressure)
     if critical and GO_MOD_CACHE.exists():
@@ -471,7 +741,16 @@ def main() -> int:
     parser.add_argument(
         "--dry-run", action="store_true", help="Print actions without deleting"
     )
+    parser.add_argument(
+        "--refresh-mirrors",
+        action="store_true",
+        help="Only create/fetch submodule mirrors and rewrite the gitconfig include",
+    )
     args = parser.parse_args()
+
+    if args.refresh_mirrors:
+        refresh_mirrors(dry_run=args.dry_run)
+        return 0
 
     used_pct, free_bytes, high, critical = disk_pressure()
     log(
@@ -480,6 +759,7 @@ def main() -> int:
     )
 
     cleanup_worktrees(dry_run=args.dry_run, high_pressure=high)
+    dedupe_submodules(dry_run=args.dry_run)
     removed_layouts = cleanup_direnv_layouts(dry_run=args.dry_run, high_pressure=high)
     cleanup_caches(dry_run=args.dry_run, high_pressure=high, critical=critical)
 
