@@ -111,6 +111,10 @@ in {
         fi
       '';
 
+      # Caches restoid's bundled librestic/librclone per submodule commit (hardlinked
+      # across worktrees). Machine-local on purpose: F-Droid builds never see it.
+      home.file.".gradle/init.d/native-lib-cache.gradle".source = ./native-lib-cache.init.gradle;
+
       systemd.user.services.t3code.Service.Environment = [
         "SHELL=/run/current-system/sw/bin/bash"
         "DIRENV_CONFIG=/etc/direnv"
@@ -130,6 +134,9 @@ in {
             name = "hddq";
             email = "git@hddq.org";
           };
+          # Written by forge-disk-cleanup once the local submodule mirrors exist;
+          # git ignores a missing include file.
+          includes = [{path = "/home/hddq/.config/git/forge-mirrors.inc";}];
         };
 
         t3code = {

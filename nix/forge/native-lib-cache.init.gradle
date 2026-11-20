@@ -1,0 +1,142 @@
+// Managed by NixOS (nix/forge). Installed as ~/.gradle/init.d/native-lib-cache.gradle.
+//
+// restoid builds librestic.so / librclone.so from git submodules via Exec tasks that
+// Gradle cannot cache, so every new worktree/thread recompiles them. This init script
+// (machine-local, not part of the repo, so F-Droid builds are untouched) keys the
+// outputs by submodule commit + build inputs and hardlinks them from a shared cache.
+//
+// Every failure path falls back to the normal build. Cache entries are read-only
+// because hardlinks share the inode with every worktree that uses them.
+import java.nio.file.Files
+
+def nativeTasks = [buildBundledRestic: 'restic', buildBundledRclone: 'rclone']
+
+def nativeCacheRoot() {
+    return new File(System.getProperty('user.home'), '.cache/native-lib-cache')
+}
+
+def nativeGit(File dir, List<String> args) {
+    try {
+        def pb = new ProcessBuilder(['git', '-C', dir.absolutePath] + args)
+        pb.redirectErrorStream(true)
+        def proc = pb.start()
+        def out = proc.inputStream.text.trim()
+        return proc.waitFor() == 0 ? out : null
+    } catch (Exception ignored) {
+        return null
+    }
+}
+
+// Returns null when the build must not be cached (unknown/dirty submodule state).
+def nativeCacheKey(File root, String sub) {
+    def gitlink = nativeGit(root, ['rev-parse', "HEAD:${sub}".toString()])
+    if (!gitlink) {
+        return null
+    }
+    def subDir = new File(root, sub)
+    if (new File(subDir, '.git').exists()) {
+        // A checked-out submodule must be pristine and at the recorded commit.
+        if (nativeGit(subDir, ['rev-parse', 'HEAD']) != gitlink) {
+            return null
+        }
+        if (nativeGit(subDir, ['status', '--porcelain']) != '') {
+            return null
+        }
+    }
+    def script = new File(root, "scripts/build_${sub}.sh")
+    def gradleFile = new File(root, 'app/build.gradle.kts')
+    def goVersion = new File(root, '.go-version')
+    if (!script.isFile() || !gradleFile.isFile()) {
+        return null
+    }
+    def material = [
+        sub,
+        gitlink,
+        script.text,
+        goVersion.isFile() ? goVersion.text : '',
+        gradleFile.readLines().findAll { it =~ /ndkVersion|minSdk\s*=/ }.join('\n'),
+        System.getenv('ANDROID_HOME') ?: '',
+    ].join('\n--\n')
+    def digest = java.security.MessageDigest.getInstance('SHA-256').digest(material.getBytes('UTF-8'))
+    return digest.encodeHex().toString()
+}
+
+// Returns true when outputs were restored from the cache (task should be skipped).
+def nativeRestore(task, String sub) {
+    try {
+        def root = task.project.rootProject.projectDir
+        def key = nativeCacheKey(root, sub)
+        def outs = task.outputs.files.files
+        if (!key || !outs) {
+            return false
+        }
+        def entry = new File(nativeCacheRoot(), key)
+        if (!entry.isDirectory()) {
+            return false
+        }
+        def pairs = outs.collect { out ->
+            [out, new File(entry, root.toPath().relativize(out.toPath()).toString())]
+        }
+        if (!pairs.every { it[1].isFile() }) {
+            return false
+        }
+        pairs.each { pair ->
+            def out = pair[0]
+            def cached = pair[1]
+            out.parentFile.mkdirs()
+            Files.deleteIfExists(out.toPath())
+            try {
+                Files.createLink(out.toPath(), cached.toPath())
+            } catch (Exception ignored) {
+                Files.copy(cached.toPath(), out.toPath())
+            }
+        }
+        entry.setLastModified(System.currentTimeMillis())
+        task.logger.lifecycle("Restored ${sub} native libs from cache (${key.take(12)})".toString())
+        return true
+    } catch (Exception e) {
+        task.logger.warn("native lib cache restore failed: ${e}".toString())
+        return false
+    }
+}
+
+def nativeStore(task, String sub) {
+    try {
+        def root = task.project.rootProject.projectDir
+        def key = nativeCacheKey(root, sub)
+        def outs = task.outputs.files.files
+        if (!key || !outs || !outs.every { it.isFile() }) {
+            return
+        }
+        def entry = new File(nativeCacheRoot(), key)
+        if (entry.exists()) {
+            return
+        }
+        def tmp = new File(nativeCacheRoot(), ".tmp-${key}-${ProcessHandle.current().pid()}".toString())
+        outs.each { out ->
+            def dest = new File(tmp, root.toPath().relativize(out.toPath()).toString())
+            dest.parentFile.mkdirs()
+            // Real copy: a later in-place overwrite in a worktree must not touch the cache.
+            Files.copy(out.toPath(), dest.toPath())
+            dest.setWritable(false, false)
+        }
+        if (!tmp.renameTo(entry)) {
+            tmp.deleteDir()
+        }
+    } catch (Exception e) {
+        task.logger.warn("native lib cache store failed: ${e}".toString())
+    }
+}
+
+allprojects { project ->
+    project.tasks.configureEach { t ->
+        def sub = nativeTasks[t.name]
+        if (sub) {
+            t.onlyIf { !nativeRestore(t, sub) }
+            // On a cache miss, unlink restored hardlinks before the real build so the
+            // compiler can never write through to a shared cache inode.
+            t.doFirst { t.outputs.files.files.each { it.delete() } }
+            t.doLast { nativeStore(t, sub) }
+        }
+    }
+}
