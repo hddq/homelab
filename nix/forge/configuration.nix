@@ -98,33 +98,37 @@ in {
     useUserPackages = true;
     extraSpecialArgs = {inherit pkgs-unstable;};
     users.hddq = {
-      home.stateVersion = "26.05";
+      home = {
+        stateVersion = "26.05";
 
-      home.file.".config/direnv/agent-env.sh".text = ''
-        unset BASH_ENV ENV
+        file = {
+          ".config/direnv/agent-env.sh".text = ''
+            unset BASH_ENV ENV
 
-        if [ -z "''${IN_NIX_SHELL:-}" ] && [ -z "''${DIRENV_DIR:-}" ]; then
-          export PATH="/run/current-system/sw/bin:/etc/profiles/per-user/hddq/bin:$PATH"
-          if command -v direnv >/dev/null 2>&1; then
-            eval "$(flock -w 120 /tmp/direnv-agent.lock direnv export bash 2>/dev/null)"
-          fi
-          unset BASH_ENV ENV
-        fi
-      '';
+            if [ -z "''${IN_NIX_SHELL:-}" ] && [ -z "''${DIRENV_DIR:-}" ]; then
+              export PATH="/run/current-system/sw/bin:/etc/profiles/per-user/hddq/bin:$PATH"
+              if command -v direnv >/dev/null 2>&1; then
+                eval "$(flock -w 120 /tmp/direnv-agent.lock direnv export bash 2>/dev/null)"
+              fi
+              unset BASH_ENV ENV
+            fi
+          '';
 
-      # Caches restoid's bundled librestic/librclone per submodule commit (hardlinked
-      # across worktrees). Machine-local on purpose: F-Droid builds never see it.
-      home.file.".gradle/init.d/native-lib-cache.gradle".source = ./native-lib-cache.init.gradle;
+          # Caches restoid's bundled librestic/librclone per submodule commit (hardlinked
+          # across worktrees). Machine-local on purpose: F-Droid builds never see it.
+          ".gradle/init.d/native-lib-cache.gradle".source = ./native-lib-cache.init.gradle;
+        };
+
+        packages = [
+          pkgs-unstable.kiro-cli
+        ];
+      };
 
       systemd.user.services.t3code.Service.Environment = [
         "SHELL=/run/current-system/sw/bin/bash"
         "DIRENV_CONFIG=/etc/direnv"
         "BASH_ENV=%h/.config/direnv/agent-env.sh"
         "T3CODE_NO_AGENT_SCOPES=1"
-      ];
-
-      home.packages = [
-        pkgs-unstable.kiro-cli
       ];
 
       programs = {
