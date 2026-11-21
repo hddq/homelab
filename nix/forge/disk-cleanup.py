@@ -562,13 +562,19 @@ def ensure_mirror(url: str, dry_run: bool) -> Path | None:
 
 
 def write_mirror_include(mirrors: dict[str, Path], dry_run: bool) -> None:
-    lines = ["# Managed by forge-disk-cleanup; do not edit.\n"]
+    entries: list[str] = []
     for url, mirror in sorted(mirrors.items()):
         if not (mirror / "HEAD").is_file():
             continue
-        lines.append(f'[url "{mirror}"]\n\tinsteadOf = {url}\n')
+        entries.append(f'[url "{mirror}"]\n\tinsteadOf = {url}\n')
         # Keep pushes pointed at the real upstream, never the read-only mirror.
-        lines.append(f'[url "{url}"]\n\tpushInsteadOf = {url}\n')
+        entries.append(f'[url "{url}"]\n\tpushInsteadOf = {url}\n')
+    lines = ["# Managed by forge-disk-cleanup; do not edit.\n"]
+    if entries:
+        # Git >= 2.38.1 blocks file transport during `git submodule update` by default
+        # (CVE-2022-39253), which breaks local-path insteadOf mirrors unless allowed.
+        lines.append('[protocol "file"]\n\tallow = always\n')
+        lines.extend(entries)
     content = "".join(lines)
     if dry_run:
         log(f"DRY-RUN write {GIT_MIRRORS_INCLUDE}")
