@@ -80,9 +80,13 @@ def nativeRestore(task, String sub) {
         if (!pairs.every { it[1].isFile() }) {
             return false
         }
+        def restored = false
         pairs.each { pair ->
             def out = pair[0]
             def cached = pair[1]
+            if (out.isFile() && Files.isSameFile(out.toPath(), cached.toPath())) {
+                return
+            }
             out.parentFile.mkdirs()
             Files.deleteIfExists(out.toPath())
             try {
@@ -90,13 +94,40 @@ def nativeRestore(task, String sub) {
             } catch (Exception ignored) {
                 Files.copy(cached.toPath(), out.toPath())
             }
+            restored = true
         }
         entry.setLastModified(System.currentTimeMillis())
-        task.logger.lifecycle("Restored ${sub} native libs from cache (${key.take(12)})".toString())
+        if (restored) {
+            task.logger.lifecycle("Restored ${sub} native libs from cache (${key.take(12)})".toString())
+        }
         return true
     } catch (Exception e) {
         task.logger.warn("native lib cache restore failed: ${e}".toString())
         return false
+    }
+}
+
+def nativeEnsureSubmodule(task, String sub) {
+    def root = task.project.rootProject.projectDir
+    def subDir = new File(root, sub)
+    if (new File(subDir, '.git').exists()) {
+        return
+    }
+    task.logger.lifecycle("Initializing ${sub} submodule for native build...".toString())
+    if (nativeGit(root, ['submodule', 'update', '--init', sub]) != null) {
+        return
+    }
+    // Mirror may be behind a recent submodule bump; refresh once and retry.
+    try {
+        def pb = new ProcessBuilder(['forge-disk-cleanup', '--refresh-mirrors'])
+        pb.redirectErrorStream(true)
+        def proc = pb.start()
+        proc.inputStream.text
+        proc.waitFor()
+    } catch (Exception ignored) {
+    }
+    if (nativeGit(root, ['submodule', 'update', '--init', sub]) == null) {
+        task.logger.warn("Could not initialize ${sub} submodule automatically".toString())
     }
 }
 
@@ -133,9 +164,12 @@ allprojects { project ->
         def sub = nativeTasks[t.name]
         if (sub) {
             t.onlyIf { !nativeRestore(t, sub) }
-            // On a cache miss, unlink restored hardlinks before the real build so the
-            // compiler can never write through to a shared cache inode.
-            t.doFirst { t.outputs.files.files.each { it.delete() } }
+            // On a cache miss: ensure the submodule is checked out, and unlink any
+            // restored hardlinks so the compiler never writes through to a cache inode.
+            t.doFirst {
+                nativeEnsureSubmodule(t, sub)
+                t.outputs.files.files.each { it.delete() }
+            }
             t.doLast { nativeStore(t, sub) }
         }
     }
