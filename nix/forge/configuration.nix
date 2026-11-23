@@ -46,16 +46,23 @@ in {
     };
   };
 
-  services.qemuGuest.enable = true;
+  services = {
+    qemuGuest.enable = true;
 
-  services.openssh = {
-    enable = true;
-    ports = [22];
-    settings = {
-      PasswordAuthentication = false;
-      KbdInteractiveAuthentication = false;
-      PermitRootLogin = "no";
+    openssh = {
+      enable = true;
+      ports = [22];
+      settings = {
+        PasswordAuthentication = false;
+        KbdInteractiveAuthentication = false;
+        PermitRootLogin = "no";
+      };
     };
+
+    journald.extraConfig = ''
+      SystemMaxUse=200M
+      MaxRetentionSec=7day
+    '';
   };
 
   programs = {
@@ -168,11 +175,6 @@ in {
   };
 
   security.sudo.wheelNeedsPassword = false;
-
-  services.journald.extraConfig = ''
-    SystemMaxUse=200M
-    MaxRetentionSec=7day
-  '';
 
   systemd.coredump.settings.Coredump = {
     MaxUse = "100M";
