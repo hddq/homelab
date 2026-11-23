@@ -40,10 +40,14 @@ resource "proxmox_virtual_environment_vm" "nix_forge" {
     floating  = 8192
   }
 
-  # Disabled during initial Debian cloud-image bootstrap so apply does not wait
-  # for qemu-guest-agent before nixos-anywhere replaces the OS.
+  # Enable QEMU guest agent in Proxmox, but skip waiting for an agent IP
+  # during apply so initial Debian cloud-image bootstrap does not block before
+  # nixos-anywhere replaces the OS.
   agent {
-    enabled = false
+    enabled = true
+    wait_for_ip {
+      disabled = true
+    }
   }
 
   serial_device {}
