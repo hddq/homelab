@@ -102,7 +102,7 @@ spec:
               cpu: 500m
               memory: 512Mi
         - name: qbittorrent
-          image: ghcr.io/home-operations/qbittorrent:5.2.4@sha256:9307627e03981d5473aa31175ea76ed56ea3752333ca49d601b6af45e281e7ba
+          image: ghcr.io/home-operations/qbittorrent:5.3.1@sha256:fcdbc4ac4a66d8c205ac67e4fe1b578158aaee0a50369c3d04918977f4f359c4
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
