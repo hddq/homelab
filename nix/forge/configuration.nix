@@ -7,6 +7,7 @@
   pkgs-unstable = import inputs.nixpkgs-unstable {
     inherit (pkgs.stdenv.hostPlatform) system;
     config.allowUnfree = true;
+    overlays = [inputs.t3code-nix.overlays.default];
   };
 in {
   imports = [
