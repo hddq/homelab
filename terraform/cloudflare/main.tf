@@ -82,14 +82,26 @@ resource "cloudflare_dns_record" "frc_github_pages" {
   proxied = false
 }
 
-# GitHub Pages: fdroid.hddq.org
-resource "cloudflare_dns_record" "fdroid_github_pages" {
+# Cloudflare Pages: fdroid.hddq.org
+resource "cloudflare_pages_project" "fdroid" {
+  account_id        = local.account_id
+  name              = "fdroid-repo"
+  production_branch = "main"
+}
+
+resource "cloudflare_pages_domain" "fdroid" {
+  account_id   = local.account_id
+  project_name = cloudflare_pages_project.fdroid.name
+  name         = "fdroid.hddq.org"
+}
+
+resource "cloudflare_dns_record" "fdroid_cloudflare_pages" {
   zone_id = local.zone_id
   name    = "fdroid"
   type    = "CNAME"
-  content = "hddq.github.io"
+  content = cloudflare_pages_project.fdroid.subdomain
   ttl     = 1
-  proxied = false
+  proxied = true
 }
 
 # Email Routing: hddq.org
