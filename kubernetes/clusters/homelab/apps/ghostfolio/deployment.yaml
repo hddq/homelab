@@ -39,7 +39,7 @@ spec:
             - "until nc -z postgres-rw.postgres.svc.cluster.local 5432; do echo waiting for postgres; sleep 2; done"
       containers:
         - name: ghostfolio
-          image: ghostfolio/ghostfolio:3.100.0@sha256:1bc2ff4740410dd2c3bdde95738268f4c619cf4eeec491e3967bec18c95130b1
+          image: ghostfolio/ghostfolio:3.101.0@sha256:e23dd1e608986e23365a5e6a357c3ad049c8e11343390449f6798dd54704cb2e
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
